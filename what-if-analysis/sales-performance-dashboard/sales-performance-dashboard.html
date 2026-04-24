@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Dashboard 2025</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ══════════════════════ HEADER ══════════════════════ -->
+<header class="header">
+  <div class="header-left">
+    <div class="header-icon">📊</div>
+    <div>
+      <h1>Sales Performance Dashboard</h1>
+      <div class="header-subtitle">India Regional Sales · Full Year 2025</div>
+    </div>
+  </div>
+  <div class="header-badge" id="record-count">Loading…</div>
+</header>
+
+<!-- ══════════════════════ MAIN ══════════════════════ -->
+<main class="main">
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>From Date</label>
+      <input type="date" id="f-date-start" value="2025-01-01" />
+    </div>
+    <div class="filter-group">
+      <label>To Date</label>
+      <input type="date" id="f-date-end" value="2025-12-31" />
+    </div>
+    <div class="filter-group">
+      <label>City</label>
+      <select id="f-city">
+        <option value="">All Cities</option>
+        <option>Bangalore</option>
+        <option>Delhi</option>
+        <option>Hyderabad</option>
+        <option>Mumbai</option>
+        <option>Pune</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Category</label>
+      <select id="f-category">
+        <option value="">All Categories</option>
+        <option>Clothing</option>
+        <option>Electronics</option>
+        <option>Furniture</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Sales Rep</label>
+      <select id="f-rep">
+        <option value="">All Reps</option>
+        <option>Ajay</option>
+        <option>Pooja</option>
+        <option>Rahul</option>
+        <option>Sneha</option>
+      </select>
+    </div>
+    <div class="filter-actions">
+      <button class="btn btn-primary" onclick="applyFilters()">Apply</button>
+      <button class="btn btn-outline" onclick="resetFilters()">Reset</button>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="section-title">Key Performance Indicators</div>
+  <div class="kpi-grid">
+    <div class="kpi-card blue">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-label">Total Sales</div>
+      <div class="kpi-value" id="kpi-sales">—</div>
+      <div class="kpi-sub" id="kpi-sales-sub">—</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-icon">📈</div>
+      <div class="kpi-label">Total Profit</div>
+      <div class="kpi-value" id="kpi-profit">—</div>
+      <div class="kpi-sub" id="kpi-profit-sub">—</div>
+    </div>
+    <div class="kpi-card pink">
+      <div class="kpi-icon">🛒</div>
+      <div class="kpi-label">Total Orders</div>
+      <div class="kpi-value" id="kpi-orders">—</div>
+      <div class="kpi-sub" id="kpi-orders-sub">—</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-icon">⚡</div>
+      <div class="kpi-label">Avg Order Value</div>
+      <div class="kpi-value" id="kpi-aov">—</div>
+      <div class="kpi-sub" id="kpi-aov-sub">—</div>
+    </div>
+  </div>
+
+  <!-- ROW 1: Monthly Trend + City Sales -->
+  <div class="section-title">Sales Trends &amp; Geography</div>
+  <div class="chart-grid-2-1" style="grid-template-columns:2fr 1fr">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">Monthly Sales Trend</span>
+        <span class="chart-card-badge badge-blue">Line Chart</span>
+      </div>
+      <div class="chart-container" style="height:260px">
+        <canvas id="chart-monthly"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">City-wise Sales</span>
+        <span class="chart-card-badge badge-orange">Bar Chart</span>
+      </div>
+      <div class="chart-container" style="height:260px">
+        <canvas id="chart-city"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Category + Rep Performance + Payment Methods -->
+  <div class="section-title">Category, Team &amp; Payment</div>
+  <div class="chart-grid-3">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">Category Performance</span>
+        <span class="chart-card-badge badge-purple">Doughnut</span>
+      </div>
+      <div class="chart-container" style="height:240px">
+        <canvas id="chart-category"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">Sales Rep Performance</span>
+        <span class="chart-card-badge badge-green">Bar Chart</span>
+      </div>
+      <div class="chart-container" style="height:240px">
+        <canvas id="chart-rep"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">Payment Method Split</span>
+        <span class="chart-card-badge badge-pink">Pie Chart</span>
+      </div>
+      <div class="chart-container" style="height:240px">
+        <canvas id="chart-payment"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Profitability + Discount Impact -->
+  <div class="section-title">Advanced Insights</div>
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">Profitability Analysis — Profit vs Sales by Category</span>
+        <span class="chart-card-badge badge-blue">Grouped Bar</span>
+      </div>
+      <div class="chart-container" style="height:260px">
+        <canvas id="chart-profitability"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">Discount Impact on Profit</span>
+        <span class="chart-card-badge badge-orange">Bar Chart</span>
+      </div>
+      <div class="chart-container" style="height:260px">
+        <canvas id="chart-discount"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: Top 5 / Bottom 5 -->
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">🏆 Top 5 Products by Sales</span>
+        <span class="chart-card-badge badge-green">Ranking</span>
+      </div>
+      <div id="table-top5"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <span class="chart-card-title">⚠️ Bottom 5 Products by Sales</span>
+        <span class="chart-card-badge badge-pink">Ranking</span>
+      </div>
+      <div id="table-bottom5"></div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  Sales Dashboard 2025 &nbsp;·&nbsp; Data: 1,287 orders &nbsp;·&nbsp; Powered by Chart.js
+</footer>
+
+<!-- Data + Logic -->
+<script src="salesData.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>
