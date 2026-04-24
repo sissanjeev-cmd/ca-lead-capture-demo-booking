@@ -1,0 +1,5 @@
+Task | Priority | Status | Notes
+Client presentation | High | In Progress | Due tomorrow
+Vendor API issue | High | Blocked | No response
+Hiring discussion | Medium | To Do |
+Finance approval | High | To Do | Pending

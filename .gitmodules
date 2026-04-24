@@ -1,0 +1,24 @@
+[submodule "ca-automation"]
+	path = ca-automation
+	url = https://github.com/sissanjeev-cmd/ca-automation.git
+[submodule "Shaswat Portfolio"]
+	path = Shaswat Portfolio
+	url = https://github.com/sissanjeev-cmd/shaswatolten.git
+[submodule "ca-lead-capture-demo-booking"]
+	path = ca-lead-capture-demo-booking
+	url = https://github.com/sissanjeev-cmd/ca-lead-capture-demo-booking.git
+[submodule "Free Claude Code Skills"]
+	path = Free Claude Code Skills
+	url = https://github.com/sissanjeev/sissanjeev-cmd.git
+[submodule "whatsapp-bulk-sender"]
+	path = whatsapp-bulk-sender
+	url = https://github.com/sissanjeev-cmd/whatsapp-bulk-sender.git
+[submodule "Learn Claude Coding"]
+	path = Learn Claude Coding
+	url = https://github.com/sissanjeev-cmd/shaswatolten.git
+[submodule "What-If-Analysis"]
+	path = What-If-Analysis
+	url = https://github.com/sissanjeev-cmd/What-If-Analysis.git
+[submodule "ca-automation Copilot"]
+	path = ca-automation Copilot
+	url = https://github.com/sissanjeev-cmd/ca-automation.git

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — Shaswat Garg</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .page-hero { padding: 7rem 1.5rem 3rem; max-width: 1200px; margin: 0 auto; }
+    .main-section { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+
+    /* Two-column layout */
+    .contact-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    @media (max-width: 860px) { .contact-layout { grid-template-columns: 1fr; gap: 2.5rem; } }
+
+    /* Contact link rows */
+    .contact-link-row {
+      display: flex; align-items: center; gap: 1.1rem;
+      padding: 1.25rem 1.5rem; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.03);
+      text-decoration: none; color: var(--text);
+      transition: border-color 0.25s, background 0.25s, transform 0.25s;
+      margin-bottom: 0.75rem;
+    }
+    .contact-link-row:hover {
+      border-color: rgba(123,57,252,0.35);
+      background: rgba(123,57,252,0.05);
+      transform: translateX(6px);
+    }
+    .contact-link-icon {
+      width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .contact-link-label { font-size: 0.72rem; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+    .contact-link-value { font-size: 0.9rem; font-weight: 500; margin-top: 1px; }
+    .contact-link-arrow { margin-left: auto; color: var(--muted); transition: transform 0.25s, color 0.25s; }
+    .contact-link-row:hover .contact-link-arrow { transform: translate(4px,-4px); color: #a78bfa; }
+
+    /* Contact form */
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label { font-size: 0.78rem; font-weight: 500; color: var(--muted); font-family: 'Space Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; }
+    .form-input, .form-textarea {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px; padding: 0.85rem 1rem;
+      color: var(--text); font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem; outline: none; width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus, .form-textarea:focus {
+      border-color: rgba(123,57,252,0.5);
+      box-shadow: 0 0 0 3px rgba(123,57,252,0.1);
+    }
+    .form-input::placeholder, .form-textarea::placeholder { color: rgba(148,163,184,0.5); }
+    .form-textarea { min-height: 130px; resize: vertical; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #7b39fc, #c084fc);
+      color: #fff; font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem; font-weight: 600; padding: 0.9rem 2rem;
+      border-radius: 10px; border: none; cursor: pointer;
+      transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      width: 100%;
+    }
+    .submit-btn:hover {
+      opacity: 0.9; transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(123,57,252,0.35);
+    }
+
+    /* Status message */
+    #form-status {
+      display: none; padding: 0.85rem 1rem; border-radius: 10px;
+      font-size: 0.85rem; font-weight: 500; text-align: center;
+    }
+    #form-status.success { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.25); color: #22d3ee; }
+    #form-status.error   { background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.25);  color: #f87171; }
+
+    /* Availability card */
+    .avail-card {
+      background: rgba(34,211,238,0.04);
+      border: 1px solid rgba(34,211,238,0.15);
+      border-radius: 16px; padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    /* Location map placeholder */
+    .location-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; overflow: hidden; margin-top: 1.5rem;
+    }
+    .location-inner {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, rgba(123,57,252,0.08), rgba(34,211,238,0.05));
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .location-pin {
+      width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+      background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2);
+      display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+    }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <div class="global-bg">
+    <div class="global-bg-fallback"></div>
+    <video autoplay loop muted playsinline class="global-bg-video"
+      oncanplay="this.style.opacity=1" style="opacity:0;transition:opacity 1.5s;">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260210_031346_d87182fb-b0af-4273-84d1-c6fd17d6bf0f.mp4" type="video/mp4" />
+    </video>
+  </div>
+  <div class="global-overlay"></div>
+
+<div id="nav-placeholder"></div>
+
+<!-- Orbs -->
+<div class="orb" style="width:500px;height:500px;top:10%;left:-150px;background:radial-gradient(circle,rgba(123,57,252,0.07) 0%,transparent 70%);"></div>
+<div class="orb" style="width:400px;height:400px;bottom:10%;right:-100px;background:radial-gradient(circle,rgba(34,211,238,0.06) 0%,transparent 70%);"></div>
+
+<div class="page-hero">
+  <div class="reveal">
+    <p class="section-eyebrow">Let's Connect</p>
+    <h1 style="font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;letter-spacing:-0.03em;line-height:1.05;">
+      Get in <span class="grad-text">Touch</span>
+    </h1>
+    <p style="color:var(--muted);font-size:1.05rem;margin-top:1rem;max-width:520px;line-height:1.7;">
+      Open to research collaborations, ML &amp; robotics roles, and connecting with fellow engineers and researchers worldwide.
+    </p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="main-section">
+  <div class="contact-layout">
+
+    <!-- Left: Contact info -->
+    <div class="reveal-left">
+      <p class="section-eyebrow">Reach Out</p>
+      <h2 style="font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;letter-spacing:-0.02em;margin-bottom:1.75rem;">
+        Direct <span class="grad-text-purple">Channels</span>
+      </h2>
+
+      <!-- Email -->
+      <a href="mailto:sis_shaswat@outlook.com" class="contact-link-row">
+        <div class="contact-link-icon" style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);">
+          <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="#22d3ee" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <div style="flex:1;">
+          <div class="contact-link-label">Email</div>
+          <div class="contact-link-value">sis_shaswat@outlook.com</div>
+        </div>
+        <svg class="contact-link-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M17 7H7M17 7v10"/>
+        </svg>
+      </a>
+
+      <!-- LinkedIn -->
+      <a href="https://www.linkedin.com/in/shaswat-garg" target="_blank" class="contact-link-row">
+        <div class="contact-link-icon" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);">
+          <svg width="20" height="20" fill="#60a5fa" viewBox="0 0 24 24">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+        </div>
+        <div style="flex:1;">
+          <div class="contact-link-label">LinkedIn</div>
+          <div class="contact-link-value">linkedin.com/in/shaswat-garg</div>
+        </div>
+        <svg class="contact-link-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M17 7H7M17 7v10"/>
+        </svg>
+      </a>
+
+      <!-- GitHub -->
+      <a href="https://shaswat2001.github.io" target="_blank" class="contact-link-row">
+        <div class="contact-link-icon" style="background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.2);">
+          <svg width="20" height="20" fill="#c084fc" viewBox="0 0 24 24">
+            <path d="M12 0C5.37 0 0 5.373 0 12c0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.298 24 12c0-6.627-5.373-12-12-12"/>
+          </svg>
+        </div>
+        <div style="flex:1;">
+          <div class="contact-link-label">GitHub / Portfolio</div>
+          <div class="contact-link-value">shaswat2001.github.io</div>
+        </div>
+        <svg class="contact-link-arrow" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M17 7H7M17 7v10"/>
+        </svg>
+      </a>
+
+      <!-- Availability -->
+      <div class="avail-card reveal">
+        <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.75rem;">
+          <span class="pulse-ring" style="width:8px;height:8px;border-radius:50%;background:#22d3ee;display:inline-block;flex-shrink:0;"></span>
+          <span style="font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:#22d3ee;">Available</span>
+        </div>
+        <p style="font-size:0.9rem;font-weight:500;margin-bottom:0.4rem;">Open to Opportunities</p>
+        <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;">ML Engineering, Robotics Research, AI/RL roles — full-time or research collaborations in Toronto and remote.</p>
+      </div>
+
+      <!-- Location -->
+      <div class="location-card reveal">
+        <div class="location-inner">
+          <div class="location-pin">📍</div>
+          <div>
+            <div style="font-weight:600;font-size:0.95rem;">Toronto, Ontario</div>
+            <div style="font-size:0.8rem;color:var(--muted);margin-top:2px;">Canada · Open to Remote</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Contact form -->
+    <div class="reveal">
+      <p class="section-eyebrow">Send a Message</p>
+      <h2 style="font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;letter-spacing:-0.02em;margin-bottom:1.75rem;">
+        Start a <span class="grad-text">Conversation</span>
+      </h2>
+
+      <form class="contact-form" id="contactForm" onsubmit="handleSubmit(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="fname">First Name</label>
+            <input class="form-input" id="fname" name="fname" type="text" placeholder="Jane" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lname">Last Name</label>
+            <input class="form-input" id="lname" name="lname" type="text" placeholder="Smith" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input class="form-input" id="email" name="email" type="email" placeholder="jane@company.com" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="subject">Subject</label>
+          <input class="form-input" id="subject" name="subject" type="text" placeholder="Research collaboration / Job opportunity / General" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="message">Message</label>
+          <textarea class="form-textarea" id="message" name="message" placeholder="Hi Shaswat, I'd love to connect about..." required></textarea>
+        </div>
+
+        <div id="form-status"></div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          </svg>
+          Send Message
+        </button>
+
+        <p style="font-size:0.75rem;color:var(--muted);text-align:center;margin-top:0.25rem;">
+          Or email directly at <a href="mailto:sis_shaswat@outlook.com" style="color:#22d3ee;text-decoration:none;">sis_shaswat@outlook.com</a>
+        </p>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
+    <span style="font-size:0.82rem;font-weight:600;">Shaswat Garg</span>
+    <div style="display:flex;gap:1.5rem;">
+      <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Home</a>
+      <a href="about.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">About</a>
+      <a href="experience.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Experience</a>
+    </div>
+    <p style="font-size:0.72rem;color:rgba(148,163,184,0.5);font-family:'Space Mono',monospace;">© 2025</p>
+  </div>
+</footer>
+
+<script src="nav.js"></script>
+<script>
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  const status = document.getElementById('form-status');
+  const form = document.getElementById('contactForm');
+
+  // Loading state
+  btn.disabled = true;
+  btn.innerHTML = `<svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Sending...`;
+
+  // Compose mailto link (opens email client as fallback)
+  const fname   = document.getElementById('fname').value;
+  const lname   = document.getElementById('lname').value;
+  const email   = document.getElementById('email').value;
+  const subject = document.getElementById('subject').value || 'Portfolio Contact';
+  const message = document.getElementById('message').value;
+
+  const body = encodeURIComponent(`From: ${fname} ${lname} <${email}>\n\n${message}`);
+  const mailto = `mailto:sis_shaswat@outlook.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+
+  setTimeout(() => {
+    window.location.href = mailto;
+    status.style.display = 'block';
+    status.className = 'success';
+    status.textContent = '✓ Your email client has been opened. Please send the email to complete.';
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Done!`;
+    setTimeout(() => {
+      btn.innerHTML = `<svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg> Send Message`;
+    }, 3000);
+  }, 800);
+}
+</script>
+<style>
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
+</body>
+</html>

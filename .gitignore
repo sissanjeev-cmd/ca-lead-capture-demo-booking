@@ -1,0 +1,33 @@
+# Sensitive files
+Anthropic API Key
+
+# Nested git repos with no remote (can't be tracked as submodule)
+All Of My Claude Skills/
+financial-scenario-analysis/frontend/
+
+# Environment files with secrets
+.env
+**/.env
+
+# Node modules
+node_modules/
+**/node_modules/
+
+# Remotion compiled output chrome binary
+remotion-project/.remotion/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Office lock files
+.~lock.*
+
+# Claude local config
+.claude/
+
+# Large binary files
+*.xlsx
+*.docx
+*.png

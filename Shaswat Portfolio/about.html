@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — Shaswat Garg</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .page-hero { padding: 7rem 1.5rem 3rem; max-width: 1200px; margin: 0 auto; }
+    .about-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 4rem; align-items: start; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+    @media (max-width: 900px) { .about-grid { grid-template-columns: 1fr; } }
+
+    /* Photo frame with animated border */
+    .photo-frame {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+    }
+    .photo-frame::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(123,57,252,0.5), rgba(34,211,238,0.4), rgba(192,132,252,0.5));
+      border-radius: 24px;
+      z-index: -1;
+      padding: 2px;
+    }
+    .photo-frame img {
+      display: block; width: 100%;
+      height: clamp(320px, 45vw, 520px);
+      object-fit: cover; object-position: center top;
+      border-radius: 22px;
+    }
+    /* Floating chips on photo */
+    .photo-chip {
+      position: absolute;
+      background: rgba(3,7,18,0.9);
+      border: 1px solid rgba(164,132,215,0.3);
+      backdrop-filter: blur(16px);
+      border-radius: 12px;
+      padding: 0.7rem 1rem;
+      font-size: 0.8rem;
+    }
+
+    .quick-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1.5rem; }
+    .fact-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 0.9rem 1rem; }
+    .fact-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.3rem; }
+    .fact-value { font-size: 0.9rem; font-weight: 500; }
+
+    /* Education timeline */
+    .edu-section { max-width: 1200px; margin: 0 auto; padding: 4rem 1.5rem 5rem; }
+    .edu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem; margin-top: 2rem; }
+
+    /* Awards */
+    .awards-section { background: rgba(255,255,255,0.02); border-top: 1px solid rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 4rem 1.5rem; }
+    .awards-inner { max-width: 1200px; margin: 0 auto; }
+    .awards-grid { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2rem; justify-content: center; }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <div class="global-bg">
+    <div class="global-bg-fallback"></div>
+    <video autoplay loop muted playsinline class="global-bg-video"
+      oncanplay="this.style.opacity=1" style="opacity:0;transition:opacity 1.5s;">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260210_031346_d87182fb-b0af-4273-84d1-c6fd17d6bf0f.mp4" type="video/mp4" />
+    </video>
+  </div>
+  <div class="global-overlay"></div>
+
+<div id="nav-placeholder"></div>
+
+<!-- Page Hero -->
+<div class="page-hero">
+  <div class="reveal">
+    <p class="section-eyebrow">Who I Am</p>
+    <h1 style="font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;letter-spacing:-0.03em;line-height:1.05;">
+      About <span class="grad-text">Shaswat</span>
+    </h1>
+    <p style="color:var(--muted);font-size:1.05rem;margin-top:1rem;max-width:540px;line-height:1.7;">
+      Robotics researcher, ML engineer, and lifelong builder passionate about creating
+      intelligent physical systems.
+    </p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- About Grid -->
+<div class="about-grid" style="padding-top:4rem;">
+
+  <!-- Left: Photo -->
+  <div class="reveal-left">
+    <div class="photo-frame" style="border: 2px solid transparent; background: linear-gradient(#030712,#030712) padding-box, linear-gradient(135deg,rgba(123,57,252,0.7),rgba(34,211,238,0.5)) border-box; border-radius:24px;">
+      <img src="Pic 1.JPG" alt="Shaswat Garg"
+           onerror="this.src='https://placehold.co/420x520/0d1526/22d3ee?text=Shaswat+Garg'" />
+    </div>
+
+    <!-- Quick facts below photo -->
+    <div class="quick-facts" style="margin-top:1.25rem;">
+      <div class="fact-card">
+        <div class="fact-label" style="color:#22d3ee;">Location</div>
+        <div class="fact-value">Toronto, Canada</div>
+      </div>
+      <div class="fact-card">
+        <div class="fact-label" style="color:#c084fc;">Status</div>
+        <div class="fact-value">Open to Roles</div>
+      </div>
+      <div class="fact-card">
+        <div class="fact-label" style="color:#60a5fa;">Email</div>
+        <div class="fact-value" style="font-size:0.78rem;word-break:break-all;">sis_shaswat@outlook.com</div>
+      </div>
+      <div class="fact-card">
+        <div class="fact-label" style="color:#22d3ee;">Focus</div>
+        <div class="fact-value">Safe RL · Robotics</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Story -->
+  <div class="reveal" style="padding-top:0.5rem;">
+    <p class="section-eyebrow">My Story</p>
+    <h2 style="font-size:clamp(1.8rem,3.5vw,2.6rem);font-weight:700;letter-spacing:-0.02em;margin-bottom:1.5rem;">
+      Curious engineer, <span class="grad-text">lifelong builder.</span>
+    </h2>
+
+    <div style="display:flex;flex-direction:column;gap:1.1rem;color:var(--muted);font-size:1rem;line-height:1.8;">
+      <p>As a kid, I loved taking apart gadgets and toys to understand how they worked. This curiosity led me to pursue a bachelor's in <span style="color:#f1f5f9;font-weight:500;">Mechanical Engineering from Delhi Technological University (DTU)</span>. During my second year, I discovered my passion for robotics and AI, sparking a deep love for the field.</p>
+      <p>The idea of creating a robot with human-like movement and thinking abilities excited me, setting me on a journey I continue to this day. Through hands-on robotics projects, I honed skills in <span style="color:#22d3ee;font-weight:500;">vision-based path planning</span>, <span style="color:#c084fc;font-weight:500;">safe reinforcement learning</span>, and mastered tools like ROS2, Python, C++, and MATLAB.</p>
+      <p>I served as a research assistant at institutions like <span style="color:#f1f5f9;font-weight:500;">IIT Delhi</span> and <span style="color:#f1f5f9;font-weight:500;">Toronto Metropolitan University</span>, contributing to AI-based control algorithms for Continuum robots.</p>
+      <p>After graduating, I joined <span style="color:#f1f5f9;font-weight:500;">Orangewood Labs</span> where I built <em style="color:#22d3ee;">RoboGPT</em> — an LLM-based tool that cut programming time by 50%. I then pursued a MASc at the <span style="color:#f1f5f9;font-weight:500;">University of Waterloo</span>, with thesis focused on Vision-based Path Planning for Aerial Manipulators using Safe RL.</p>
+      <p>Now at <span style="color:#f1f5f9;font-weight:500;">ArenaX Labs</span> as an ML Researcher and Engineer, I'm excited to keep pushing the boundaries of robotics and AI.</p>
+    </div>
+
+    <!-- CTA -->
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-top:2rem;">
+      <a href="experience.html" class="glass-btn glass-btn-primary" style="height:42px;padding:0 22px;font-size:0.88rem;">
+        View Experience
+      </a>
+      <a href="https://www.linkedin.com/in/shaswat-garg" target="_blank" class="glass-btn glass-btn-secondary" style="height:42px;padding:0 22px;font-size:0.88rem;">
+        LinkedIn Profile
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Education -->
+<div class="edu-section">
+  <div class="reveal">
+    <p class="section-eyebrow">Academic Journey</p>
+    <h2 style="font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;letter-spacing:-0.02em;">
+      Education & <span class="grad-text">Credentials</span>
+    </h2>
+  </div>
+
+  <div class="edu-grid">
+    <div class="card reveal" style="padding:1.75rem;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:0;right:0;width:100px;height:100px;background:radial-gradient(circle,rgba(34,211,238,0.1),transparent);border-radius:0 16px 0 0;"></div>
+      <div style="display:flex;gap:1rem;align-items:start;">
+        <div style="width:50px;height:50px;border-radius:12px;background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.25);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">🎓</div>
+        <div>
+          <span class="tag" style="margin-bottom:0.6rem;display:inline-flex;">2024 – 2025</span>
+          <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:0.3rem;">University of Waterloo</h3>
+          <p style="color:#22d3ee;font-size:0.9rem;font-weight:500;margin-bottom:0.3rem;">Master of Applied Science (MASc)</p>
+          <p style="color:var(--muted);font-size:0.82rem;">Mechatronics, Robotics &amp; Automation Engineering</p>
+          <p style="color:var(--muted);font-size:0.78rem;margin-top:0.6rem;line-height:1.6;">Thesis: Vision-based Path Planning and Control of UAVs and Aerial Manipulators using Safe Reinforcement Learning</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal" style="padding:1.75rem;position:relative;overflow:hidden;transition-delay:0.08s;">
+      <div style="position:absolute;top:0;right:0;width:100px;height:100px;background:radial-gradient(circle,rgba(192,132,252,0.1),transparent);border-radius:0 16px 0 0;"></div>
+      <div style="display:flex;gap:1rem;align-items:start;">
+        <div style="width:50px;height:50px;border-radius:12px;background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.25);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">🏛️</div>
+        <div>
+          <span class="tag tag-purple" style="margin-bottom:0.6rem;display:inline-flex;">2019 – 2023</span>
+          <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:0.3rem;">Delhi Technological University</h3>
+          <p style="color:#c084fc;font-size:0.9rem;font-weight:500;margin-bottom:0.3rem;">Bachelor of Technology (BTech)</p>
+          <p style="color:var(--muted);font-size:0.82rem;">Mechanical Engineering</p>
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.8rem;">
+            <span class="tag tag-purple" style="font-size:0.65rem;">Meritorious Award</span>
+            <span class="tag tag-purple" style="font-size:0.65rem;">Academic Excellence</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card reveal" style="padding:1.75rem;transition-delay:0.16s;">
+      <div style="display:flex;gap:1rem;align-items:start;">
+        <div style="width:50px;height:50px;border-radius:12px;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">🏫</div>
+        <div>
+          <span class="tag tag-blue" style="margin-bottom:0.6rem;display:inline-flex;">2007 – 2019</span>
+          <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:0.3rem;">DAV Public School</h3>
+          <p style="color:#60a5fa;font-size:0.9rem;font-weight:500;margin-bottom:0.3rem;">Secondary Education</p>
+          <p style="color:var(--muted);font-size:0.82rem;">Sreshtha Vihar, Delhi</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Certifications -->
+  <div class="reveal" style="margin-top:2.5rem;">
+    <h3 style="font-size:1rem;font-weight:600;color:var(--muted);margin-bottom:1rem;letter-spacing:0.05em;text-transform:uppercase;font-family:'Space Mono',monospace;font-size:0.75rem;">Certifications</h3>
+    <div style="display:flex;flex-wrap:wrap;gap:0.6rem;">
+      <span class="tag">Convolutional Neural Networks — deeplearning.ai</span>
+      <span class="tag">Sequence Models — deeplearning.ai</span>
+      <span class="tag">Machine Learning A-Z · Python &amp; R</span>
+      <span class="tag tag-blue">CSWA — Additive Manufacturing</span>
+      <span class="tag tag-blue">CSWA — Mechanical Design</span>
+    </div>
+  </div>
+</div>
+
+<!-- Awards -->
+<div class="awards-section">
+  <div class="awards-inner">
+    <div class="reveal" style="text-align:center;margin-bottom:2rem;">
+      <p class="section-eyebrow" style="justify-content:center;">Recognition</p>
+      <h2 style="font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;letter-spacing:-0.02em;">
+        Honors & <span class="grad-text">Awards</span>
+      </h2>
+    </div>
+    <div class="awards-grid">
+      <div class="card reveal" style="display:flex;align-items:center;gap:1rem;padding:1.25rem 1.5rem;">
+        <div class="award-badge">🏆</div>
+        <div><div style="font-weight:600;font-size:0.95rem;">Meritorious Award</div><div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">Academic Excellence · DTU</div></div>
+      </div>
+      <div class="card reveal" style="display:flex;align-items:center;gap:1rem;padding:1.25rem 1.5rem;transition-delay:0.06s;">
+        <div class="award-badge">🥇</div>
+        <div><div style="font-weight:600;font-size:0.95rem;">Meritorious Award</div><div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">Outstanding Achievement</div></div>
+      </div>
+      <div class="card reveal" style="display:flex;align-items:center;gap:1rem;padding:1.25rem 1.5rem;transition-delay:0.12s;">
+        <div class="award-badge">⭐</div>
+        <div><div style="font-weight:600;font-size:0.95rem;">Academic Excellence Award</div><div style="font-size:0.78rem;color:var(--muted);margin-top:2px;">Top Academic Performance</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
+    <span style="font-size:0.82rem;font-weight:600;">Shaswat Garg</span>
+    <div style="display:flex;gap:1.5rem;">
+      <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Home</a>
+      <a href="experience.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Experience</a>
+      <a href="contact.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Contact</a>
+    </div>
+    <p style="font-size:0.72rem;color:rgba(148,163,184,0.5);font-family:'Space Mono',monospace;">© 2025</p>
+  </div>
+</footer>
+
+<script src="nav.js"></script>
+</body>
+</html>

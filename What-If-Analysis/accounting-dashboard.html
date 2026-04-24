@@ -1,0 +1,2473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Accounting Dashboard</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --border: #475569;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #eab308;
+    --orange: #f97316;
+    --purple: #a855f7;
+    --cyan: #06b6d4;
+    --pink: #ec4899;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  header .subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .flow-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .flow-indicator .step {
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: var(--surface2);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .flow-indicator .step:hover,
+  .flow-indicator .step.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .flow-indicator .arrow {
+    color: var(--border);
+    font-size: 1rem;
+  }
+
+  .main-container {
+    display: flex;
+    height: calc(100vh - 60px);
+  }
+
+  .left-panel {
+    width: 380px;
+    min-width: 380px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .voucher-form {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: flex-end;
+  }
+
+  .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-group label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .form-group input,
+  .form-group select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: var(--accent);
+  }
+
+  .form-group select option {
+    background: var(--surface);
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: var(--accent-hover);
+  }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--red);
+    border: 1px solid var(--red);
+  }
+
+  .btn-danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+  }
+
+  .voucher-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 20px;
+  }
+
+  .voucher-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .voucher-item:hover {
+    border-color: var(--accent);
+  }
+
+  .voucher-item.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
+  }
+
+  .voucher-item .v-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .voucher-item .v-id {
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .voucher-item .v-date {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+
+  .voucher-item .v-type {
+    font-size: 0.65rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .type-receipt { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+  .type-payment { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+  .type-journal { background: rgba(168, 85, 247, 0.15); color: var(--purple); }
+  .type-sales { background: rgba(6, 182, 212, 0.15); color: var(--cyan); }
+  .type-purchase { background: rgba(249, 115, 22, 0.15); color: var(--orange); }
+
+  .voucher-item .v-narration {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .voucher-item .v-entries {
+    font-size: 0.72rem;
+  }
+
+  .voucher-item .v-entry {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 0;
+    gap: 8px;
+  }
+
+  .voucher-item .v-entry .acct { flex: 1; }
+  .voucher-item .v-entry .dr { color: var(--green); min-width: 70px; text-align: right; }
+  .voucher-item .v-entry .cr { color: var(--red); min-width: 70px; text-align: right; }
+
+  .voucher-item .v-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: none;
+    gap: 4px;
+  }
+
+  .voucher-item:hover .v-actions { display: flex; }
+
+  .v-actions button {
+    background: var(--surface2);
+    border: none;
+    color: var(--text-muted);
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .v-actions button:hover { color: var(--red); background: rgba(239, 68, 68, 0.15); }
+
+  .right-panel {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 28px;
+  }
+
+  .section {
+    margin-bottom: 28px;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--surface2);
+  }
+
+  .section-title .icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+  }
+
+  .icon-ledger { background: rgba(59, 130, 246, 0.15); color: var(--accent); }
+  .icon-tb { background: rgba(168, 85, 247, 0.15); color: var(--purple); }
+  .icon-pl { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+  .icon-bs { background: rgba(6, 182, 212, 0.15); color: var(--cyan); }
+  .icon-tax { background: rgba(249, 115, 22, 0.15); color: var(--orange); }
+
+  .ledger-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 14px;
+  }
+
+  .ledger-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .ledger-card-header {
+    padding: 10px 14px;
+    background: var(--surface2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+
+  .ledger-card-header .balance {
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .ledger-card-header .balance.dr-bal { color: var(--green); }
+  .ledger-card-header .balance.cr-bal { color: var(--red); }
+
+  .ledger-table {
+    width: 100%;
+    font-size: 0.75rem;
+    border-collapse: collapse;
+  }
+
+  .ledger-table th {
+    background: var(--bg);
+    padding: 6px 10px;
+    text-align: left;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    letter-spacing: 0.5px;
+  }
+
+  .ledger-table td {
+    padding: 6px 10px;
+    border-top: 1px solid rgba(71, 85, 105, 0.3);
+  }
+
+  .ledger-table .amt { text-align: right; font-variant-numeric: tabular-nums; }
+  .ledger-table .dr-amt { color: var(--green); }
+  .ledger-table .cr-amt { color: var(--red); }
+
+  /* Financial Statement Tables */
+  .fin-table {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.82rem;
+  }
+
+  .fin-table th {
+    background: var(--surface2);
+    padding: 10px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  .fin-table th.amt-col { text-align: right; }
+
+  .fin-table td {
+    padding: 8px 16px;
+    border-top: 1px solid rgba(71, 85, 105, 0.3);
+  }
+
+  .fin-table td.amt {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  .fin-table tr.subtotal td {
+    font-weight: 700;
+    border-top: 2px solid var(--border);
+    background: rgba(59, 130, 246, 0.05);
+  }
+
+  .fin-table tr.grand-total td {
+    font-weight: 700;
+    border-top: 3px double var(--border);
+    background: rgba(59, 130, 246, 0.1);
+    font-size: 0.9rem;
+  }
+
+  .fin-table tr.section-header td {
+    font-weight: 700;
+    color: var(--accent);
+    padding-top: 12px;
+    font-size: 0.85rem;
+  }
+
+  .fin-table tr.indent td:first-child {
+    padding-left: 32px;
+  }
+
+  .positive { color: var(--green); }
+  .negative { color: var(--red); }
+
+  .two-col-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .stat-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+
+  .stat-card .stat-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .stat-card .stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-card .stat-sub {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-muted);
+  }
+
+  .empty-state .icon-big {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  .highlight-pulse {
+    animation: pulse 0.6s ease-out;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+    100% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
+  }
+
+  .narration-input {
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .preset-btns {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .preset-btn {
+    padding: 4px 10px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .preset-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .entry-rows {
+    margin-top: 8px;
+  }
+
+  .entry-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+    align-items: center;
+  }
+
+  .entry-row select {
+    flex: 2;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    outline: none;
+  }
+
+  .entry-row input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    outline: none;
+    text-align: right;
+  }
+
+  .entry-row input:focus,
+  .entry-row select:focus {
+    border-color: var(--accent);
+  }
+
+  .entry-row .remove-entry {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 4px;
+  }
+
+  .entry-row .remove-entry:hover { color: var(--red); }
+
+  .form-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    align-items: center;
+  }
+
+  .form-actions .balance-check {
+    flex: 1;
+    font-size: 0.75rem;
+    text-align: right;
+  }
+
+  .balanced { color: var(--green); }
+  .unbalanced { color: var(--red); }
+
+  .add-entry-btn {
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--text-muted);
+    padding: 5px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .add-entry-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0;
+  }
+
+  .tab {
+    padding: 8px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+  }
+
+  .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .tab:hover { color: var(--text); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border); }
+
+  .impact-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    color: var(--border);
+    font-size: 1.5rem;
+  }
+
+  .tax-slab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .tax-slab .slab-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .tax-slab .slab-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+
+  .regime-toggle {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+
+  .regime-toggle button {
+    flex: 1;
+    padding: 8px 14px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .regime-toggle button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .fy-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .fy-selector label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .fy-selector select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .fy-selector select:focus {
+    border-color: var(--accent);
+  }
+
+  .fy-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent);
+    font-weight: 600;
+    margin-left: 4px;
+  }
+
+  /* Drill-down links */
+  .drill-link {
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(59, 130, 246, 0.4);
+    transition: all 0.2s;
+  }
+
+  .drill-link:hover {
+    color: #60a5fa;
+    border-bottom-color: #60a5fa;
+  }
+
+  .drill-amt {
+    color: inherit;
+    cursor: pointer;
+    border-bottom: 1px dashed rgba(148, 163, 184, 0.3);
+    transition: all 0.2s;
+  }
+
+  .drill-amt:hover {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  /* Drill-down overlay */
+  .drill-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 200;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(4px);
+  }
+
+  .drill-overlay.open {
+    display: flex;
+  }
+
+  .drill-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  .drill-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 1;
+  }
+
+  .drill-panel-header h3 {
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .drill-panel-header .breadcrumb {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .drill-panel-header .breadcrumb .crumb {
+    cursor: pointer;
+    color: var(--accent);
+  }
+
+  .drill-panel-header .breadcrumb .crumb:hover {
+    text-decoration: underline;
+  }
+
+  .drill-close {
+    background: var(--surface2);
+    border: none;
+    color: var(--text);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .drill-close:hover {
+    background: var(--border);
+  }
+
+  .drill-panel-body {
+    padding: 20px 24px;
+  }
+
+  .drill-panel-body .fin-table {
+    margin-bottom: 16px;
+  }
+
+  .drill-summary {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .drill-summary-card {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+
+  .drill-summary-card .ds-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .drill-summary-card .ds-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Accounting Flow Dashboard</h1>
+    <div class="subtitle">Voucher &rarr; Ledger &rarr; Trial Balance &rarr; P&amp;L &rarr; Balance Sheet &rarr; Income Tax</div>
+  </div>
+  <div class="flow-indicator">
+    <span class="step active" onclick="scrollToSection('voucher')">Voucher</span>
+    <span class="arrow">&rarr;</span>
+    <span class="step" onclick="scrollToSection('ledger')">Ledger</span>
+    <span class="arrow">&rarr;</span>
+    <span class="step" onclick="scrollToSection('trial-balance')">Trial Balance</span>
+    <span class="arrow">&rarr;</span>
+    <span class="step" onclick="scrollToSection('pnl')">P&amp;L</span>
+    <span class="arrow">&rarr;</span>
+    <span class="step" onclick="scrollToSection('balance-sheet')">Balance Sheet</span>
+    <span class="arrow">&rarr;</span>
+    <span class="step" onclick="scrollToSection('income-tax')">Income Tax</span>
+  </div>
+</header>
+
+<div class="main-container">
+  <!-- Left Panel: Voucher Entry -->
+  <div class="left-panel">
+    <div class="panel-header">
+      <h2><span style="color:var(--accent)">&#9993;</span> Voucher Entry</h2>
+      <button class="btn btn-danger btn-sm" onclick="clearAllVouchers()" title="Clear all">Clear All</button>
+    </div>
+
+    <div class="preset-btns">
+      <button class="preset-btn" onclick="loadPreset('sales')">Sales Invoice</button>
+      <button class="preset-btn" onclick="loadPreset('purchase')">Purchase</button>
+      <button class="preset-btn" onclick="loadPreset('salary')">Salary Payment</button>
+      <button class="preset-btn" onclick="loadPreset('rent')">Rent Received</button>
+      <button class="preset-btn" onclick="loadPreset('depreciation')">Depreciation</button>
+      <button class="preset-btn" onclick="loadPreset('capital')">Capital Intro</button>
+      <button class="preset-btn" onclick="loadPreset('loan')">Loan Taken</button>
+      <button class="preset-btn" onclick="loadPreset('asset')">Asset Purchase</button>
+    </div>
+
+    <div class="voucher-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="vDate" value="2026-04-01">
+        </div>
+        <div class="form-group">
+          <label>Type</label>
+          <select id="vType">
+            <option value="journal">Journal</option>
+            <option value="receipt">Receipt</option>
+            <option value="payment">Payment</option>
+            <option value="sales">Sales</option>
+            <option value="purchase">Purchase</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:8px">
+        <label>Narration</label>
+        <input type="text" id="vNarration" placeholder="Description..." class="narration-input">
+      </div>
+      <div id="entryRows" class="entry-rows">
+        <div class="entry-row">
+          <select class="acct-select"></select>
+          <input type="number" placeholder="Debit" class="dr-input" min="0" step="100" oninput="updateBalance()">
+          <input type="number" placeholder="Credit" class="cr-input" min="0" step="100" oninput="updateBalance()">
+          <button class="remove-entry" onclick="removeEntryRow(this)">&times;</button>
+        </div>
+        <div class="entry-row">
+          <select class="acct-select"></select>
+          <input type="number" placeholder="Debit" class="dr-input" min="0" step="100" oninput="updateBalance()">
+          <input type="number" placeholder="Credit" class="cr-input" min="0" step="100" oninput="updateBalance()">
+          <button class="remove-entry" onclick="removeEntryRow(this)">&times;</button>
+        </div>
+      </div>
+      <button class="add-entry-btn" onclick="addEntryRow()">+ Add Line</button>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="postVoucher()">Post Voucher</button>
+        <div class="balance-check" id="balanceCheck">Dr: 0 | Cr: 0</div>
+      </div>
+    </div>
+
+    <div class="voucher-list" id="voucherList">
+      <div class="empty-state">
+        <div class="icon-big">&#128221;</div>
+        <p>No vouchers yet. Post your first voucher above or use a preset.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel: Ledger / TB / P&L / BS / Tax -->
+  <div class="right-panel" id="rightPanel">
+    <div class="fy-selector">
+      <label>Financial Year:</label>
+      <select id="fySelect" onchange="renderAll()">
+        <option value="all">All Years</option>
+        <option value="2023-24">FY 2023-24</option>
+        <option value="2024-25">FY 2024-25</option>
+        <option value="2025-26" selected>FY 2025-26</option>
+      </select>
+    </div>
+
+    <div class="stat-cards" id="statCards"></div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="ledger" onclick="switchTab('ledger')">Ledger</button>
+      <button class="tab" data-tab="trial-balance" onclick="switchTab('trial-balance')">Trial Balance</button>
+      <button class="tab" data-tab="pnl" onclick="switchTab('pnl')">P&amp;L</button>
+      <button class="tab" data-tab="balance-sheet" onclick="switchTab('balance-sheet')">Balance Sheet</button>
+      <button class="tab" data-tab="income-tax" onclick="switchTab('income-tax')">Income Tax</button>
+    </div>
+
+    <div class="tab-content active" id="tab-ledger"></div>
+    <div class="tab-content" id="tab-trial-balance"></div>
+    <div class="tab-content" id="tab-pnl"></div>
+    <div class="tab-content" id="tab-balance-sheet"></div>
+    <div class="tab-content" id="tab-income-tax"></div>
+  </div>
+</div>
+
+<!-- Drill-down overlay -->
+<div class="drill-overlay" id="drillOverlay" onclick="if(event.target===this)closeDrill()">
+  <div class="drill-panel">
+    <div class="drill-panel-header">
+      <div>
+        <div class="breadcrumb" id="drillBreadcrumb"></div>
+        <h3 id="drillTitle"></h3>
+      </div>
+      <button class="drill-close" onclick="closeDrill()">&times;</button>
+    </div>
+    <div class="drill-panel-body" id="drillBody"></div>
+  </div>
+</div>
+
+<script>
+// ========== Chart of Accounts ==========
+const ACCOUNTS = {
+  // Assets
+  'Cash': { group: 'asset', nature: 'debit', bs: 'Current Assets' },
+  'Bank': { group: 'asset', nature: 'debit', bs: 'Current Assets' },
+  'Accounts Receivable': { group: 'asset', nature: 'debit', bs: 'Current Assets' },
+  'Inventory': { group: 'asset', nature: 'debit', bs: 'Current Assets' },
+  'Prepaid Expenses': { group: 'asset', nature: 'debit', bs: 'Current Assets' },
+  'Furniture & Fixtures': { group: 'asset', nature: 'debit', bs: 'Fixed Assets' },
+  'Plant & Machinery': { group: 'asset', nature: 'debit', bs: 'Fixed Assets' },
+  'Building': { group: 'asset', nature: 'debit', bs: 'Fixed Assets' },
+  'Computer Equipment': { group: 'asset', nature: 'debit', bs: 'Fixed Assets' },
+  'Acc. Depreciation': { group: 'asset', nature: 'credit', bs: 'Fixed Assets' },
+  // Liabilities
+  'Accounts Payable': { group: 'liability', nature: 'credit', bs: 'Current Liabilities' },
+  'Salary Payable': { group: 'liability', nature: 'credit', bs: 'Current Liabilities' },
+  'Tax Payable': { group: 'liability', nature: 'credit', bs: 'Current Liabilities' },
+  'GST Payable': { group: 'liability', nature: 'credit', bs: 'Current Liabilities' },
+  'Bank Loan': { group: 'liability', nature: 'credit', bs: 'Long-term Liabilities' },
+  // Equity
+  'Capital Account': { group: 'equity', nature: 'credit', bs: 'Equity' },
+  'Retained Earnings': { group: 'equity', nature: 'credit', bs: 'Equity' },
+  'Drawings': { group: 'equity', nature: 'debit', bs: 'Equity' },
+  // Revenue
+  'Sales Revenue': { group: 'revenue', nature: 'credit', pl: 'Revenue' },
+  'Service Revenue': { group: 'revenue', nature: 'credit', pl: 'Revenue' },
+  'Rent Income': { group: 'revenue', nature: 'credit', pl: 'Other Income' },
+  'Interest Income': { group: 'revenue', nature: 'credit', pl: 'Other Income' },
+  'Commission Income': { group: 'revenue', nature: 'credit', pl: 'Other Income' },
+  // Expenses
+  'Cost of Goods Sold': { group: 'expense', nature: 'debit', pl: 'Cost of Goods Sold' },
+  'Salary Expense': { group: 'expense', nature: 'debit', pl: 'Operating Expenses' },
+  'Rent Expense': { group: 'expense', nature: 'debit', pl: 'Operating Expenses' },
+  'Utilities Expense': { group: 'expense', nature: 'debit', pl: 'Operating Expenses' },
+  'Office Supplies': { group: 'expense', nature: 'debit', pl: 'Operating Expenses' },
+  'Insurance Expense': { group: 'expense', nature: 'debit', pl: 'Operating Expenses' },
+  'Depreciation Expense': { group: 'expense', nature: 'debit', pl: 'Operating Expenses' },
+  'Interest Expense': { group: 'expense', nature: 'debit', pl: 'Finance Costs' },
+  'Bad Debts': { group: 'expense', nature: 'debit', pl: 'Operating Expenses' },
+  'Advertising Expense': { group: 'expense', nature: 'debit', pl: 'Operating Expenses' },
+  'Repairs & Maintenance': { group: 'expense', nature: 'debit', pl: 'Operating Expenses' },
+  'Travel Expense': { group: 'expense', nature: 'debit', pl: 'Operating Expenses' },
+  'Professional Fees': { group: 'expense', nature: 'debit', pl: 'Operating Expenses' },
+};
+
+const accountNames = Object.keys(ACCOUNTS).sort();
+
+// ========== State ==========
+let vouchers = [
+  // ===== FY 2023-24 (Apr 2023 - Mar 2024) — Business Setup Year =====
+  // Q1: Apr-Jun 2023
+  { id: 'V001', date: '2023-04-01', type: 'receipt', narration: 'Owner capital introduced in bank',
+    entries: [{ acct: 'Bank', dr: 500000, cr: 0 }, { acct: 'Capital Account', dr: 0, cr: 500000 }], totalDr: 500000 },
+  { id: 'V002', date: '2023-04-05', type: 'receipt', narration: 'Bank loan sanctioned for business',
+    entries: [{ acct: 'Bank', dr: 300000, cr: 0 }, { acct: 'Bank Loan', dr: 0, cr: 300000 }], totalDr: 300000 },
+  { id: 'V003', date: '2023-04-10', type: 'payment', narration: 'Purchase of computer equipment',
+    entries: [{ acct: 'Computer Equipment', dr: 120000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 120000 }], totalDr: 120000 },
+  { id: 'V004', date: '2023-04-15', type: 'payment', narration: 'Office furniture purchased',
+    entries: [{ acct: 'Furniture & Fixtures', dr: 85000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 85000 }], totalDr: 85000 },
+  { id: 'V005', date: '2023-05-01', type: 'sales', narration: 'First sales invoice to ABC Corp with GST',
+    entries: [{ acct: 'Accounts Receivable', dr: 118000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 100000 }, { acct: 'GST Payable', dr: 0, cr: 18000 }], totalDr: 118000 },
+  { id: 'V006', date: '2023-05-15', type: 'purchase', narration: 'Purchase of inventory from supplier',
+    entries: [{ acct: 'Inventory', dr: 60000, cr: 0 }, { acct: 'GST Payable', dr: 10800, cr: 0 }, { acct: 'Accounts Payable', dr: 0, cr: 70800 }], totalDr: 70800 },
+  { id: 'V007', date: '2023-06-01', type: 'payment', narration: 'Salary paid for May-Jun',
+    entries: [{ acct: 'Salary Expense', dr: 80000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 80000 }], totalDr: 80000 },
+  { id: 'V008', date: '2023-06-15', type: 'payment', narration: 'Office rent Q1',
+    entries: [{ acct: 'Rent Expense', dr: 45000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 45000 }], totalDr: 45000 },
+  // Q2: Jul-Sep 2023
+  { id: 'V009', date: '2023-07-10', type: 'sales', narration: 'Sales to XYZ Ltd with GST',
+    entries: [{ acct: 'Accounts Receivable', dr: 177000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 150000 }, { acct: 'GST Payable', dr: 0, cr: 27000 }], totalDr: 177000 },
+  { id: 'V010', date: '2023-07-20', type: 'sales', narration: 'Consulting services rendered',
+    entries: [{ acct: 'Bank', dr: 75000, cr: 0 }, { acct: 'Service Revenue', dr: 0, cr: 75000 }], totalDr: 75000 },
+  { id: 'V011', date: '2023-08-01', type: 'journal', narration: 'COGS for goods sold in Q1-Q2',
+    entries: [{ acct: 'Cost of Goods Sold', dr: 45000, cr: 0 }, { acct: 'Inventory', dr: 0, cr: 45000 }], totalDr: 45000 },
+  { id: 'V012', date: '2023-08-15', type: 'payment', narration: 'Salary Jul-Sep',
+    entries: [{ acct: 'Salary Expense', dr: 120000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 120000 }], totalDr: 120000 },
+  { id: 'V013', date: '2023-09-01', type: 'payment', narration: 'Utilities bill Q1-Q2',
+    entries: [{ acct: 'Utilities Expense', dr: 18000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 18000 }], totalDr: 18000 },
+  { id: 'V014', date: '2023-09-15', type: 'payment', narration: 'Rent Q2',
+    entries: [{ acct: 'Rent Expense', dr: 45000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 45000 }], totalDr: 45000 },
+  { id: 'V015', date: '2023-09-20', type: 'receipt', narration: 'Payment from ABC Corp',
+    entries: [{ acct: 'Bank', dr: 118000, cr: 0 }, { acct: 'Accounts Receivable', dr: 0, cr: 118000 }], totalDr: 118000 },
+  // Q3: Oct-Dec 2023
+  { id: 'V016', date: '2023-10-05', type: 'sales', narration: 'Bulk sales to PQR Traders with GST',
+    entries: [{ acct: 'Accounts Receivable', dr: 236000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 200000 }, { acct: 'GST Payable', dr: 0, cr: 36000 }], totalDr: 236000 },
+  { id: 'V017', date: '2023-10-20', type: 'purchase', narration: 'Inventory restocking',
+    entries: [{ acct: 'Inventory', dr: 80000, cr: 0 }, { acct: 'GST Payable', dr: 14400, cr: 0 }, { acct: 'Accounts Payable', dr: 0, cr: 94400 }], totalDr: 94400 },
+  { id: 'V018', date: '2023-11-01', type: 'payment', narration: 'Insurance premium annual',
+    entries: [{ acct: 'Insurance Expense', dr: 24000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 24000 }], totalDr: 24000 },
+  { id: 'V019', date: '2023-11-15', type: 'payment', narration: 'Salary Oct-Dec',
+    entries: [{ acct: 'Salary Expense', dr: 120000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 120000 }], totalDr: 120000 },
+  { id: 'V020', date: '2023-12-01', type: 'payment', narration: 'Rent Q3',
+    entries: [{ acct: 'Rent Expense', dr: 45000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 45000 }], totalDr: 45000 },
+  { id: 'V021', date: '2023-12-15', type: 'payment', narration: 'Interest on bank loan H1',
+    entries: [{ acct: 'Interest Expense', dr: 18000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 18000 }], totalDr: 18000 },
+  { id: 'V022', date: '2023-12-20', type: 'journal', narration: 'COGS Q3',
+    entries: [{ acct: 'Cost of Goods Sold', dr: 55000, cr: 0 }, { acct: 'Inventory', dr: 0, cr: 55000 }], totalDr: 55000 },
+  // Q4: Jan-Mar 2024
+  { id: 'V023', date: '2024-01-10', type: 'sales', narration: 'Service revenue - IT consulting',
+    entries: [{ acct: 'Bank', dr: 100000, cr: 0 }, { acct: 'Service Revenue', dr: 0, cr: 100000 }], totalDr: 100000 },
+  { id: 'V024', date: '2024-01-20', type: 'receipt', narration: 'Received from PQR Traders',
+    entries: [{ acct: 'Bank', dr: 200000, cr: 0 }, { acct: 'Accounts Receivable', dr: 0, cr: 200000 }], totalDr: 200000 },
+  { id: 'V025', date: '2024-02-01', type: 'payment', narration: 'Salary Jan-Mar',
+    entries: [{ acct: 'Salary Expense', dr: 120000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 120000 }], totalDr: 120000 },
+  { id: 'V026', date: '2024-02-15', type: 'payment', narration: 'Rent Q4',
+    entries: [{ acct: 'Rent Expense', dr: 45000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 45000 }], totalDr: 45000 },
+  { id: 'V027', date: '2024-02-20', type: 'payment', narration: 'Advertising & marketing',
+    entries: [{ acct: 'Advertising Expense', dr: 30000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 30000 }], totalDr: 30000 },
+  { id: 'V028', date: '2024-03-01', type: 'payment', narration: 'Utilities Q3-Q4',
+    entries: [{ acct: 'Utilities Expense', dr: 22000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 22000 }], totalDr: 22000 },
+  { id: 'V029', date: '2024-03-15', type: 'payment', narration: 'Interest on bank loan H2',
+    entries: [{ acct: 'Interest Expense', dr: 18000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 18000 }], totalDr: 18000 },
+  { id: 'V030', date: '2024-03-25', type: 'payment', narration: 'Supplier payment - partial',
+    entries: [{ acct: 'Accounts Payable', dr: 100000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 100000 }], totalDr: 100000 },
+  { id: 'V031', date: '2024-03-31', type: 'journal', narration: 'Depreciation FY 2023-24',
+    entries: [{ acct: 'Depreciation Expense', dr: 41000, cr: 0 }, { acct: 'Acc. Depreciation', dr: 0, cr: 41000 }], totalDr: 41000 },
+
+  // ===== FY 2024-25 (Apr 2024 - Mar 2025) — Growth Year =====
+  // Q1: Apr-Jun 2024
+  { id: 'V032', date: '2024-04-01', type: 'receipt', narration: 'Additional capital infused by owner',
+    entries: [{ acct: 'Bank', dr: 200000, cr: 0 }, { acct: 'Capital Account', dr: 0, cr: 200000 }], totalDr: 200000 },
+  { id: 'V033', date: '2024-04-10', type: 'payment', narration: 'Plant & machinery purchased',
+    entries: [{ acct: 'Plant & Machinery', dr: 250000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 250000 }], totalDr: 250000 },
+  { id: 'V034', date: '2024-05-01', type: 'sales', narration: 'Sales to DEF Industries with GST',
+    entries: [{ acct: 'Accounts Receivable', dr: 354000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 300000 }, { acct: 'GST Payable', dr: 0, cr: 54000 }], totalDr: 354000 },
+  { id: 'V035', date: '2024-05-15', type: 'sales', narration: 'Product sales cash with GST',
+    entries: [{ acct: 'Bank', dr: 177000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 150000 }, { acct: 'GST Payable', dr: 0, cr: 27000 }], totalDr: 177000 },
+  { id: 'V036', date: '2024-05-20', type: 'purchase', narration: 'Bulk inventory purchase',
+    entries: [{ acct: 'Inventory', dr: 150000, cr: 0 }, { acct: 'GST Payable', dr: 27000, cr: 0 }, { acct: 'Accounts Payable', dr: 0, cr: 177000 }], totalDr: 177000 },
+  { id: 'V037', date: '2024-06-01', type: 'payment', narration: 'Salary Apr-Jun (3 employees)',
+    entries: [{ acct: 'Salary Expense', dr: 180000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 180000 }], totalDr: 180000 },
+  { id: 'V038', date: '2024-06-15', type: 'payment', narration: 'Rent Q1 (upgraded office)',
+    entries: [{ acct: 'Rent Expense', dr: 60000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 60000 }], totalDr: 60000 },
+  { id: 'V039', date: '2024-06-20', type: 'sales', narration: 'Consulting & implementation services',
+    entries: [{ acct: 'Bank', dr: 200000, cr: 0 }, { acct: 'Service Revenue', dr: 0, cr: 200000 }], totalDr: 200000 },
+  // Q2: Jul-Sep 2024
+  { id: 'V040', date: '2024-07-05', type: 'sales', narration: 'Sales to GHI Enterprises with GST',
+    entries: [{ acct: 'Accounts Receivable', dr: 472000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 400000 }, { acct: 'GST Payable', dr: 0, cr: 72000 }], totalDr: 472000 },
+  { id: 'V041', date: '2024-07-15', type: 'journal', narration: 'COGS H1 FY25',
+    entries: [{ acct: 'Cost of Goods Sold', dr: 130000, cr: 0 }, { acct: 'Inventory', dr: 0, cr: 130000 }], totalDr: 130000 },
+  { id: 'V042', date: '2024-08-01', type: 'payment', narration: 'Salary Jul-Sep',
+    entries: [{ acct: 'Salary Expense', dr: 180000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 180000 }], totalDr: 180000 },
+  { id: 'V043', date: '2024-08-15', type: 'payment', narration: 'Utilities H1',
+    entries: [{ acct: 'Utilities Expense', dr: 28000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 28000 }], totalDr: 28000 },
+  { id: 'V044', date: '2024-09-01', type: 'payment', narration: 'Rent Q2',
+    entries: [{ acct: 'Rent Expense', dr: 60000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 60000 }], totalDr: 60000 },
+  { id: 'V045', date: '2024-09-10', type: 'receipt', narration: 'Received from DEF Industries',
+    entries: [{ acct: 'Bank', dr: 354000, cr: 0 }, { acct: 'Accounts Receivable', dr: 0, cr: 354000 }], totalDr: 354000 },
+  { id: 'V046', date: '2024-09-15', type: 'receipt', narration: 'Rent income from sub-let property',
+    entries: [{ acct: 'Bank', dr: 90000, cr: 0 }, { acct: 'Rent Income', dr: 0, cr: 90000 }], totalDr: 90000 },
+  // Q3: Oct-Dec 2024
+  { id: 'V047', date: '2024-10-01', type: 'purchase', narration: 'Inventory purchase Q3',
+    entries: [{ acct: 'Inventory', dr: 120000, cr: 0 }, { acct: 'GST Payable', dr: 21600, cr: 0 }, { acct: 'Accounts Payable', dr: 0, cr: 141600 }], totalDr: 141600 },
+  { id: 'V048', date: '2024-10-15', type: 'sales', narration: 'Sales to JKL Corp with GST',
+    entries: [{ acct: 'Accounts Receivable', dr: 295000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 250000 }, { acct: 'GST Payable', dr: 0, cr: 45000 }], totalDr: 295000 },
+  { id: 'V049', date: '2024-11-01', type: 'payment', narration: 'Salary Oct-Dec',
+    entries: [{ acct: 'Salary Expense', dr: 180000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 180000 }], totalDr: 180000 },
+  { id: 'V050', date: '2024-11-10', type: 'payment', narration: 'Professional fees - CA & legal',
+    entries: [{ acct: 'Professional Fees', dr: 35000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 35000 }], totalDr: 35000 },
+  { id: 'V051', date: '2024-11-15', type: 'payment', narration: 'Insurance renewal',
+    entries: [{ acct: 'Insurance Expense', dr: 30000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 30000 }], totalDr: 30000 },
+  { id: 'V052', date: '2024-12-01', type: 'payment', narration: 'Rent Q3',
+    entries: [{ acct: 'Rent Expense', dr: 60000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 60000 }], totalDr: 60000 },
+  { id: 'V053', date: '2024-12-10', type: 'payment', narration: 'Interest on bank loan FY25',
+    entries: [{ acct: 'Interest Expense', dr: 30000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 30000 }], totalDr: 30000 },
+  { id: 'V054', date: '2024-12-15', type: 'payment', narration: 'Advertising - digital marketing',
+    entries: [{ acct: 'Advertising Expense', dr: 50000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 50000 }], totalDr: 50000 },
+  { id: 'V055', date: '2024-12-20', type: 'journal', narration: 'COGS H2 FY25',
+    entries: [{ acct: 'Cost of Goods Sold', dr: 110000, cr: 0 }, { acct: 'Inventory', dr: 0, cr: 110000 }], totalDr: 110000 },
+  // Q4: Jan-Mar 2025
+  { id: 'V056', date: '2025-01-05', type: 'sales', narration: 'Bulk order from MNO Ltd with GST',
+    entries: [{ acct: 'Accounts Receivable', dr: 590000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 500000 }, { acct: 'GST Payable', dr: 0, cr: 90000 }], totalDr: 590000 },
+  { id: 'V057', date: '2025-01-15', type: 'sales', narration: 'Annual service contract revenue',
+    entries: [{ acct: 'Bank', dr: 300000, cr: 0 }, { acct: 'Service Revenue', dr: 0, cr: 300000 }], totalDr: 300000 },
+  { id: 'V058', date: '2025-02-01', type: 'payment', narration: 'Salary Jan-Mar',
+    entries: [{ acct: 'Salary Expense', dr: 180000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 180000 }], totalDr: 180000 },
+  { id: 'V059', date: '2025-02-10', type: 'payment', narration: 'Rent Q4',
+    entries: [{ acct: 'Rent Expense', dr: 60000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 60000 }], totalDr: 60000 },
+  { id: 'V060', date: '2025-02-15', type: 'payment', narration: 'Utilities H2',
+    entries: [{ acct: 'Utilities Expense', dr: 32000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 32000 }], totalDr: 32000 },
+  { id: 'V061', date: '2025-02-20', type: 'payment', narration: 'Supplier payments - clear payables',
+    entries: [{ acct: 'Accounts Payable', dr: 200000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 200000 }], totalDr: 200000 },
+  { id: 'V062', date: '2025-03-01', type: 'receipt', narration: 'Collection from GHI & JKL',
+    entries: [{ acct: 'Bank', dr: 500000, cr: 0 }, { acct: 'Accounts Receivable', dr: 0, cr: 500000 }], totalDr: 500000 },
+  { id: 'V063', date: '2025-03-10', type: 'payment', narration: 'Repairs & maintenance',
+    entries: [{ acct: 'Repairs & Maintenance', dr: 25000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 25000 }], totalDr: 25000 },
+  { id: 'V064', date: '2025-03-20', type: 'payment', narration: 'Bank loan repayment - partial',
+    entries: [{ acct: 'Bank Loan', dr: 100000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 100000 }], totalDr: 100000 },
+  { id: 'V065', date: '2025-03-31', type: 'journal', narration: 'Depreciation FY 2024-25',
+    entries: [{ acct: 'Depreciation Expense', dr: 72000, cr: 0 }, { acct: 'Acc. Depreciation', dr: 0, cr: 72000 }], totalDr: 72000 },
+
+  // ===== FY 2025-26 (Apr 2025 - Mar 2026) — Expansion Year =====
+  // Q1: Apr-Jun 2025
+  { id: 'V066', date: '2025-04-01', type: 'receipt', narration: 'Fresh capital infusion by owner',
+    entries: [{ acct: 'Bank', dr: 300000, cr: 0 }, { acct: 'Capital Account', dr: 0, cr: 300000 }], totalDr: 300000 },
+  { id: 'V067', date: '2025-04-10', type: 'payment', narration: 'Building purchased for warehouse',
+    entries: [{ acct: 'Building', dr: 800000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 800000 }], totalDr: 800000 },
+  { id: 'V068', date: '2025-04-15', type: 'receipt', narration: 'Additional bank loan for expansion',
+    entries: [{ acct: 'Bank', dr: 500000, cr: 0 }, { acct: 'Bank Loan', dr: 0, cr: 500000 }], totalDr: 500000 },
+  { id: 'V069', date: '2025-05-01', type: 'sales', narration: 'Major sales order RST Corp with GST',
+    entries: [{ acct: 'Accounts Receivable', dr: 708000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 600000 }, { acct: 'GST Payable', dr: 0, cr: 108000 }], totalDr: 708000 },
+  { id: 'V070', date: '2025-05-10', type: 'sales', narration: 'Product sales - walk-in customers',
+    entries: [{ acct: 'Bank', dr: 236000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 200000 }, { acct: 'GST Payable', dr: 0, cr: 36000 }], totalDr: 236000 },
+  { id: 'V071', date: '2025-05-20', type: 'purchase', narration: 'Bulk inventory for new orders',
+    entries: [{ acct: 'Inventory', dr: 250000, cr: 0 }, { acct: 'GST Payable', dr: 45000, cr: 0 }, { acct: 'Accounts Payable', dr: 0, cr: 295000 }], totalDr: 295000 },
+  { id: 'V072', date: '2025-06-01', type: 'payment', narration: 'Salary Apr-Jun (5 employees)',
+    entries: [{ acct: 'Salary Expense', dr: 300000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 300000 }], totalDr: 300000 },
+  { id: 'V073', date: '2025-06-10', type: 'payment', narration: 'Rent Q1 (new larger office)',
+    entries: [{ acct: 'Rent Expense', dr: 90000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 90000 }], totalDr: 90000 },
+  { id: 'V074', date: '2025-06-15', type: 'sales', narration: 'Consulting & training services',
+    entries: [{ acct: 'Bank', dr: 350000, cr: 0 }, { acct: 'Service Revenue', dr: 0, cr: 350000 }], totalDr: 350000 },
+  { id: 'V075', date: '2025-06-20', type: 'journal', narration: 'COGS Q1 FY26',
+    entries: [{ acct: 'Cost of Goods Sold', dr: 180000, cr: 0 }, { acct: 'Inventory', dr: 0, cr: 180000 }], totalDr: 180000 },
+  // Q2: Jul-Sep 2025
+  { id: 'V076', date: '2025-07-05', type: 'sales', narration: 'Export sales to overseas client with GST',
+    entries: [{ acct: 'Accounts Receivable', dr: 826000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 700000 }, { acct: 'GST Payable', dr: 0, cr: 126000 }], totalDr: 826000 },
+  { id: 'V077', date: '2025-07-15', type: 'receipt', narration: 'Received from RST Corp',
+    entries: [{ acct: 'Bank', dr: 708000, cr: 0 }, { acct: 'Accounts Receivable', dr: 0, cr: 708000 }], totalDr: 708000 },
+  { id: 'V078', date: '2025-08-01', type: 'payment', narration: 'Salary Jul-Sep',
+    entries: [{ acct: 'Salary Expense', dr: 300000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 300000 }], totalDr: 300000 },
+  { id: 'V079', date: '2025-08-10', type: 'purchase', narration: 'Inventory restocking Q2',
+    entries: [{ acct: 'Inventory', dr: 200000, cr: 0 }, { acct: 'GST Payable', dr: 36000, cr: 0 }, { acct: 'Accounts Payable', dr: 0, cr: 236000 }], totalDr: 236000 },
+  { id: 'V080', date: '2025-08-15', type: 'payment', narration: 'Utilities H1 FY26',
+    entries: [{ acct: 'Utilities Expense', dr: 42000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 42000 }], totalDr: 42000 },
+  { id: 'V081', date: '2025-09-01', type: 'payment', narration: 'Rent Q2',
+    entries: [{ acct: 'Rent Expense', dr: 90000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 90000 }], totalDr: 90000 },
+  { id: 'V082', date: '2025-09-10', type: 'receipt', narration: 'Rent income from warehouse sub-let',
+    entries: [{ acct: 'Bank', dr: 120000, cr: 0 }, { acct: 'Rent Income', dr: 0, cr: 120000 }], totalDr: 120000 },
+  { id: 'V083', date: '2025-09-15', type: 'journal', narration: 'COGS Q2 FY26',
+    entries: [{ acct: 'Cost of Goods Sold', dr: 200000, cr: 0 }, { acct: 'Inventory', dr: 0, cr: 200000 }], totalDr: 200000 },
+  { id: 'V084', date: '2025-09-20', type: 'payment', narration: 'Advertising - branding campaign',
+    entries: [{ acct: 'Advertising Expense', dr: 75000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 75000 }], totalDr: 75000 },
+  // Q3: Oct-Dec 2025
+  { id: 'V085', date: '2025-10-01', type: 'sales', narration: 'Annual contract with UVW Group',
+    entries: [{ acct: 'Accounts Receivable', dr: 944000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 800000 }, { acct: 'GST Payable', dr: 0, cr: 144000 }], totalDr: 944000 },
+  { id: 'V086', date: '2025-10-10', type: 'sales', narration: 'Service revenue - implementation project',
+    entries: [{ acct: 'Bank', dr: 400000, cr: 0 }, { acct: 'Service Revenue', dr: 0, cr: 400000 }], totalDr: 400000 },
+  { id: 'V087', date: '2025-11-01', type: 'payment', narration: 'Salary Oct-Dec',
+    entries: [{ acct: 'Salary Expense', dr: 300000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 300000 }], totalDr: 300000 },
+  { id: 'V088', date: '2025-11-10', type: 'payment', narration: 'Professional fees & audit',
+    entries: [{ acct: 'Professional Fees', dr: 50000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 50000 }], totalDr: 50000 },
+  { id: 'V089', date: '2025-11-15', type: 'payment', narration: 'Insurance renewal FY26',
+    entries: [{ acct: 'Insurance Expense', dr: 36000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 36000 }], totalDr: 36000 },
+  { id: 'V090', date: '2025-12-01', type: 'payment', narration: 'Rent Q3',
+    entries: [{ acct: 'Rent Expense', dr: 90000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 90000 }], totalDr: 90000 },
+  { id: 'V091', date: '2025-12-10', type: 'payment', narration: 'Interest on bank loans FY26',
+    entries: [{ acct: 'Interest Expense', dr: 56000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 56000 }], totalDr: 56000 },
+  { id: 'V092', date: '2025-12-15', type: 'receipt', narration: 'Received from UVW Group - partial',
+    entries: [{ acct: 'Bank', dr: 500000, cr: 0 }, { acct: 'Accounts Receivable', dr: 0, cr: 500000 }], totalDr: 500000 },
+  { id: 'V093', date: '2025-12-20', type: 'journal', narration: 'COGS Q3 FY26',
+    entries: [{ acct: 'Cost of Goods Sold', dr: 220000, cr: 0 }, { acct: 'Inventory', dr: 0, cr: 220000 }], totalDr: 220000 },
+  // Q4: Jan-Mar 2026
+  { id: 'V094', date: '2026-01-05', type: 'sales', narration: 'Sales to multiple clients with GST',
+    entries: [{ acct: 'Accounts Receivable', dr: 590000, cr: 0 }, { acct: 'Sales Revenue', dr: 0, cr: 500000 }, { acct: 'GST Payable', dr: 0, cr: 90000 }], totalDr: 590000 },
+  { id: 'V095', date: '2026-01-15', type: 'sales', narration: 'Service revenue Q4',
+    entries: [{ acct: 'Bank', dr: 250000, cr: 0 }, { acct: 'Service Revenue', dr: 0, cr: 250000 }], totalDr: 250000 },
+  { id: 'V096', date: '2026-01-20', type: 'receipt', narration: 'Interest earned on FD',
+    entries: [{ acct: 'Bank', dr: 15000, cr: 0 }, { acct: 'Interest Income', dr: 0, cr: 15000 }], totalDr: 15000 },
+  { id: 'V097', date: '2026-02-01', type: 'payment', narration: 'Salary Jan-Mar',
+    entries: [{ acct: 'Salary Expense', dr: 300000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 300000 }], totalDr: 300000 },
+  { id: 'V098', date: '2026-02-10', type: 'payment', narration: 'Rent Q4',
+    entries: [{ acct: 'Rent Expense', dr: 90000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 90000 }], totalDr: 90000 },
+  { id: 'V099', date: '2026-02-15', type: 'payment', narration: 'Utilities H2 FY26',
+    entries: [{ acct: 'Utilities Expense', dr: 48000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 48000 }], totalDr: 48000 },
+  { id: 'V100', date: '2026-02-20', type: 'payment', narration: 'Supplier payments - clear payables',
+    entries: [{ acct: 'Accounts Payable', dr: 350000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 350000 }], totalDr: 350000 },
+  { id: 'V101', date: '2026-03-01', type: 'receipt', narration: 'Collections from debtors',
+    entries: [{ acct: 'Bank', dr: 800000, cr: 0 }, { acct: 'Accounts Receivable', dr: 0, cr: 800000 }], totalDr: 800000 },
+  { id: 'V102', date: '2026-03-05', type: 'journal', narration: 'COGS Q4 FY26',
+    entries: [{ acct: 'Cost of Goods Sold', dr: 150000, cr: 0 }, { acct: 'Inventory', dr: 0, cr: 150000 }], totalDr: 150000 },
+  { id: 'V103', date: '2026-03-10', type: 'payment', narration: 'Travel expenses - client visits',
+    entries: [{ acct: 'Travel Expense', dr: 45000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 45000 }], totalDr: 45000 },
+  { id: 'V104', date: '2026-03-15', type: 'payment', narration: 'Repairs & maintenance FY26',
+    entries: [{ acct: 'Repairs & Maintenance', dr: 35000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 35000 }], totalDr: 35000 },
+  { id: 'V105', date: '2026-03-20', type: 'payment', narration: 'Bank loan repayment',
+    entries: [{ acct: 'Bank Loan', dr: 150000, cr: 0 }, { acct: 'Bank', dr: 0, cr: 150000 }], totalDr: 150000 },
+  { id: 'V106', date: '2026-03-25', type: 'receipt', narration: 'Commission income earned',
+    entries: [{ acct: 'Bank', dr: 60000, cr: 0 }, { acct: 'Commission Income', dr: 0, cr: 60000 }], totalDr: 60000 },
+  { id: 'V107', date: '2026-03-31', type: 'journal', narration: 'Depreciation FY 2025-26',
+    entries: [{ acct: 'Depreciation Expense', dr: 115000, cr: 0 }, { acct: 'Acc. Depreciation', dr: 0, cr: 115000 }], totalDr: 115000 },
+  { id: 'V108', date: '2026-03-31', type: 'journal', narration: 'Bad debts written off',
+    entries: [{ acct: 'Bad Debts', dr: 36000, cr: 0 }, { acct: 'Accounts Receivable', dr: 0, cr: 36000 }], totalDr: 36000 },
+];
+let voucherCounter = 109;
+
+// ========== Presets ==========
+const PRESETS = {
+  sales: {
+    type: 'sales', narration: 'Sales to customer on credit with GST',
+    entries: [
+      { acct: 'Accounts Receivable', dr: 11800, cr: 0 },
+      { acct: 'Sales Revenue', dr: 0, cr: 10000 },
+      { acct: 'GST Payable', dr: 0, cr: 1800 },
+    ]
+  },
+  purchase: {
+    type: 'purchase', narration: 'Purchase of goods on credit',
+    entries: [
+      { acct: 'Inventory', dr: 6000, cr: 0 },
+      { acct: 'GST Payable', dr: 900, cr: 0 },
+      { acct: 'Accounts Payable', dr: 0, cr: 6900 },
+    ]
+  },
+  salary: {
+    type: 'payment', narration: 'Monthly salary payment via bank',
+    entries: [
+      { acct: 'Salary Expense', dr: 50000, cr: 0 },
+      { acct: 'Bank', dr: 0, cr: 50000 },
+    ]
+  },
+  rent: {
+    type: 'receipt', narration: 'Rent received in bank',
+    entries: [
+      { acct: 'Bank', dr: 15000, cr: 0 },
+      { acct: 'Rent Income', dr: 0, cr: 15000 },
+    ]
+  },
+  depreciation: {
+    type: 'journal', narration: 'Monthly depreciation on fixed assets',
+    entries: [
+      { acct: 'Depreciation Expense', dr: 5000, cr: 0 },
+      { acct: 'Acc. Depreciation', dr: 0, cr: 5000 },
+    ]
+  },
+  capital: {
+    type: 'receipt', narration: 'Owner capital introduced in bank',
+    entries: [
+      { acct: 'Bank', dr: 500000, cr: 0 },
+      { acct: 'Capital Account', dr: 0, cr: 500000 },
+    ]
+  },
+  loan: {
+    type: 'receipt', narration: 'Bank loan sanctioned and credited',
+    entries: [
+      { acct: 'Bank', dr: 200000, cr: 0 },
+      { acct: 'Bank Loan', dr: 0, cr: 200000 },
+    ]
+  },
+  asset: {
+    type: 'payment', narration: 'Purchase of computer equipment',
+    entries: [
+      { acct: 'Computer Equipment', dr: 80000, cr: 0 },
+      { acct: 'Bank', dr: 0, cr: 80000 },
+    ]
+  },
+};
+
+// ========== Initialize ==========
+function init() {
+  populateAccountSelects();
+  updateBalance();
+  renderAll();
+}
+
+function populateAccountSelects() {
+  document.querySelectorAll('.acct-select').forEach(sel => {
+    if (sel.options.length > 1) return;
+    sel.innerHTML = '<option value="">-- Select Account --</option>';
+    const groups = {};
+    accountNames.forEach(name => {
+      const g = ACCOUNTS[name].group;
+      if (!groups[g]) groups[g] = [];
+      groups[g].push(name);
+    });
+    ['asset', 'liability', 'equity', 'revenue', 'expense'].forEach(g => {
+      if (!groups[g]) return;
+      const og = document.createElement('optgroup');
+      og.label = g.charAt(0).toUpperCase() + g.slice(1);
+      groups[g].forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        og.appendChild(opt);
+      });
+      sel.appendChild(og);
+    });
+  });
+}
+
+function addEntryRow() {
+  const container = document.getElementById('entryRows');
+  const row = document.createElement('div');
+  row.className = 'entry-row';
+  row.innerHTML = `
+    <select class="acct-select"></select>
+    <input type="number" placeholder="Debit" class="dr-input" min="0" step="100" oninput="updateBalance()">
+    <input type="number" placeholder="Credit" class="cr-input" min="0" step="100" oninput="updateBalance()">
+    <button class="remove-entry" onclick="removeEntryRow(this)">&times;</button>
+  `;
+  container.appendChild(row);
+  populateAccountSelects();
+}
+
+function removeEntryRow(btn) {
+  const rows = document.querySelectorAll('.entry-row');
+  if (rows.length <= 2) return;
+  btn.closest('.entry-row').remove();
+  updateBalance();
+}
+
+function updateBalance() {
+  let totalDr = 0, totalCr = 0;
+  document.querySelectorAll('.entry-row').forEach(row => {
+    totalDr += parseFloat(row.querySelector('.dr-input').value) || 0;
+    totalCr += parseFloat(row.querySelector('.cr-input').value) || 0;
+  });
+  const el = document.getElementById('balanceCheck');
+  const balanced = Math.abs(totalDr - totalCr) < 0.01 && totalDr > 0;
+  el.innerHTML = `Dr: ${fmt(totalDr)} | Cr: ${fmt(totalCr)} ${balanced ? '&#10003;' : '&#10007;'}`;
+  el.className = 'balance-check ' + (balanced ? 'balanced' : 'unbalanced');
+}
+
+function postVoucher() {
+  const rows = document.querySelectorAll('.entry-row');
+  const entries = [];
+  let totalDr = 0, totalCr = 0;
+
+  rows.forEach(row => {
+    const acct = row.querySelector('.acct-select').value;
+    const dr = parseFloat(row.querySelector('.dr-input').value) || 0;
+    const cr = parseFloat(row.querySelector('.cr-input').value) || 0;
+    if (acct && (dr > 0 || cr > 0)) {
+      entries.push({ acct, dr, cr });
+      totalDr += dr;
+      totalCr += cr;
+    }
+  });
+
+  if (entries.length < 2) { alert('Need at least 2 line entries'); return; }
+  if (Math.abs(totalDr - totalCr) > 0.01) { alert('Voucher must be balanced (Dr = Cr)'); return; }
+
+  const voucher = {
+    id: 'V' + String(voucherCounter++).padStart(3, '0'),
+    date: document.getElementById('vDate').value,
+    type: document.getElementById('vType').value,
+    narration: document.getElementById('vNarration').value || 'No narration',
+    entries,
+    totalDr,
+  };
+
+  vouchers.push(voucher);
+  resetForm();
+  renderAll();
+}
+
+function resetForm() {
+  document.getElementById('vNarration').value = '';
+  const container = document.getElementById('entryRows');
+  container.innerHTML = '';
+  for (let i = 0; i < 2; i++) {
+    const row = document.createElement('div');
+    row.className = 'entry-row';
+    row.innerHTML = `
+      <select class="acct-select"></select>
+      <input type="number" placeholder="Debit" class="dr-input" min="0" step="100" oninput="updateBalance()">
+      <input type="number" placeholder="Credit" class="cr-input" min="0" step="100" oninput="updateBalance()">
+      <button class="remove-entry" onclick="removeEntryRow(this)">&times;</button>
+    `;
+    container.appendChild(row);
+  }
+  populateAccountSelects();
+  updateBalance();
+}
+
+function loadPreset(key) {
+  const p = PRESETS[key];
+  document.getElementById('vType').value = p.type;
+  document.getElementById('vNarration').value = p.narration;
+
+  const container = document.getElementById('entryRows');
+  container.innerHTML = '';
+  p.entries.forEach(e => {
+    const row = document.createElement('div');
+    row.className = 'entry-row';
+    row.innerHTML = `
+      <select class="acct-select"></select>
+      <input type="number" placeholder="Debit" class="dr-input" min="0" step="100" value="${e.dr || ''}" oninput="updateBalance()">
+      <input type="number" placeholder="Credit" class="cr-input" min="0" step="100" value="${e.cr || ''}" oninput="updateBalance()">
+      <button class="remove-entry" onclick="removeEntryRow(this)">&times;</button>
+    `;
+    container.appendChild(row);
+  });
+  populateAccountSelects();
+  // Set account values after populating
+  const rows = container.querySelectorAll('.entry-row');
+  p.entries.forEach((e, i) => {
+    if (rows[i]) rows[i].querySelector('.acct-select').value = e.acct;
+  });
+  updateBalance();
+}
+
+function deleteVoucher(id) {
+  vouchers = vouchers.filter(v => v.id !== id);
+  renderAll();
+}
+
+function clearAllVouchers() {
+  if (vouchers.length === 0) return;
+  if (!confirm('Clear all vouchers?')) return;
+  vouchers = [];
+  voucherCounter = 1;
+  renderAll();
+}
+
+// ========== FY Helpers ==========
+function getFY(dateStr) {
+  const d = new Date(dateStr);
+  const month = d.getMonth(); // 0-indexed
+  const year = d.getFullYear();
+  // FY runs Apr-Mar: Apr 2023 = FY 2023-24
+  if (month >= 3) return `${year}-${String(year + 1).slice(2)}`;
+  return `${year - 1}-${String(year).slice(2)}`;
+}
+
+function getFilteredVouchers() {
+  const fy = document.getElementById('fySelect').value;
+  if (fy === 'all') return vouchers;
+  return vouchers.filter(v => getFY(v.date) === fy);
+}
+
+// ========== Compute Ledger Balances ==========
+function computeLedgers() {
+  const filtered = getFilteredVouchers();
+  const ledgers = {};
+  filtered.forEach(v => {
+    v.entries.forEach(e => {
+      if (!ledgers[e.acct]) ledgers[e.acct] = { entries: [], totalDr: 0, totalCr: 0 };
+      ledgers[e.acct].entries.push({ ...e, voucherId: v.id, date: v.date, narration: v.narration });
+      ledgers[e.acct].totalDr += e.dr;
+      ledgers[e.acct].totalCr += e.cr;
+    });
+  });
+  return ledgers;
+}
+
+function computeTrialBalance(ledgers) {
+  const tb = [];
+  for (const [acct, data] of Object.entries(ledgers)) {
+    const net = data.totalDr - data.totalCr;
+    tb.push({
+      account: acct,
+      group: ACCOUNTS[acct]?.group || 'unknown',
+      drBal: net > 0 ? net : 0,
+      crBal: net < 0 ? -net : 0,
+    });
+  }
+  tb.sort((a, b) => {
+    const order = { asset: 0, expense: 1, liability: 2, equity: 3, revenue: 4 };
+    return (order[a.group] || 5) - (order[b.group] || 5);
+  });
+  return tb;
+}
+
+function computePL(ledgers) {
+  const pl = { revenue: {}, otherIncome: {}, cogs: {}, opex: {}, finance: {} };
+  for (const [acct, data] of Object.entries(ledgers)) {
+    const info = ACCOUNTS[acct];
+    if (!info) continue;
+    const net = data.totalCr - data.totalDr; // positive = income for revenue
+    if (info.group === 'revenue') {
+      if (info.pl === 'Revenue') pl.revenue[acct] = net;
+      else pl.otherIncome[acct] = net;
+    } else if (info.group === 'expense') {
+      const netExp = data.totalDr - data.totalCr; // positive = expense
+      if (info.pl === 'Cost of Goods Sold') pl.cogs[acct] = netExp;
+      else if (info.pl === 'Finance Costs') pl.finance[acct] = netExp;
+      else pl.opex[acct] = netExp;
+    }
+  }
+  return pl;
+}
+
+function computeBS(ledgers, netProfit) {
+  const bs = { assets: {}, liabilities: {}, equity: {} };
+  for (const [acct, data] of Object.entries(ledgers)) {
+    const info = ACCOUNTS[acct];
+    if (!info || info.group === 'revenue' || info.group === 'expense') continue;
+    const net = data.totalDr - data.totalCr;
+    if (info.group === 'asset') {
+      const cat = info.bs || 'Other Assets';
+      if (!bs.assets[cat]) bs.assets[cat] = {};
+      bs.assets[cat][acct] = net;
+    } else if (info.group === 'liability') {
+      const cat = info.bs || 'Other Liabilities';
+      if (!bs.liabilities[cat]) bs.liabilities[cat] = {};
+      bs.liabilities[cat][acct] = Math.abs(net);
+    } else if (info.group === 'equity') {
+      const cat = 'Equity';
+      if (!bs.equity[cat]) bs.equity[cat] = {};
+      bs.equity[cat][acct] = info.nature === 'debit' ? -net : Math.abs(net);
+    }
+  }
+  // Add net profit to equity
+  if (!bs.equity['Equity']) bs.equity['Equity'] = {};
+  bs.equity['Equity']['Net Profit (Current Year)'] = netProfit;
+  return bs;
+}
+
+function computeTax(netProfit) {
+  // Indian Income Tax - New Regime (AY 2026-27) simplified
+  const income = Math.max(0, netProfit);
+  const standardDeduction = 75000;
+  const taxableIncome = Math.max(0, income - standardDeduction);
+
+  // New Regime slabs
+  const slabs = [
+    { upto: 400000, rate: 0, label: 'Up to 4,00,000' },
+    { upto: 800000, rate: 0.05, label: '4,00,001 - 8,00,000' },
+    { upto: 1200000, rate: 0.10, label: '8,00,001 - 12,00,000' },
+    { upto: 1600000, rate: 0.15, label: '12,00,001 - 16,00,000' },
+    { upto: 2000000, rate: 0.20, label: '16,00,001 - 20,00,000' },
+    { upto: 2400000, rate: 0.25, label: '20,00,001 - 24,00,000' },
+    { upto: Infinity, rate: 0.30, label: 'Above 24,00,000' },
+  ];
+
+  let remaining = taxableIncome;
+  let totalTax = 0;
+  let prev = 0;
+  const slabBreakdown = slabs.map(s => {
+    const slabAmt = Math.min(remaining, s.upto - prev);
+    const tax = Math.max(0, slabAmt) * s.rate;
+    remaining -= Math.max(0, slabAmt);
+    prev = s.upto;
+    return { ...s, amount: Math.max(0, slabAmt), tax };
+  });
+
+  totalTax = slabBreakdown.reduce((sum, s) => sum + s.tax, 0);
+
+  // Rebate u/s 87A (if taxable income <= 12,00,000 under new regime)
+  let rebate = 0;
+  if (taxableIncome <= 1200000) {
+    rebate = Math.min(totalTax, 60000);
+  }
+
+  const taxAfterRebate = totalTax - rebate;
+  // Surcharge
+  let surchargeRate = 0;
+  if (taxableIncome > 50000000) surchargeRate = 0.25;
+  else if (taxableIncome > 20000000) surchargeRate = 0.15;
+  else if (taxableIncome > 10000000) surchargeRate = 0.10;
+  else if (taxableIncome > 5000000) surchargeRate = 0.05;
+  const surcharge = taxAfterRebate * surchargeRate;
+
+  const healthCess = (taxAfterRebate + surcharge) * 0.04;
+  const totalLiability = taxAfterRebate + surcharge + healthCess;
+
+  return {
+    grossIncome: income,
+    standardDeduction,
+    taxableIncome,
+    slabBreakdown,
+    totalTax,
+    rebate,
+    taxAfterRebate,
+    surchargeRate,
+    surcharge,
+    healthCess,
+    totalLiability,
+  };
+}
+
+// ========== Drill-down ==========
+function openDrill(title, breadcrumbs, bodyHTML) {
+  document.getElementById('drillTitle').textContent = title;
+  document.getElementById('drillBreadcrumb').innerHTML = breadcrumbs.map((b, i) =>
+    i < breadcrumbs.length - 1
+      ? `<span class="crumb" onclick="${b.action || ''}">${b.label}</span> <span>&rarr;</span>`
+      : `<span>${b.label}</span>`
+  ).join(' ');
+  document.getElementById('drillBody').innerHTML = bodyHTML;
+  document.getElementById('drillOverlay').classList.add('open');
+}
+
+function closeDrill() {
+  document.getElementById('drillOverlay').classList.remove('open');
+}
+
+function drillToLedger(acctName) {
+  const ledgers = computeLedgers();
+  const data = ledgers[acctName];
+  if (!data) return;
+  const net = data.totalDr - data.totalCr;
+  const balLabel = net >= 0 ? `Dr ${fmt(net)}` : `Cr ${fmt(-net)}`;
+  const info = ACCOUNTS[acctName];
+  const groupLabel = info ? info.group.charAt(0).toUpperCase() + info.group.slice(1) : '';
+
+  openDrill(acctName, [
+    { label: 'Ledger', action: "closeDrill();switchTab('ledger')" },
+    { label: acctName }
+  ], `
+    <div class="drill-summary">
+      <div class="drill-summary-card">
+        <div class="ds-label">Account Group</div>
+        <div class="ds-value" style="color:var(--text-muted)">${groupLabel}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Total Debit</div>
+        <div class="ds-value positive">${fmt(data.totalDr)}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Total Credit</div>
+        <div class="ds-value negative">${fmt(data.totalCr)}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Balance</div>
+        <div class="ds-value ${net >= 0 ? 'positive' : 'negative'}">${balLabel}</div>
+      </div>
+    </div>
+    <table class="fin-table">
+      <thead><tr><th>Date</th><th>Voucher</th><th>Narration</th><th class="amt-col">Debit</th><th class="amt-col">Credit</th></tr></thead>
+      <tbody>
+        ${data.entries.map(e => `
+          <tr>
+            <td>${e.date}</td>
+            <td><span class="drill-link" onclick="drillToVoucher('${e.voucherId}')">${e.voucherId}</span></td>
+            <td>${e.narration}</td>
+            <td class="amt">${e.dr > 0 ? fmt(e.dr) : ''}</td>
+            <td class="amt">${e.cr > 0 ? fmt(e.cr) : ''}</td>
+          </tr>
+        `).join('')}
+        <tr class="grand-total">
+          <td colspan="3">Total</td>
+          <td class="amt">${fmt(data.totalDr)}</td>
+          <td class="amt">${fmt(data.totalCr)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `);
+}
+
+function drillToVoucher(voucherId) {
+  const v = vouchers.find(x => x.id === voucherId);
+  if (!v) return;
+  openDrill(`Voucher ${v.id}`, [
+    { label: 'Vouchers', action: "closeDrill()" },
+    { label: v.id }
+  ], `
+    <div class="drill-summary">
+      <div class="drill-summary-card">
+        <div class="ds-label">Date</div>
+        <div class="ds-value">${v.date}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Type</div>
+        <div class="ds-value" style="text-transform:capitalize">${v.type}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Amount</div>
+        <div class="ds-value">${fmt(v.totalDr)}</div>
+      </div>
+    </div>
+    <p style="margin-bottom:12px;color:var(--text-muted);font-size:0.85rem">${v.narration}</p>
+    <table class="fin-table">
+      <thead><tr><th>Account</th><th class="amt-col">Debit</th><th class="amt-col">Credit</th></tr></thead>
+      <tbody>
+        ${v.entries.map(e => `
+          <tr>
+            <td><span class="drill-link" onclick="drillToLedger('${e.acct}')">${e.acct}</span></td>
+            <td class="amt">${e.dr > 0 ? fmt(e.dr) : ''}</td>
+            <td class="amt">${e.cr > 0 ? fmt(e.cr) : ''}</td>
+          </tr>
+        `).join('')}
+        <tr class="grand-total">
+          <td>Total</td>
+          <td class="amt">${fmt(v.totalDr)}</td>
+          <td class="amt">${fmt(v.totalDr)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `);
+}
+
+function drillToPLGroup(groupKey, groupLabel) {
+  const ledgers = computeLedgers();
+  const pl = computePL(ledgers);
+  const groupMap = { revenue: pl.revenue, otherIncome: pl.otherIncome, cogs: pl.cogs, opex: pl.opex, finance: pl.finance };
+  const items = groupMap[groupKey] || {};
+  const total = Object.values(items).reduce((s, v) => s + v, 0);
+
+  openDrill(groupLabel, [
+    { label: 'P&L', action: "closeDrill();switchTab('pnl')" },
+    { label: groupLabel }
+  ], `
+    <div class="drill-summary">
+      <div class="drill-summary-card">
+        <div class="ds-label">Total ${groupLabel}</div>
+        <div class="ds-value">${fmt(total)}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">No. of Accounts</div>
+        <div class="ds-value">${Object.keys(items).length}</div>
+      </div>
+    </div>
+    <table class="fin-table">
+      <thead><tr><th>Account</th><th class="amt-col">Amount (&#8377;)</th><th class="amt-col">% of Total</th></tr></thead>
+      <tbody>
+        ${Object.entries(items).map(([k, v]) => `
+          <tr>
+            <td><span class="drill-link" onclick="drillToLedger('${k}')">${k}</span></td>
+            <td class="amt"><span class="drill-amt" onclick="drillToLedger('${k}')">${fmt(v)}</span></td>
+            <td class="amt" style="color:var(--text-muted)">${total > 0 ? (Math.abs(v) / total * 100).toFixed(1) + '%' : '-'}</td>
+          </tr>
+        `).join('')}
+        <tr class="grand-total">
+          <td>Total</td>
+          <td class="amt">${fmt(total)}</td>
+          <td class="amt">100%</td>
+        </tr>
+      </tbody>
+    </table>
+  `);
+}
+
+function drillToBSCategory(side, catName) {
+  const ledgers = computeLedgers();
+  const pl = computePL(ledgers);
+  const totalRevenue = Object.values(pl.revenue).reduce((s, v) => s + v, 0);
+  const totalOtherIncome = Object.values(pl.otherIncome).reduce((s, v) => s + v, 0);
+  const totalCOGS = Object.values(pl.cogs).reduce((s, v) => s + v, 0);
+  const totalOpex = Object.values(pl.opex).reduce((s, v) => s + v, 0);
+  const totalFinance = Object.values(pl.finance).reduce((s, v) => s + v, 0);
+  const grossProfit = totalRevenue - totalCOGS;
+  const operatingProfit = grossProfit - totalOpex;
+  const netProfit = operatingProfit + totalOtherIncome - totalFinance;
+  const bs = computeBS(ledgers, netProfit);
+
+  const sideData = side === 'assets' ? bs.assets : (side === 'liabilities' ? bs.liabilities : bs.equity);
+  const items = sideData[catName] || {};
+  const catTotal = Object.values(items).reduce((s, v) => s + v, 0);
+
+  openDrill(catName, [
+    { label: 'Balance Sheet', action: "closeDrill();switchTab('balance-sheet')" },
+    { label: catName }
+  ], `
+    <div class="drill-summary">
+      <div class="drill-summary-card">
+        <div class="ds-label">Category Total</div>
+        <div class="ds-value">${fmtSigned(catTotal)}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">No. of Accounts</div>
+        <div class="ds-value">${Object.keys(items).length}</div>
+      </div>
+    </div>
+    <table class="fin-table">
+      <thead><tr><th>Account</th><th class="amt-col">Amount (&#8377;)</th></tr></thead>
+      <tbody>
+        ${Object.entries(items).map(([k, v]) => `
+          <tr>
+            <td>${ACCOUNTS[k] ? `<span class="drill-link" onclick="drillToLedger('${k}')">${k}</span>` : k}</td>
+            <td class="amt">${ACCOUNTS[k] ? `<span class="drill-amt" onclick="drillToLedger('${k}')">${fmtSigned(v)}</span>` : fmtSigned(v)}</td>
+          </tr>
+        `).join('')}
+        <tr class="grand-total">
+          <td>Total ${catName}</td>
+          <td class="amt">${fmtSigned(catTotal)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `);
+}
+
+// ========== Rendering ==========
+function fmt(n) {
+  if (n === 0 || isNaN(n)) return '-';
+  return new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(Math.abs(n));
+}
+
+function fmtSigned(n) {
+  if (n === 0 || isNaN(n)) return '-';
+  const s = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 }).format(Math.abs(n));
+  return n < 0 ? `(${s})` : s;
+}
+
+function renderAll() {
+  const ledgers = computeLedgers();
+  const tb = computeTrialBalance(ledgers);
+  const pl = computePL(ledgers);
+
+  // Compute P&L totals
+  const totalRevenue = Object.values(pl.revenue).reduce((s, v) => s + v, 0);
+  const totalOtherIncome = Object.values(pl.otherIncome).reduce((s, v) => s + v, 0);
+  const totalCOGS = Object.values(pl.cogs).reduce((s, v) => s + v, 0);
+  const totalOpex = Object.values(pl.opex).reduce((s, v) => s + v, 0);
+  const totalFinance = Object.values(pl.finance).reduce((s, v) => s + v, 0);
+  const grossProfit = totalRevenue - totalCOGS;
+  const operatingProfit = grossProfit - totalOpex;
+  const netProfit = operatingProfit + totalOtherIncome - totalFinance;
+
+  const bs = computeBS(ledgers, netProfit);
+  const tax = computeTax(netProfit);
+
+  renderStats(totalRevenue, totalOpex + totalCOGS + totalFinance, netProfit, tax.totalLiability);
+  renderVoucherList();
+  renderLedger(ledgers);
+  renderTrialBalance(tb);
+  renderPL(pl, totalRevenue, totalOtherIncome, totalCOGS, totalOpex, totalFinance, grossProfit, operatingProfit, netProfit);
+  renderBS(bs);
+  renderTax(tax);
+}
+
+function renderStats(revenue, expenses, netProfit, taxLiability) {
+  const fy = document.getElementById('fySelect').value;
+  const fyLabel = fy === 'all' ? 'All Years' : 'FY ' + fy;
+  const filtered = getFilteredVouchers();
+  document.getElementById('statCards').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Vouchers (${fyLabel})</div>
+      <div class="stat-value">${filtered.length}</div>
+      <div class="stat-sub">${vouchers.length} total across all FYs</div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="switchTab('pnl')">
+      <div class="stat-label">Total Revenue</div>
+      <div class="stat-value positive">${fmt(revenue)}</div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="switchTab('pnl')">
+      <div class="stat-label">Total Expenses</div>
+      <div class="stat-value negative">${fmt(expenses)}</div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="switchTab('pnl')">
+      <div class="stat-label">Net Profit</div>
+      <div class="stat-value ${netProfit >= 0 ? 'positive' : 'negative'}">${fmtSigned(netProfit)}</div>
+    </div>
+    <div class="stat-card" style="cursor:pointer" onclick="switchTab('income-tax')">
+      <div class="stat-label">Tax Liability</div>
+      <div class="stat-value" style="color:var(--orange)">${fmt(taxLiability)}</div>
+    </div>
+  `;
+}
+
+function renderVoucherList() {
+  const el = document.getElementById('voucherList');
+  const filtered = getFilteredVouchers();
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="icon-big">&#128221;</div><p>No vouchers for selected period. Post a voucher or change the FY filter.</p></div>';
+    return;
+  }
+  el.innerHTML = filtered.map(v => `
+    <div class="voucher-item" id="vi-${v.id}">
+      <div class="v-actions">
+        <button onclick="event.stopPropagation(); deleteVoucher('${v.id}')" title="Delete">&times;</button>
+      </div>
+      <div class="v-header">
+        <span class="v-id">${v.id}</span>
+        <span class="v-type type-${v.type}">${v.type}</span>
+        <span class="v-date">${v.date}</span>
+      </div>
+      <div class="v-narration">${v.narration}</div>
+      <div class="v-entries">
+        ${v.entries.map(e => `
+          <div class="v-entry">
+            <span class="acct">${e.acct}</span>
+            <span class="dr">${e.dr > 0 ? fmt(e.dr) : ''}</span>
+            <span class="cr">${e.cr > 0 ? fmt(e.cr) : ''}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderLedger(ledgers) {
+  const el = document.getElementById('tab-ledger');
+  const accts = Object.keys(ledgers).sort();
+  if (accts.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="icon-big">&#128218;</div><p>Post vouchers to see ledger accounts</p></div>';
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="section">
+      <div class="section-title"><span class="icon icon-ledger">&#128218;</span> General Ledger</div>
+      <div class="ledger-grid">
+        ${accts.map(acct => {
+          const data = ledgers[acct];
+          const net = data.totalDr - data.totalCr;
+          const balLabel = net >= 0 ? `Dr ${fmt(net)}` : `Cr ${fmt(-net)}`;
+          const balClass = net >= 0 ? 'dr-bal' : 'cr-bal';
+          return `
+            <div class="ledger-card">
+              <div class="ledger-card-header" style="cursor:pointer" onclick="drillToLedger('${acct}')">
+                <span class="drill-link">${acct}</span>
+                <span class="balance ${balClass}">${balLabel}</span>
+              </div>
+              <table class="ledger-table">
+                <thead><tr><th>Date</th><th>Particulars</th><th style="text-align:right">Dr</th><th style="text-align:right">Cr</th></tr></thead>
+                <tbody>
+                  ${data.entries.map(e => `
+                    <tr>
+                      <td>${e.date}</td>
+                      <td>${e.narration} <span class="drill-link" style="font-size:0.65rem" onclick="drillToVoucher('${e.voucherId}')">(${e.voucherId})</span></td>
+                      <td class="amt dr-amt">${e.dr > 0 ? `<span class="drill-amt" onclick="drillToVoucher('${e.voucherId}')">${fmt(e.dr)}</span>` : ''}</td>
+                      <td class="amt cr-amt">${e.cr > 0 ? `<span class="drill-amt" onclick="drillToVoucher('${e.voucherId}')">${fmt(e.cr)}</span>` : ''}</td>
+                    </tr>
+                  `).join('')}
+                  <tr style="font-weight:700;border-top:2px solid var(--border)">
+                    <td colspan="2" style="text-align:right">Total</td>
+                    <td class="amt dr-amt">${fmt(data.totalDr)}</td>
+                    <td class="amt cr-amt">${fmt(data.totalCr)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderTrialBalance(tb) {
+  const el = document.getElementById('tab-trial-balance');
+  if (tb.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="icon-big">&#9878;</div><p>Post vouchers to see the Trial Balance</p></div>';
+    return;
+  }
+
+  const totalDr = tb.reduce((s, r) => s + r.drBal, 0);
+  const totalCr = tb.reduce((s, r) => s + r.crBal, 0);
+
+  el.innerHTML = `
+    <div class="section">
+      <div class="section-title"><span class="icon icon-tb">&#9878;</span> Trial Balance</div>
+      <table class="fin-table">
+        <thead>
+          <tr>
+            <th>Account</th>
+            <th>Group</th>
+            <th class="amt-col">Debit Balance</th>
+            <th class="amt-col">Credit Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tb.map(r => `
+            <tr>
+              <td><span class="drill-link" onclick="drillToLedger('${r.account}')">${r.account}</span></td>
+              <td><span style="text-transform:capitalize;color:var(--text-muted)">${r.group}</span></td>
+              <td class="amt">${r.drBal > 0 ? `<span class="drill-amt" onclick="drillToLedger('${r.account}')">${fmt(r.drBal)}</span>` : ''}</td>
+              <td class="amt">${r.crBal > 0 ? `<span class="drill-amt" onclick="drillToLedger('${r.account}')">${fmt(r.crBal)}</span>` : ''}</td>
+            </tr>
+          `).join('')}
+          <tr class="grand-total">
+            <td colspan="2">Total</td>
+            <td class="amt">${fmt(totalDr)}</td>
+            <td class="amt">${fmt(totalCr)}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top:10px;font-size:0.75rem;color:${Math.abs(totalDr - totalCr) < 0.01 ? 'var(--green)' : 'var(--red)'}">
+        ${Math.abs(totalDr - totalCr) < 0.01 ? 'Trial Balance is balanced.' : 'WARNING: Trial Balance does not balance!'}
+      </p>
+    </div>
+  `;
+}
+
+function renderPL(pl, totalRevenue, totalOtherIncome, totalCOGS, totalOpex, totalFinance, grossProfit, operatingProfit, netProfit) {
+  const el = document.getElementById('tab-pnl');
+
+  const makeRows = (obj, indent = true) =>
+    Object.entries(obj).map(([k, v]) => `
+      <tr class="${indent ? 'indent' : ''}">
+        <td><span class="drill-link" onclick="drillToLedger('${k}')">${k}</span></td>
+        <td class="amt"><span class="drill-amt" onclick="drillToLedger('${k}')">${fmt(v)}</span></td>
+      </tr>
+    `).join('');
+
+  el.innerHTML = `
+    <div class="section">
+      <div class="section-title"><span class="icon icon-pl">&#128200;</span> Profit & Loss Statement</div>
+      <table class="fin-table">
+        <thead><tr><th>Particulars</th><th class="amt-col">Amount (&#8377;)</th></tr></thead>
+        <tbody>
+          <tr class="section-header"><td><span class="drill-link" onclick="drillToPLGroup('revenue','Revenue')">Revenue</span></td><td></td></tr>
+          ${makeRows(pl.revenue)}
+          <tr class="subtotal"><td>Total Revenue</td><td class="amt"><span class="drill-amt" onclick="drillToPLGroup('revenue','Revenue')">${fmt(totalRevenue)}</span></td></tr>
+
+          ${Object.keys(pl.cogs).length > 0 ? `
+            <tr class="section-header"><td><span class="drill-link" onclick="drillToPLGroup('cogs','Cost of Goods Sold')">Cost of Goods Sold</span></td><td></td></tr>
+            ${makeRows(pl.cogs)}
+            <tr class="subtotal"><td>Gross Profit</td><td class="amt ${grossProfit >= 0 ? 'positive' : 'negative'}">${fmtSigned(grossProfit)}</td></tr>
+          ` : ''}
+
+          ${Object.keys(pl.opex).length > 0 ? `
+            <tr class="section-header"><td><span class="drill-link" onclick="drillToPLGroup('opex','Operating Expenses')">Operating Expenses</span></td><td></td></tr>
+            ${makeRows(pl.opex)}
+            <tr class="subtotal"><td>Operating Profit</td><td class="amt ${operatingProfit >= 0 ? 'positive' : 'negative'}">${fmtSigned(operatingProfit)}</td></tr>
+          ` : ''}
+
+          ${Object.keys(pl.otherIncome).length > 0 ? `
+            <tr class="section-header"><td><span class="drill-link" onclick="drillToPLGroup('otherIncome','Other Income')">Other Income</span></td><td></td></tr>
+            ${makeRows(pl.otherIncome)}
+          ` : ''}
+
+          ${Object.keys(pl.finance).length > 0 ? `
+            <tr class="section-header"><td><span class="drill-link" onclick="drillToPLGroup('finance','Finance Costs')">Finance Costs</span></td><td></td></tr>
+            ${makeRows(pl.finance)}
+          ` : ''}
+
+          <tr class="grand-total">
+            <td>Net Profit / (Loss)</td>
+            <td class="amt ${netProfit >= 0 ? 'positive' : 'negative'}">${fmtSigned(netProfit)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderBS(bs) {
+  const el = document.getElementById('tab-balance-sheet');
+
+  let totalAssets = 0;
+  let totalLiabEquity = 0;
+
+  const makeBSRows = (items, side, cat) =>
+    Object.entries(items).map(([k, v]) => {
+      const isAccount = !!ACCOUNTS[k];
+      const nameHtml = isAccount
+        ? `<span class="drill-link" onclick="drillToLedger('${k}')">${k}</span>`
+        : (k === 'Net Profit (Current Year)' ? `<span class="drill-link" onclick="switchTab('pnl')">${k}</span>` : k);
+      const amtHtml = isAccount
+        ? `<span class="drill-amt" onclick="drillToLedger('${k}')">${fmtSigned(v)}</span>`
+        : (k === 'Net Profit (Current Year)' ? `<span class="drill-amt" onclick="switchTab('pnl')">${fmtSigned(v)}</span>` : fmtSigned(v));
+      return `<tr class="indent"><td>${nameHtml}</td><td class="amt">${amtHtml}</td></tr>`;
+    }).join('');
+
+  const assetRows = Object.entries(bs.assets).map(([cat, items]) => {
+    const catTotal = Object.values(items).reduce((s, v) => s + v, 0);
+    totalAssets += catTotal;
+    return `
+      <tr class="section-header"><td><span class="drill-link" onclick="drillToBSCategory('assets','${cat}')">${cat}</span></td><td></td></tr>
+      ${makeBSRows(items, 'assets', cat)}
+      <tr class="subtotal"><td>Total ${cat}</td><td class="amt"><span class="drill-amt" onclick="drillToBSCategory('assets','${cat}')">${fmt(catTotal)}</span></td></tr>
+    `;
+  }).join('');
+
+  const liabRows = Object.entries(bs.liabilities).map(([cat, items]) => {
+    const catTotal = Object.values(items).reduce((s, v) => s + v, 0);
+    totalLiabEquity += catTotal;
+    return `
+      <tr class="section-header"><td><span class="drill-link" onclick="drillToBSCategory('liabilities','${cat}')">${cat}</span></td><td></td></tr>
+      ${makeBSRows(items, 'liabilities', cat)}
+      <tr class="subtotal"><td>Total ${cat}</td><td class="amt"><span class="drill-amt" onclick="drillToBSCategory('liabilities','${cat}')">${fmt(catTotal)}</span></td></tr>
+    `;
+  }).join('');
+
+  const equityRows = Object.entries(bs.equity).map(([cat, items]) => {
+    const catTotal = Object.values(items).reduce((s, v) => s + v, 0);
+    totalLiabEquity += catTotal;
+    return `
+      <tr class="section-header"><td><span class="drill-link" onclick="drillToBSCategory('equity','${cat}')">${cat}</span></td><td></td></tr>
+      ${makeBSRows(items, 'equity', cat)}
+      <tr class="subtotal"><td>Total ${cat}</td><td class="amt"><span class="drill-amt" onclick="drillToBSCategory('equity','${cat}')">${fmtSigned(catTotal)}</span></td></tr>
+    `;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="section">
+      <div class="section-title"><span class="icon icon-bs">&#127970;</span> Balance Sheet</div>
+      <div class="two-col-layout">
+        <div>
+          <table class="fin-table">
+            <thead><tr><th>Assets</th><th class="amt-col">Amount (&#8377;)</th></tr></thead>
+            <tbody>
+              ${assetRows || '<tr><td colspan="2" style="text-align:center;color:var(--text-muted)">No assets</td></tr>'}
+              <tr class="grand-total"><td>Total Assets</td><td class="amt">${fmt(totalAssets)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <table class="fin-table">
+            <thead><tr><th>Liabilities & Equity</th><th class="amt-col">Amount (&#8377;)</th></tr></thead>
+            <tbody>
+              ${liabRows}${equityRows || '<tr><td colspan="2" style="text-align:center;color:var(--text-muted)">No liabilities</td></tr>'}
+              <tr class="grand-total"><td>Total Liabilities & Equity</td><td class="amt">${fmt(totalLiabEquity)}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p style="margin-top:10px;font-size:0.75rem;color:${Math.abs(totalAssets - totalLiabEquity) < 1 ? 'var(--green)' : 'var(--red)'}">
+        ${Math.abs(totalAssets - totalLiabEquity) < 1 ? 'Balance Sheet is balanced. Assets = Liabilities + Equity' : 'WARNING: Balance Sheet does not balance!'}
+      </p>
+    </div>
+  `;
+}
+
+// Tax drill-down helpers
+function drillToTaxableIncome(tax) {
+  openDrill('Taxable Income Computation', [
+    { label: 'Income Tax', action: "closeDrill();switchTab('income-tax')" },
+    { label: 'Taxable Income' }
+  ], `
+    <div class="drill-summary">
+      <div class="drill-summary-card">
+        <div class="ds-label">Gross Income</div>
+        <div class="ds-value positive">${fmt(tax.grossIncome)}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Deductions</div>
+        <div class="ds-value negative">${fmt(tax.standardDeduction)}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Taxable Income</div>
+        <div class="ds-value">${fmt(tax.taxableIncome)}</div>
+      </div>
+    </div>
+    <table class="fin-table">
+      <thead><tr><th>Particulars</th><th class="amt-col">Amount (&#8377;)</th></tr></thead>
+      <tbody>
+        <tr><td><span class="drill-link" onclick="closeDrill();switchTab('pnl')">Net Profit as per P&amp;L Account</span></td><td class="amt"><span class="drill-amt" onclick="closeDrill();switchTab('pnl')">${fmtSigned(tax.grossIncome)}</span></td></tr>
+        <tr class="section-header"><td>Less: Deductions</td><td></td></tr>
+        <tr class="indent"><td>Standard Deduction u/s 16(ia)</td><td class="amt negative">(${fmt(tax.standardDeduction)})</td></tr>
+        <tr class="grand-total"><td>Total Taxable Income</td><td class="amt">${fmt(tax.taxableIncome)}</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px;font-size:0.75rem;color:var(--text-muted)">
+      Under the New Tax Regime, the standard deduction of &#8377;75,000 is the primary deduction available.
+      Most Chapter VI-A deductions (80C, 80D, etc.) are not available under the new regime.
+    </p>
+  `);
+}
+
+function drillToSlabBreakdown(tax) {
+  const colors = ['#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#eab308', '#ef4444'];
+  openDrill('Tax Slab Breakdown', [
+    { label: 'Income Tax', action: "closeDrill();switchTab('income-tax')" },
+    { label: 'Slab Breakdown' }
+  ], `
+    <div class="drill-summary">
+      <div class="drill-summary-card">
+        <div class="ds-label">Taxable Income</div>
+        <div class="ds-value">${fmt(tax.taxableIncome)}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Tax Before Rebate</div>
+        <div class="ds-value" style="color:var(--orange)">${fmt(tax.totalTax)}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Effective Rate</div>
+        <div class="ds-value" style="color:var(--orange)">${tax.taxableIncome > 0 ? (tax.totalTax / tax.taxableIncome * 100).toFixed(2) + '%' : '0%'}</div>
+      </div>
+    </div>
+    <table class="fin-table">
+      <thead><tr><th>Income Slab</th><th class="amt-col">Rate</th><th class="amt-col">Taxable Amount</th><th class="amt-col">Tax</th></tr></thead>
+      <tbody>
+        ${tax.slabBreakdown.map((s, i) => s.amount > 0 ? `
+          <tr>
+            <td><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${colors[i % colors.length]};margin-right:8px"></span>${s.label}</td>
+            <td class="amt">${(s.rate * 100)}%</td>
+            <td class="amt">${fmt(s.amount)}</td>
+            <td class="amt" style="color:var(--orange)">${fmt(s.tax)}</td>
+          </tr>
+        ` : '').join('')}
+        <tr class="grand-total">
+          <td colspan="2">Total</td>
+          <td class="amt">${fmt(tax.taxableIncome)}</td>
+          <td class="amt" style="color:var(--orange)">${fmt(tax.totalTax)}</td>
+        </tr>
+      </tbody>
+    </table>
+  `);
+}
+
+function drillToTaxComputation(tax) {
+  openDrill('Tax Computation Detail', [
+    { label: 'Income Tax', action: "closeDrill();switchTab('income-tax')" },
+    { label: 'Tax Computation' }
+  ], `
+    <div class="drill-summary">
+      <div class="drill-summary-card">
+        <div class="ds-label">Tax on Slabs</div>
+        <div class="ds-value">${fmt(tax.totalTax)}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Rebate u/s 87A</div>
+        <div class="ds-value negative">${tax.rebate > 0 ? fmt(tax.rebate) : 'Nil'}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Surcharge</div>
+        <div class="ds-value">${tax.surcharge > 0 ? fmt(tax.surcharge) + ' @ ' + (tax.surchargeRate * 100) + '%' : 'Nil'}</div>
+      </div>
+      <div class="drill-summary-card">
+        <div class="ds-label">Final Liability</div>
+        <div class="ds-value" style="color:var(--orange)">${fmt(tax.totalLiability)}</div>
+      </div>
+    </div>
+    <table class="fin-table">
+      <thead><tr><th>Step</th><th>Particulars</th><th class="amt-col">Amount (&#8377;)</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><span class="drill-link" onclick="drillToSlabBreakdown(lastTax)">Tax on Total Income (as per slabs)</span></td><td class="amt"><span class="drill-amt" onclick="drillToSlabBreakdown(lastTax)">${fmt(tax.totalTax)}</span></td></tr>
+        ${tax.rebate > 0 ? `<tr><td>2</td><td>Less: Rebate u/s 87A (income &le; &#8377;12,00,000)</td><td class="amt negative">(${fmt(tax.rebate)})</td></tr>` : ''}
+        <tr><td>${tax.rebate > 0 ? '3' : '2'}</td><td>Tax after Rebate</td><td class="amt">${fmt(tax.taxAfterRebate)}</td></tr>
+        ${tax.surcharge > 0 ? `<tr><td>${tax.rebate > 0 ? '4' : '3'}</td><td>Add: Surcharge @ ${(tax.surchargeRate * 100)}% (income &gt; &#8377;${tax.surchargeRate === 0.05 ? '50,00,000' : tax.surchargeRate === 0.10 ? '1,00,00,000' : tax.surchargeRate === 0.15 ? '2,00,00,000' : '5,00,00,000'})</td><td class="amt">${fmt(tax.surcharge)}</td></tr>` : ''}
+        <tr><td>${tax.rebate > 0 ? (tax.surcharge > 0 ? '5' : '4') : (tax.surcharge > 0 ? '4' : '3')}</td><td>Add: Health &amp; Education Cess @ 4% on (Tax + Surcharge)</td><td class="amt">${fmt(tax.healthCess)}</td></tr>
+        <tr class="grand-total"><td></td><td>Total Tax Liability</td><td class="amt" style="color:var(--orange)">${fmt(tax.totalLiability)}</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px;font-size:0.75rem;color:var(--text-muted)">
+      Health &amp; Education Cess is calculated at 4% on the sum of Tax after Rebate (&#8377;${fmt(tax.taxAfterRebate)}) + Surcharge (&#8377;${fmt(tax.surcharge)}) = &#8377;${fmt(tax.healthCess)}
+    </p>
+  `);
+}
+
+// Store last tax for drill-down references
+let lastTax = {};
+
+function renderTax(tax) {
+  lastTax = tax;
+  const el = document.getElementById('tab-income-tax');
+  const maxIncome = Math.max(tax.taxableIncome, 2400000);
+  const fy = document.getElementById('fySelect').value;
+  const ayLabel = fy === '2025-26' ? 'AY 2026-27' : fy === '2024-25' ? 'AY 2025-26' : fy === '2023-24' ? 'AY 2024-25' : 'AY 2026-27';
+
+  el.innerHTML = `
+    <div class="section">
+      <div class="section-title"><span class="icon icon-tax">&#128176;</span> Income Tax Computation (New Regime - ${ayLabel})</div>
+
+      <table class="fin-table" style="margin-bottom:20px">
+        <thead><tr><th>Particulars</th><th class="amt-col">Amount (&#8377;)</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="drill-link" onclick="switchTab('pnl')">Gross Total Income (Net Profit from P&amp;L)</span></td>
+            <td class="amt"><span class="drill-amt" onclick="switchTab('pnl')">${fmtSigned(tax.grossIncome)}</span></td>
+          </tr>
+          <tr>
+            <td><span class="drill-link" onclick="drillToTaxableIncome(lastTax)">Less: Standard Deduction u/s 16(ia)</span></td>
+            <td class="amt"><span class="drill-amt negative" onclick="drillToTaxableIncome(lastTax)">(${fmt(tax.standardDeduction)})</span></td>
+          </tr>
+          <tr class="subtotal">
+            <td><span class="drill-link" onclick="drillToTaxableIncome(lastTax)">Total Taxable Income</span></td>
+            <td class="amt"><span class="drill-amt" onclick="drillToTaxableIncome(lastTax)">${fmt(tax.taxableIncome)}</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 style="font-size:0.9rem;margin-bottom:12px;color:var(--text-muted);cursor:pointer" onclick="drillToSlabBreakdown(lastTax)">
+        <span class="drill-link">Tax Slab Breakdown</span>
+      </h3>
+
+      <div style="margin-bottom:20px">
+        ${tax.slabBreakdown.map(s => {
+          const pct = maxIncome > 0 ? (s.amount / maxIncome) * 100 : 0;
+          const colors = ['#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#eab308', '#ef4444'];
+          const idx = tax.slabBreakdown.indexOf(s);
+          return s.amount > 0 ? `
+            <div class="tax-slab" style="cursor:pointer" onclick="drillToSlabBreakdown(lastTax)">
+              <div style="min-width:180px;font-size:0.78rem"><span class="drill-link">${s.label}</span></div>
+              <div style="min-width:40px;font-size:0.75rem;color:var(--text-muted);text-align:right">${(s.rate * 100)}%</div>
+              <div class="slab-bar">
+                <div class="slab-fill" style="width:${pct}%;background:${colors[idx % colors.length]}"></div>
+              </div>
+              <div style="min-width:90px;font-size:0.78rem;text-align:right"><span class="drill-amt">${fmt(s.amount)}</span></div>
+              <div style="min-width:80px;font-size:0.78rem;text-align:right;color:var(--orange)"><span class="drill-amt">${fmt(s.tax)}</span></div>
+            </div>
+          ` : '';
+        }).join('')}
+      </div>
+
+      <table class="fin-table">
+        <thead><tr><th>Tax Computation</th><th class="amt-col">Amount (&#8377;)</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="drill-link" onclick="drillToSlabBreakdown(lastTax)">Tax on Total Income (as per slabs)</span></td>
+            <td class="amt"><span class="drill-amt" onclick="drillToSlabBreakdown(lastTax)">${fmt(tax.totalTax)}</span></td>
+          </tr>
+          ${tax.rebate > 0 ? `<tr>
+            <td><span class="drill-link" onclick="drillToTaxComputation(lastTax)">Less: Rebate u/s 87A</span></td>
+            <td class="amt"><span class="drill-amt negative" onclick="drillToTaxComputation(lastTax)">(${fmt(tax.rebate)})</span></td>
+          </tr>` : ''}
+          <tr>
+            <td><span class="drill-link" onclick="drillToTaxComputation(lastTax)">Tax after Rebate</span></td>
+            <td class="amt"><span class="drill-amt" onclick="drillToTaxComputation(lastTax)">${fmt(tax.taxAfterRebate)}</span></td>
+          </tr>
+          ${tax.surcharge > 0 ? `<tr>
+            <td><span class="drill-link" onclick="drillToTaxComputation(lastTax)">Add: Surcharge @ ${(tax.surchargeRate * 100)}%</span></td>
+            <td class="amt"><span class="drill-amt" onclick="drillToTaxComputation(lastTax)">${fmt(tax.surcharge)}</span></td>
+          </tr>` : ''}
+          <tr>
+            <td><span class="drill-link" onclick="drillToTaxComputation(lastTax)">Add: Health &amp; Education Cess @ 4%</span></td>
+            <td class="amt"><span class="drill-amt" onclick="drillToTaxComputation(lastTax)">${fmt(tax.healthCess)}</span></td>
+          </tr>
+          <tr class="grand-total">
+            <td><span class="drill-link" onclick="drillToTaxComputation(lastTax)">Total Tax Liability</span></td>
+            <td class="amt"><span class="drill-amt" style="color:var(--orange)" onclick="drillToTaxComputation(lastTax)">${fmt(tax.totalLiability)}</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      ${tax.grossIncome <= 0 ? '<p style="margin-top:12px;font-size:0.8rem;color:var(--text-muted)">No taxable income. Post revenue vouchers to see tax computation.</p>' : ''}
+
+      <p style="margin-top:12px;font-size:0.7rem;color:var(--text-muted)">
+        Note: Simplified computation under New Tax Regime. Assumes business income for an individual assessee.
+        Actual computation may vary based on nature of income, deductions, and applicable provisions.
+      </p>
+    </div>
+  `;
+}
+
+// ========== Tab Switching ==========
+function switchTab(tabId) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+  document.getElementById('tab-' + tabId).classList.add('active');
+
+  // Update flow indicator
+  document.querySelectorAll('.flow-indicator .step').forEach(s => s.classList.remove('active'));
+  const mapping = { 'ledger': 1, 'trial-balance': 2, 'pnl': 3, 'balance-sheet': 4, 'income-tax': 5 };
+  const idx = mapping[tabId] || 0;
+  document.querySelectorAll('.flow-indicator .step')[idx]?.classList.add('active');
+}
+
+function scrollToSection(id) {
+  const mapping = { 'voucher': null, 'ledger': 'ledger', 'trial-balance': 'trial-balance', 'pnl': 'pnl', 'balance-sheet': 'balance-sheet', 'income-tax': 'income-tax' };
+  if (mapping[id]) switchTab(mapping[id]);
+}
+
+// Boot
+init();
+</script>
+</body>
+</html>

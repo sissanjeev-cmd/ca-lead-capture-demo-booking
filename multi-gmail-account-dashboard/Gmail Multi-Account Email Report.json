@@ -1,0 +1,394 @@
+{
+  "name": "Gmail Multi-Account Email Report",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3c791a29-6708-446c-b014-7d30b6da33da",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "readStatus": "both",
+          "receivedAfter": "={{ $now.minus({ days: 1 }).toISO() }}"
+        }
+      },
+      "id": "f0bd4f2d-5605-4cc9-a436-0cccec436670",
+      "name": "learnyourway.ai@gmail.com",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        112
+      ],
+      "webhookId": "487d7d3c-99cd-4918-9eec-5099eb220b91",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "j4SF7Ia9QlJWQrTN",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "id": "ec9fbdc6-fba2-4074-9e32-77cc2b8f31bc",
+      "name": "Merge All Emails",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        688,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "readStatus": "both",
+          "receivedAfter": "={{ $now.minus({ days: 1 }).toISO() }}"
+        }
+      },
+      "id": "f02fb623-d07d-467f-bed7-78914a1b0cb2",
+      "name": "garg1969sanjeev@gmail.com",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        304
+      ],
+      "webhookId": "b11f1bc6-d1e9-45de-8cf2-f433d6b26d8a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4QCFkmiHyfkfuKoh",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "readStatus": "both",
+          "receivedAfter": "={{ $now.minus({ days: 1 }).toISO() }}"
+        }
+      },
+      "id": "8693259e-79ee-4517-894e-e28efc24ba38",
+      "name": "sis.sanjeev@gmail.com",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        496
+      ],
+      "webhookId": "ef0cf59d-b843-45db-b4ce-68913a34919f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "tHWpYOk63MN8XpVN",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "readStatus": "both",
+          "receivedAfter": "={{ $now.minus({ days: 1 }).toISO() }}"
+        }
+      },
+      "id": "60ce4579-de4b-45c2-a54e-1355722039ea",
+      "name": "vmanageeverything@gmail.com",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        688
+      ],
+      "webhookId": "40872917-35cf-4387-8d0f-7e372b152b6b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RMAmvihRLiQ11VjF",
+          "name": "Gmail account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "readStatus": "both",
+          "receivedAfter": "={{ $now.minus({ days: 1 }).toISO() }}"
+        }
+      },
+      "id": "25b8562d-772a-422f-a075-d11757df8da5",
+      "name": "automation.atwork69@gmail.com",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        464,
+        880
+      ],
+      "webhookId": "51e4abb5-058c-4972-a858-6f340b55d6c7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wuSjEJtmHQ62GVXI",
+          "name": "Gmail account 6"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "snippet",
+              "renameField": true,
+              "outputFieldName": "allEmails"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b597b01f-97f9-409a-b3c3-ceefce6ef4e5",
+      "name": "Combine Email Bodies",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        912,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-5",
+          "mode": "id"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Please summarize the following emails from the last 24 hours:\n\n{{ $json.allEmails.join(\"\\n\\n---\\n\\n\") }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 4096
+        }
+      },
+      "id": "6c3dbe11-9224-4726-8efe-4c6cedf5653e",
+      "name": "Claude AI Summarize",
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        496
+      ],
+      "credentials": {
+        "anthropicApi": {
+          "id": "LTkh1AXadnJrEvf7",
+          "name": "Anthropic account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const summary = $input.item.json.content[0].text;\nconst date = new Date().toDateString();\n\nconst html = `<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Email Summary - ${date}</title>\n  <style>\n    body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; padding: 20px; background: #f0f2f5; }\n    h1 { color: #1a1a2e; text-align: center; }\n    .date { text-align: center; color: #888; margin-bottom: 30px; }\n    .card { background: white; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); white-space: pre-wrap; line-height: 1.7; }\n  </style>\n</head>\n<body>\n  <h1>📧 Daily Email Summary</h1>\n  <p class=\"date\">${date}</p>\n  <div class=\"card\">${summary}</div>\n</body>\n</html>`;\n\nconst buffer = Buffer.from(html, 'utf-8');\n\nreturn [{ \n  json: {}, \n  binary: { \n    htmlContent: { \n      data: buffer.toString('base64'),\n      mimeType: 'text/html',\n      fileName: 'email_summary.html'\n    } \n  } \n}];"
+      },
+      "id": "32ce75ec-6fd0-4dc4-9b6f-9b12bacb0532",
+      "name": "Format HTML Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1488,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "htmlContent",
+        "name": "={{ \"Email_Summary_\" + $now.toFormat(\"yyyy-MM-dd\") + \".html\" }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "id": "e2ea85e2-5e76-489a-be5b-755badbd9da6",
+      "name": "Upload to Google Drive",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1712,
+        496
+      ],
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "bmNvzhljHqJFqtZF",
+          "name": "Google Drive account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "learnyourway.ai@gmail.com",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "garg1969sanjeev@gmail.com",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sis.sanjeev@gmail.com",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "vmanageeverything@gmail.com",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "automation.atwork69@gmail.com",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "learnyourway.ai@gmail.com": {
+      "main": [
+        [
+          {
+            "node": "Merge All Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Emails": {
+      "main": [
+        [
+          {
+            "node": "Combine Email Bodies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "garg1969sanjeev@gmail.com": {
+      "main": [
+        [
+          {
+            "node": "Merge All Emails",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "sis.sanjeev@gmail.com": {
+      "main": [
+        [
+          {
+            "node": "Merge All Emails",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "vmanageeverything@gmail.com": {
+      "main": [
+        [
+          {
+            "node": "Merge All Emails",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "automation.atwork69@gmail.com": {
+      "main": [
+        [
+          {
+            "node": "Merge All Emails",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Combine Email Bodies": {
+      "main": [
+        [
+          {
+            "node": "Claude AI Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude AI Summarize": {
+      "main": [
+        [
+          {
+            "node": "Format HTML Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format HTML Report": {
+      "main": [
+        [
+          {
+            "node": "Upload to Google Drive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "8ba107b8-90f8-4a4d-ad08-a3d0e632da45",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1db649c120c2f18bb36945c4df2968485f5ae44b7ff89429b439474d649ce692"
+  },
+  "id": "KmVMDccwq5ZdhL3t",
+  "tags": []
+}

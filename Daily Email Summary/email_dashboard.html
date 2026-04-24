@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Email Summary</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #0b0e13; color: #c9d1d9; padding: 36px 28px; font-size: 17px; }
+
+    h1 { font-size: 32px; font-weight: 600; color: #f0f6fc; margin-bottom: 6px; letter-spacing: -0.3px; }
+    .subtitle { font-size: 16px; color: #8b949e; margin-bottom: 24px; }
+    .section-label { font-size: 20px; font-weight: 600; color: #c9d1d9; letter-spacing: -0.2px; margin-bottom: 18px; border-left: 4px solid #388bfd; padding-left: 12px; }
+
+    /* ── LOADING ── */
+    .loading { text-align: center; padding: 80px 20px; }
+    .spinner { width: 48px; height: 48px; border: 4px solid #21262d; border-top-color: #388bfd; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 18px; color: #8b949e; }
+
+    /* ── ERROR ── */
+    .error-box { background: #2d1210; border: 1px solid #6e2320; border-radius: 10px; padding: 24px; margin: 40px auto; max-width: 600px; text-align: center; }
+    .error-box h2 { color: #ff7b72; margin-bottom: 12px; }
+    .error-box p { color: #c9d1d9; font-size: 15px; line-height: 1.6; }
+    .retry-btn { margin-top: 18px; padding: 10px 24px; background: #21262d; border: 1px solid #388bfd; color: #388bfd; border-radius: 8px; font-size: 15px; cursor: pointer; }
+    .retry-btn:hover { background: #1f3a5f; }
+
+    /* ── SUMMARY CARDS ── */
+    .summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 32px; }
+    .summary-card { border-radius: 12px; padding: 24px 18px; text-align: center; border: 1px solid; }
+    .sc-1 { background: #0d1117; border-color: #388bfd; }
+    .sc-2 { background: #0d1117; border-color: #3fb950; }
+    .sc-3 { background: #0d1117; border-color: #bc8cff; }
+    .sc-4 { background: #0d1117; border-color: #ffa657; }
+    .sc-5 { background: #0d1117; border-color: #ff7b72; }
+    .summary-email { font-size: 15px; font-weight: 500; color: #c9d1d9; margin-bottom: 20px; word-break: break-all; line-height: 1.5; }
+    .summary-count { font-size: 68px; font-weight: 700; margin-bottom: 6px; line-height: 1; }
+    .cnt-1 { color: #388bfd; } .cnt-2 { color: #3fb950; } .cnt-3 { color: #bc8cff; } .cnt-4 { color: #ffa657; } .cnt-5 { color: #ff7b72; }
+    .summary-count-label { font-size: 17px; color: #8b949e; margin-bottom: 10px; }
+    .summary-deleted { font-size: 15px; color: #ff7b72; font-weight: 500; min-height: 22px; }
+
+    /* ── METRICS ── */
+    .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 36px; }
+    .metric { background: #161b22; border-radius: 12px; padding: 22px 24px; border: 1px solid #21262d; }
+    .metric-label { font-size: 18px; font-weight: 500; color: #8b949e; margin-bottom: 10px; }
+    .metric-value { font-size: 44px; font-weight: 700; line-height: 1; }
+    .mv-blue { color: #388bfd; } .mv-red { color: #ff7b72; } .mv-green { color: #3fb950; } .mv-gray { color: #8b949e; }
+
+    /* ── AI SUMMARY ── */
+    .ai-summary-box { background: #161b22; border: 1px solid #21262d; border-radius: 12px; padding: 24px; margin-bottom: 36px; }
+    .ai-summary-box h1, .ai-summary-box h2 { font-size: 18px; font-weight: 700; color: #f0f6fc; margin: 20px 0 10px; border-bottom: 1px solid #21262d; padding-bottom: 6px; }
+    .ai-summary-box h3 { font-size: 16px; font-weight: 700; color: #e3b341; margin: 16px 0 8px; }
+    .ai-summary-box ul { padding-left: 20px; margin: 6px 0 12px; }
+    .ai-summary-box li { margin-bottom: 6px; color: #c9d1d9; font-size: 15px; line-height: 1.7; }
+    .ai-summary-box strong { color: #f0f6fc; font-weight: 600; }
+    .ai-summary-box em { color: #8b949e; font-style: italic; }
+    .ai-summary-box p { margin-bottom: 10px; font-size: 15px; line-height: 1.7; }
+
+    /* ── COLUMNS ── */
+    .columns-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; align-items: start; }
+    .col-card { border-radius: 12px; border: 1px solid; overflow: hidden; }
+    .cc-1 { background: #0d1117; border-color: #388bfd; }
+    .cc-2 { background: #0d1117; border-color: #3fb950; }
+    .cc-3 { background: #0d1117; border-color: #bc8cff; }
+    .cc-4 { background: #0d1117; border-color: #ffa657; }
+    .cc-5 { background: #0d1117; border-color: #ff7b72; }
+    .col-header { padding: 18px 16px 14px; border-bottom: 1px solid #21262d; }
+    .col-account-email { font-size: 13px; font-weight: 600; color: #c9d1d9; margin-bottom: 12px; word-break: break-all; line-height: 1.5; }
+    .col-header-actions { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .col-badge { font-size: 13px; font-weight: 500; padding: 4px 12px; border-radius: 20px; }
+    .cb-1 { background: #1f3a5f; color: #79c0ff; }
+    .cb-2 { background: #1a3a1a; color: #56d364; }
+    .cb-3 { background: #2e1f5e; color: #d2a8ff; }
+    .cb-4 { background: #3d2200; color: #ffc680; }
+    .cb-5 { background: #3d1a18; color: #ffa198; }
+    .col-delete-all { font-size: 13px; color: #ff7b72; background: #2d1210; border: 1px solid #6e2320; padding: 5px 12px; border-radius: 6px; cursor: pointer; white-space: nowrap; }
+    .col-delete-all:hover { background: #3d1a18; }
+
+    .email-item { padding: 14px 16px; border-bottom: 1px solid #21262d; transition: background 0.15s; }
+    .email-item:last-child { border-bottom: none; }
+    .email-item:hover { background: rgba(56,139,253,0.05); }
+    .email-item.deleted-email { opacity: 0.28; }
+
+    /* From/Date row */
+    .email-meta-row { display: flex; gap: 8px; margin-bottom: 5px; align-items: baseline; }
+    .email-meta-label { font-size: 14px; font-weight: 700; color: #6e7681; text-transform: uppercase; letter-spacing: 0.07em; min-width: 54px; flex-shrink: 0; }
+    .email-meta-value { font-size: 15px; color: #8b949e; line-height: 1.5; }
+
+    /* Subject — full width, no label beside it */
+    .email-subject-row { margin: 8px 0 10px; }
+    .email-subject-value { font-size: 17px; font-weight: 600; color: #f0f6fc; line-height: 1.4; display: block; width: 100%; }
+    .email-item.deleted-email .email-subject-value { text-decoration: line-through; color: #3d444d; }
+
+    .email-body { font-size: 15px; color: #c9d1d9; line-height: 1.8; margin: 8px 0 12px; padding: 12px 14px; background: #161b22; border-left: 3px solid; border-radius: 0 8px 8px 0; }
+    .email-item.deleted-email .email-body { color: #3d444d; }
+
+    .del-btn { font-size: 13px; color: #ff7b72; background: #2d1210; border: 1px solid #6e2320; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; }
+    .del-btn:hover { background: #3d1a18; }
+    .undo-btn { font-size: 13px; color: #388bfd; background: none; border: none; cursor: pointer; text-decoration: underline; display: none; padding: 6px 0; }
+    .email-item.deleted-email .del-btn { display: none; }
+    .email-item.deleted-email .undo-btn { display: inline; }
+
+    .bl-0 { border-color: #388bfd; } .bl-1 { border-color: #3fb950; } .bl-2 { border-color: #bc8cff; } .bl-3 { border-color: #ffa657; } .bl-4 { border-color: #ff7b72; }
+
+    .refresh-btn { font-size: 14px; color: #388bfd; background: #1f3a5f; border: 1px solid #388bfd; padding: 8px 18px; border-radius: 8px; cursor: pointer; margin-left: 12px; }
+    .refresh-btn:hover { background: #264f8c; }
+
+    @media (max-width: 1200px) { .summary-grid, .columns-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 700px) { .summary-grid, .columns-grid { grid-template-columns: 1fr; } .metrics { grid-template-columns: repeat(2, 1fr); } }
+  </style>
+</head>
+<body>
+
+  <h1>📧 Daily Email Summary</h1>
+  <p class="subtitle" id="date-line">Loading...</p>
+
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <div class="loading-text">Fetching your emails from n8n...</div>
+  </div>
+
+  <div id="error-container" style="display:none;"></div>
+
+  <div id="dashboard" style="display:none;">
+    <p class="section-label">Account overview</p>
+    <div class="summary-grid" id="summary-grid"></div>
+
+    <p class="section-label">Stats</p>
+    <div class="metrics">
+      <div class="metric"><div class="metric-label">Total emails</div><div class="metric-value mv-blue" id="m-total">0</div></div>
+      <div class="metric"><div class="metric-label">Deleted</div><div class="metric-value mv-red" id="m-deleted">0</div></div>
+      <div class="metric"><div class="metric-label">Remaining</div><div class="metric-value mv-gray" id="m-remaining">0</div></div>
+      <div class="metric"><div class="metric-label">Active accounts</div><div class="metric-value mv-green" id="m-accounts">5</div></div>
+    </div>
+
+    <p class="section-label">Claude's Summary <button class="refresh-btn" onclick="loadData()">↻ Refresh</button></p>
+    <div class="ai-summary-box" id="ai-summary"></div>
+
+    <p class="section-label" style="margin-top:36px;">Emails by account</p>
+    <div class="columns-grid" id="columns-grid"></div>
+  </div>
+
+  <script>
+    const WEBHOOK_URL = 'https://automationaisanjeev.app.n8n.cloud/webhook/email-summary';
+    const summaryCardClasses = ['sc-1','sc-2','sc-3','sc-4','sc-5'];
+    const colCardClasses = ['cc-1','cc-2','cc-3','cc-4','cc-5'];
+    const colBadgeClasses = ['cb-1','cb-2','cb-3','cb-4','cb-5'];
+    const countClasses = ['cnt-1','cnt-2','cnt-3','cnt-4','cnt-5'];
+
+    let accounts = [];
+    const deletedEmails = new Set();
+
+    function renderMarkdown(text) {
+      if (!text) return '';
+      return text
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+        .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+        .replace(/^# (.+)$/gm,'<h1>$1</h1>')
+        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g,'<em>$1</em>')
+        .replace(/^[-•] (.+)$/gm,'<li>$1</li>')
+        .replace(/(<li>[\s\S]*?<\/li>\n?)+/g, m => '<ul>'+m+'</ul>')
+        .replace(/\n{2,}/g,'</p><p>')
+        .replace(/<p><\/p>/g,'');
+    }
+
+    function updateMetrics() {
+      const total = accounts.reduce((s,a) => s + a.emails.length, 0);
+      const deleted = deletedEmails.size;
+      document.getElementById('m-total').textContent = total;
+      document.getElementById('m-deleted').textContent = deleted;
+      document.getElementById('m-remaining').textContent = total - deleted;
+      document.getElementById('m-accounts').textContent = accounts.filter(a => a.emails.some(e => !deletedEmails.has(a.id+'-'+e.id))).length || accounts.length;
+      accounts.forEach(a => {
+        const rem = a.emails.filter(e => !deletedEmails.has(a.id+'-'+e.id)).length;
+        const del = a.emails.filter(e => deletedEmails.has(a.id+'-'+e.id)).length;
+        const sc = document.getElementById('scount-'+a.id);
+        const sd = document.getElementById('sdel-'+a.id);
+        const cb = document.getElementById('cbadge-'+a.id);
+        if (sc) sc.textContent = rem;
+        if (sd) sd.textContent = del > 0 ? del+' deleted' : '';
+        if (cb) cb.textContent = rem+' remaining';
+      });
+    }
+
+    function deleteEmail(aid, eid) {
+      const key = aid+'-'+eid;
+      deletedEmails.add(key);
+      document.getElementById('row-'+key).classList.add('deleted-email');
+      updateMetrics();
+    }
+
+    function undoEmail(aid, eid) {
+      const key = aid+'-'+eid;
+      deletedEmails.delete(key);
+      document.getElementById('row-'+key).classList.remove('deleted-email');
+      updateMetrics();
+    }
+
+    function deleteAll(aid) {
+      const a = accounts.find(x => x.id === aid);
+      if (!a) return;
+      a.emails.forEach(e => {
+        const key = aid+'-'+e.id;
+        deletedEmails.add(key);
+        const row = document.getElementById('row-'+key);
+        if (row) row.classList.add('deleted-email');
+      });
+      updateMetrics();
+    }
+
+    function renderSummary() {
+      document.getElementById('summary-grid').innerHTML = accounts.map((a,i) => `
+        <div class="summary-card ${summaryCardClasses[i]||'sc-1'}">
+          <div class="summary-email">${a.email}</div>
+          <div class="summary-count ${countClasses[i]||'cnt-1'}" id="scount-${a.id}">${a.emails.length}</div>
+          <div class="summary-count-label">emails</div>
+          <div class="summary-deleted" id="sdel-${a.id}"></div>
+        </div>`).join('');
+    }
+
+    function renderColumns() {
+      document.getElementById('columns-grid').innerHTML = accounts.map((a,i) => `
+        <div class="col-card ${colCardClasses[i]||'cc-1'}">
+          <div class="col-header">
+            <div class="col-account-email">${a.email}</div>
+            <div class="col-header-actions">
+              <span class="col-badge ${colBadgeClasses[i]||'cb-1'}" id="cbadge-${a.id}">${a.emails.length} remaining</span>
+              <button class="col-delete-all" onclick="deleteAll(${a.id})">🗑 All</button>
+            </div>
+          </div>
+          <div>
+            ${a.emails.length === 0 ? '<div style="padding:20px;color:#8b949e;text-align:center;font-size:14px;">No emails today</div>' :
+              a.emails.map(e => `
+                <div class="email-item" id="row-${a.id}-${e.id}">
+                  <div class="email-meta-row"><span class="email-meta-label">Date</span><span class="email-meta-value">${e.date||e.Date||e.internalDate||'—'}</span></div>
+                  <div class="email-meta-row"><span class="email-meta-label">From</span><span class="email-meta-value">${(e.from||e.From||e.sender||'').replace(/<.*?>/g,'').trim()}</span></div>
+                  <div class="email-subject-row"><span class="email-subject-value">${e.subject||'(No subject)'}</span></div>
+                  <div class="email-body bl-${i}">${e.body||e.snippet||''}</div>
+                  <button class="del-btn" onclick="deleteEmail(${a.id},'${e.id}')">🗑 Delete</button>
+                  <button class="undo-btn" onclick="undoEmail(${a.id},'${e.id}')">↩ Undo</button>
+                </div>`).join('')}
+          </div>
+        </div>`).join('');
+    }
+
+    async function loadData() {
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('error-container').style.display = 'none';
+      deletedEmails.clear();
+
+      try {
+        const res = await fetch(WEBHOOK_URL);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+
+        accounts = (data.accounts||[]).map((a,i) => ({ ...a, id: i }));
+
+        const date = data.generatedAt
+          ? new Date(data.generatedAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})
+          : new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+        const total = accounts.reduce((s,a) => s+(a.emails||[]).length, 0);
+        document.getElementById('date-line').textContent = `${date} · ${accounts.length} accounts · ${total} emails`;
+
+        document.getElementById('ai-summary').innerHTML = renderMarkdown(data.summary||'No summary available.');
+        document.getElementById('m-total').textContent = total;
+        document.getElementById('m-deleted').textContent = 0;
+        document.getElementById('m-remaining').textContent = total;
+        document.getElementById('m-accounts').textContent = accounts.length;
+
+        renderSummary();
+        renderColumns();
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+
+      } catch(err) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error-container').style.display = 'block';
+        document.getElementById('error-container').innerHTML = `
+          <div class="error-box">
+            <h2>⚠️ Could not load email data</h2>
+            <p>Make sure Workflow 2 is Published in n8n.<br><br>Error: ${err.message}</p>
+            <button class="retry-btn" onclick="loadData()">↻ Retry</button>
+          </div>`;
+      }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

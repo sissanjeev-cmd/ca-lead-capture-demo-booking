@@ -1,0 +1,11 @@
+{
+    "name": "shaswats-portfolio",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "npx serve . --listen 3000"
+    },
+    "devDependencies": {
+        "puppeteer": "^24.41.0"
+    }
+}

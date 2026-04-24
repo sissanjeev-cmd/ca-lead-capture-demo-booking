@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Experience — Shaswat Garg</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .page-hero { padding: 7rem 1.5rem 3rem; max-width: 1200px; margin: 0 auto; }
+    .exp-section { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+    .exp-tabs { display: flex; gap: 0.5rem; margin-bottom: 2.5rem; flex-wrap: wrap; }
+    .exp-tab {
+      padding: 0.5rem 1.25rem; border-radius: 8px; font-size: 0.82rem; font-weight: 500;
+      cursor: pointer; border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03); color: var(--muted);
+      transition: all 0.2s; font-family: 'Space Grotesk', sans-serif;
+    }
+    .exp-tab.active, .exp-tab:hover {
+      border-color: rgba(123,57,252,0.4); background: rgba(123,57,252,0.1); color: #f1f5f9;
+    }
+    .exp-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+    @media (max-width: 860px) { .exp-cols { grid-template-columns: 1fr; } }
+    .exp-col-title {
+      font-family: 'Space Mono', monospace; font-size: 0.72rem;
+      letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 1.5rem;
+    }
+    .exp-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 1.5rem;
+      margin-bottom: 1rem; position: relative;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .exp-card:hover {
+      border-color: rgba(123,57,252,0.25);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+    }
+    .exp-card-header { display: flex; justify-content: space-between; align-items: start; gap: 0.75rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+    .exp-card-meta { flex: 1; }
+    .exp-card-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.2rem; }
+    .exp-card-org { font-size: 0.85rem; font-weight: 500; }
+    .exp-card-body { color: var(--muted); font-size: 0.82rem; line-height: 1.75; }
+    .exp-card-body ul { padding-left: 1.1rem; }
+    .exp-card-body li { margin-bottom: 0.35rem; }
+    .exp-card-body li::marker { color: rgba(123,57,252,0.6); }
+    .exp-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.85rem; }
+
+    /* Current role badge */
+    .current-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.25);
+      color: #22d3ee; font-size: 0.62rem; padding: 2px 8px; border-radius: 999px;
+      font-family: 'Space Mono', monospace; letter-spacing: 0.08em;
+    }
+    .current-dot { width: 6px; height: 6px; border-radius: 50%; background: #22d3ee; }
+    .current-dot { animation: pulse-ring 2s infinite; }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <div class="global-bg">
+    <div class="global-bg-fallback"></div>
+    <video autoplay loop muted playsinline class="global-bg-video"
+      oncanplay="this.style.opacity=1" style="opacity:0;transition:opacity 1.5s;">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260210_031346_d87182fb-b0af-4273-84d1-c6fd17d6bf0f.mp4" type="video/mp4" />
+    </video>
+  </div>
+  <div class="global-overlay"></div>
+
+<div id="nav-placeholder"></div>
+
+<div class="page-hero">
+  <div class="reveal">
+    <p class="section-eyebrow">Career</p>
+    <h1 style="font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;letter-spacing:-0.03em;line-height:1.05;">
+      Professional <span class="grad-text">Experience</span>
+    </h1>
+    <p style="color:var(--muted);font-size:1.05rem;margin-top:1rem;max-width:560px;line-height:1.7;">
+      Industry roles, research positions, and academic work across robotics, ML, and engineering.
+    </p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="exp-section">
+  <div class="exp-cols">
+
+    <!-- Industry Column -->
+    <div>
+      <div class="exp-col-title" style="color:#22d3ee;">⚡ Industry</div>
+
+      <!-- ArenaX Labs -->
+      <div class="exp-card reveal">
+        <div class="exp-card-header">
+          <div class="exp-card-meta">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem;">
+              <div class="exp-card-title">ML Researcher &amp; Engineer</div>
+              <span class="current-badge"><span class="current-dot"></span>Current</span>
+            </div>
+            <div class="exp-card-org" style="color:#22d3ee;">ArenaX Labs</div>
+          </div>
+          <span class="tag" style="flex-shrink:0;">Apr 2025 – Present</span>
+        </div>
+        <div class="exp-card-body">
+          <p>Toronto, Ontario — Cutting-edge ML research and engineering for autonomous systems.</p>
+        </div>
+        <div class="exp-tags">
+          <span class="tag">ML Engineering</span>
+          <span class="tag">Deep Learning</span>
+          <span class="tag">Autonomous Systems</span>
+        </div>
+      </div>
+
+      <!-- Real Life Robotics -->
+      <div class="exp-card reveal" style="transition-delay:0.06s;">
+        <div class="exp-card-header">
+          <div class="exp-card-meta">
+            <div class="exp-card-title">Robotics Engineer</div>
+            <div class="exp-card-org" style="color:#60a5fa;">Real Life Robotics</div>
+          </div>
+          <span class="tag tag-blue" style="flex-shrink:0;">Oct 2024 – Apr 2025</span>
+        </div>
+        <div class="exp-card-body">
+          <p>Waterloo, Ontario — Robotics engineering for real-world autonomous systems deployment.</p>
+        </div>
+        <div class="exp-tags">
+          <span class="tag tag-blue">ROS2</span>
+          <span class="tag tag-blue">Autonomous Systems</span>
+          <span class="tag tag-blue">Robotics</span>
+        </div>
+      </div>
+
+      <!-- Orangewood -->
+      <div class="exp-card reveal" style="transition-delay:0.12s;">
+        <div class="exp-card-header">
+          <div class="exp-card-meta">
+            <div class="exp-card-title">Robotics Engineer</div>
+            <div class="exp-card-org" style="color:#22d3ee;">Orangewood Labs</div>
+          </div>
+          <span class="tag" style="flex-shrink:0;">Jun – Oct 2023</span>
+        </div>
+        <div class="exp-card-body">
+          <ul>
+            <li>Built <strong style="color:#f1f5f9;">RoboGPT</strong> — LLM tool reducing new use-case programming time by <span style="color:#22d3ee;">50%</span> via LangChain &amp; ChatGPT API</li>
+            <li>Added zero-shot object detection + YOLO to RoboGPT pipeline</li>
+            <li>Integrated MoveIt + Gazebo simulations, cutting deployment from 1 week → 2 days</li>
+            <li>Integrated environment pointcloud as Octomap in MoveIt for robot-world collision checking</li>
+          </ul>
+        </div>
+        <div class="exp-tags">
+          <span class="tag">LangChain</span>
+          <span class="tag">YOLO</span>
+          <span class="tag">MoveIt</span>
+          <span class="tag">Gazebo</span>
+          <span class="tag">ROS2</span>
+          <span class="tag">RTAB-Map</span>
+        </div>
+      </div>
+
+      <!-- DelTech Baja -->
+      <div class="exp-card reveal" style="transition-delay:0.18s;">
+        <div class="exp-card-header">
+          <div class="exp-card-meta">
+            <div class="exp-card-title">Vice Captain &amp; Head of Chassis</div>
+            <div class="exp-card-org" style="color:#60a5fa;">DelTech Baja, DTU</div>
+          </div>
+          <span class="tag tag-blue" style="flex-shrink:0;">Feb 2020 – May 2023</span>
+        </div>
+        <div class="exp-card-body">
+          <ul>
+            <li>CAD modelling and assembly of SAE Baja vehicle in SolidWorks</li>
+            <li>Structural analysis (implicit/explicit) of components on ANSYS</li>
+            <li>Researched AI/ML implementation in design and analysis process</li>
+          </ul>
+        </div>
+        <div class="exp-tags">
+          <span class="tag tag-blue">SolidWorks</span>
+          <span class="tag tag-blue">ANSYS</span>
+          <span class="tag tag-blue">CAD/FEA</span>
+        </div>
+      </div>
+
+      <!-- HyperX Energy -->
+      <div class="exp-card reveal" style="transition-delay:0.24s;">
+        <div class="exp-card-header">
+          <div class="exp-card-meta">
+            <div class="exp-card-title">Mechanical Intern</div>
+            <div class="exp-card-org" style="color:#22d3ee;">HyperX Energy</div>
+          </div>
+          <span class="tag" style="flex-shrink:0;">Jan – Jul 2021</span>
+        </div>
+        <div class="exp-card-body">
+          <ul>
+            <li>Designed chassis for Prototype II in SolidWorks</li>
+            <li>Developed vehicle model in MATLAB</li>
+            <li>Optimized chassis design using Genetic Algorithms</li>
+          </ul>
+        </div>
+        <div class="exp-tags">
+          <span class="tag">SolidWorks</span>
+          <span class="tag">MATLAB</span>
+          <span class="tag">Genetic Algorithms</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Research Column -->
+    <div>
+      <div class="exp-col-title" style="color:#c084fc;">🔬 Research &amp; Academic</div>
+
+      <!-- UWaterloo GRA -->
+      <div class="exp-card reveal">
+        <div class="exp-card-header">
+          <div class="exp-card-meta">
+            <div class="exp-card-title">Graduate Research Assistant</div>
+            <div class="exp-card-org" style="color:#c084fc;">University of Waterloo</div>
+          </div>
+          <span class="tag tag-purple" style="flex-shrink:0;">Jan 2024 – Apr 2025</span>
+        </div>
+        <div class="exp-card-body">
+          <ul>
+            <li>MASc Thesis: Vision-based Path Planning &amp; Control of UAVs and Aerial Manipulators using Safe RL</li>
+            <li>Benchmarked off-policy RL algorithms for UAV path planning with LiDAR — <span style="color:#c084fc;">accepted at ICUAS 2024</span></li>
+            <li>Developing RL-based trajectory tracking for UAVs in complex obstacle environments using 3D Point Cloud</li>
+            <li>Research on controlling aerial manipulators using RL in complex and dynamic environments</li>
+          </ul>
+        </div>
+        <div class="exp-tags">
+          <span class="tag tag-purple">Safe RL</span>
+          <span class="tag tag-purple">LiDAR</span>
+          <span class="tag tag-purple">UAV</span>
+          <span class="tag tag-purple">Point Cloud</span>
+          <span class="tag tag-purple">ICUAS 2024</span>
+        </div>
+      </div>
+
+      <!-- UWaterloo GTA -->
+      <div class="exp-card reveal" style="transition-delay:0.06s;">
+        <div class="exp-card-header">
+          <div class="exp-card-meta">
+            <div class="exp-card-title">Graduate Teaching Assistant</div>
+            <div class="exp-card-org" style="color:#c084fc;">University of Waterloo</div>
+          </div>
+          <span class="tag tag-purple" style="flex-shrink:0;">Sep – Dec 2024</span>
+        </div>
+        <div class="exp-card-body">
+          <p>Teaching assistance for undergraduate robotics and engineering courses, Waterloo, Ontario.</p>
+        </div>
+        <div class="exp-tags">
+          <span class="tag tag-purple">Teaching</span>
+          <span class="tag tag-purple">Robotics</span>
+        </div>
+      </div>
+
+      <!-- UToronto Neural Robotics Lab -->
+      <div class="exp-card reveal" style="transition-delay:0.12s;">
+        <div class="exp-card-header">
+          <div class="exp-card-meta">
+            <div class="exp-card-title">RL Researcher — Neural Robotics Lab</div>
+            <div class="exp-card-org" style="color:#22d3ee;">University of Toronto Robotics Institute</div>
+          </div>
+          <span class="tag" style="flex-shrink:0;">Jul – Oct 2024</span>
+        </div>
+        <div class="exp-card-body">
+          <ul>
+            <li>Developing RL algorithms for control of musculoskeletal systems with Bionic Legs</li>
+          </ul>
+        </div>
+        <div class="exp-tags">
+          <span class="tag">Bionic Legs</span>
+          <span class="tag">Musculoskeletal RL</span>
+          <span class="tag">PyTorch</span>
+        </div>
+      </div>
+
+      <!-- TMU MITACS -->
+      <div class="exp-card reveal" style="transition-delay:0.18s;">
+        <div class="exp-card-header">
+          <div class="exp-card-meta">
+            <div class="exp-card-title">MITACS GRI Researcher</div>
+            <div class="exp-card-org" style="color:#c084fc;">Toronto Metropolitan University</div>
+          </div>
+          <span class="tag tag-purple" style="flex-shrink:0;">May – Aug 2022</span>
+        </div>
+        <div class="exp-card-body">
+          <ul>
+            <li>Implemented DDPG, TD3, SoftQ, SAC, NAF and constraint-based Safety Layer from scratch using PyTorch</li>
+            <li>Proposed constraint-based Safe RL using SAC + CMA for efficient exploration while ensuring robot safety</li>
+            <li>Built OpenAI Gym environment using Cosserat-rod and Cosserat-string models</li>
+          </ul>
+        </div>
+        <div class="exp-tags">
+          <span class="tag tag-purple">PyTorch</span>
+          <span class="tag tag-purple">SAC / TD3</span>
+          <span class="tag tag-purple">CMA</span>
+          <span class="tag tag-purple">OpenAI Gym</span>
+        </div>
+      </div>
+
+      <!-- IIT Delhi -->
+      <div class="exp-card reveal" style="transition-delay:0.24s;">
+        <div class="exp-card-header">
+          <div class="exp-card-meta">
+            <div class="exp-card-title">Research Intern</div>
+            <div class="exp-card-org" style="color:#60a5fa;">IIT Delhi</div>
+          </div>
+          <span class="tag tag-blue" style="flex-shrink:0;">Aug 2021 – May 2022</span>
+        </div>
+        <div class="exp-card-body">
+          <ul>
+            <li>Surveyed dynamic modelling of railway models (multi-DOF) and investigated hunting stability</li>
+            <li>Developed <strong style="color:#f1f5f9;">Railhunt</strong> — simulation tool for hunting stability via MATLAB App-Designer</li>
+            <li>Studied effects of dissimilar rail properties on critical speed using DeNOC method (17-DOF model)</li>
+          </ul>
+        </div>
+        <div class="exp-tags">
+          <span class="tag tag-blue">MATLAB</span>
+          <span class="tag tag-blue">Dynamic Modelling</span>
+          <span class="tag tag-blue">DeNOC</span>
+        </div>
+      </div>
+
+      <!-- DTU Undergrad Research -->
+      <div class="exp-card reveal" style="transition-delay:0.30s;">
+        <div class="exp-card-header">
+          <div class="exp-card-meta">
+            <div class="exp-card-title">Undergraduate Research Intern</div>
+            <div class="exp-card-org" style="color:#c084fc;">Delhi Technological University</div>
+          </div>
+          <span class="tag tag-purple" style="flex-shrink:0;">Mar – Jul 2021</span>
+        </div>
+        <div class="exp-card-body">
+          <ul>
+            <li>Developed ANN model achieving <span style="color:#60a5fa;">99.89% accuracy</span> for predicting end milling parameters</li>
+            <li>Paper accepted: "ANN based real-time modelling while milling Al6061" — ICAMMP 2021</li>
+          </ul>
+        </div>
+        <div class="exp-tags">
+          <span class="tag tag-purple">ANN</span>
+          <span class="tag tag-purple">ICAMMP 2021</span>
+          <span class="tag tag-purple">Python</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
+    <span style="font-size:0.82rem;font-weight:600;">Shaswat Garg</span>
+    <div style="display:flex;gap:1.5rem;">
+      <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Home</a>
+      <a href="projects.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Research</a>
+      <a href="contact.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Contact</a>
+    </div>
+    <p style="font-size:0.72rem;color:rgba(148,163,184,0.5);font-family:'Space Mono',monospace;">© 2025</p>
+  </div>
+</footer>
+
+<script src="nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+{
+  "name": "ca-automation-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "find .next/static/webpack -name '*.hot-update.*' -delete 2>/dev/null; next dev",
+    "fresh": "rm -rf .next && next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "react": "^18",
+    "react-dom": "^18",
+    "next": "^14",
+    "axios": "^1.6"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3",
+    "postcss": "^8",
+    "autoprefixer": "^10"
+  }
+}

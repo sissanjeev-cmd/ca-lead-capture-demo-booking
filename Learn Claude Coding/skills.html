@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skills — Shaswat Garg</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .page-hero { padding: 7rem 1.5rem 3rem; max-width: 1200px; margin: 0 auto; }
+    .main-section { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+
+    /* Skill category cards */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+    }
+    .skill-cat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px; padding: 1.75rem;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .skill-cat-card:hover { border-color: rgba(123,57,252,0.25); transform: translateY(-4px); }
+    .skill-cat-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .skill-cat-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+    }
+    .skill-cat-title { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; }
+    .skill-bar-row { margin-bottom: 1rem; }
+    .skill-bar-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .skill-bar-name { font-size: 0.85rem; font-weight: 500; }
+    .skill-bar-level { font-size: 0.68rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+    /* Tech cloud */
+    .tech-cloud-section {
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 4rem 1.5rem;
+    }
+    .tech-cloud-inner { max-width: 1200px; margin: 0 auto; }
+    .tech-cloud {
+      display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 2rem;
+    }
+    .tech-pill {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 0.5rem 1rem;
+      font-size: 0.82rem; font-weight: 500;
+      transition: all 0.2s; cursor: default;
+    }
+    .tech-pill:hover { background: rgba(123,57,252,0.1); border-color: rgba(123,57,252,0.35); color: #f1f5f9; transform: translateY(-2px); }
+
+    /* Certifications */
+    .certs-section { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+    .certs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .cert-card {
+      background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px; padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .cert-card:hover { border-color: rgba(34,211,238,0.25); transform: translateY(-3px); }
+    .cert-icon {
+      width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <div class="global-bg">
+    <div class="global-bg-fallback"></div>
+    <video autoplay loop muted playsinline class="global-bg-video"
+      oncanplay="this.style.opacity=1" style="opacity:0;transition:opacity 1.5s;">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260210_031346_d87182fb-b0af-4273-84d1-c6fd17d6bf0f.mp4" type="video/mp4" />
+    </video>
+  </div>
+  <div class="global-overlay"></div>
+
+<div id="nav-placeholder"></div>
+
+<div class="page-hero">
+  <div class="reveal">
+    <p class="section-eyebrow">Technical Expertise</p>
+    <h1 style="font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;letter-spacing:-0.03em;line-height:1.05;">
+      Skills & <span class="grad-text">Technologies</span>
+    </h1>
+    <p style="color:var(--muted);font-size:1.05rem;margin-top:1rem;max-width:560px;line-height:1.7;">
+      A toolkit built across robotics, machine learning, mechanical engineering, and software development.
+    </p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Skill bars by category -->
+<div class="main-section">
+  <div class="reveal">
+    <p class="section-eyebrow">Proficiency</p>
+    <h2 style="font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;letter-spacing:-0.02em;">
+      Core <span class="grad-text">Competencies</span>
+    </h2>
+  </div>
+
+  <div class="skills-grid">
+
+    <!-- Programming Languages -->
+    <div class="skill-cat-card reveal">
+      <div class="skill-cat-header">
+        <div class="skill-cat-icon" style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);">💻</div>
+        <div class="skill-cat-title" style="color:#22d3ee;">Languages</div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">Python</span><span class="skill-bar-level">Expert</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="95" style="background:linear-gradient(90deg,#22d3ee,#60a5fa);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">MATLAB</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="88" style="background:linear-gradient(90deg,#22d3ee,#60a5fa);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">C++</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="80" style="background:linear-gradient(90deg,#22d3ee,#60a5fa);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">R</span><span class="skill-bar-level">Intermediate</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="60" style="background:linear-gradient(90deg,#22d3ee,#60a5fa);"></div></div>
+      </div>
+    </div>
+
+    <!-- ML / AI -->
+    <div class="skill-cat-card reveal" style="transition-delay:0.06s;">
+      <div class="skill-cat-header">
+        <div class="skill-cat-icon" style="background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.2);">🧠</div>
+        <div class="skill-cat-title" style="color:#c084fc;">ML / AI</div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">Reinforcement Learning</span><span class="skill-bar-level">Expert</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="95" style="background:linear-gradient(90deg,#c084fc,#7b39fc);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">PyTorch</span><span class="skill-bar-level">Expert</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="92" style="background:linear-gradient(90deg,#c084fc,#7b39fc);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">Deep Learning</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="88" style="background:linear-gradient(90deg,#c084fc,#7b39fc);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">LLMs / LangChain</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="82" style="background:linear-gradient(90deg,#c084fc,#7b39fc);"></div></div>
+      </div>
+    </div>
+
+    <!-- Robotics -->
+    <div class="skill-cat-card reveal" style="transition-delay:0.12s;">
+      <div class="skill-cat-header">
+        <div class="skill-cat-icon" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);">🤖</div>
+        <div class="skill-cat-title" style="color:#60a5fa;">Robotics</div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">ROS2</span><span class="skill-bar-level">Expert</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="92" style="background:linear-gradient(90deg,#60a5fa,#22d3ee);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">Path Planning</span><span class="skill-bar-level">Expert</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="94" style="background:linear-gradient(90deg,#60a5fa,#22d3ee);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">MoveIt / Gazebo</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="85" style="background:linear-gradient(90deg,#60a5fa,#22d3ee);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">Computer Vision</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="84" style="background:linear-gradient(90deg,#60a5fa,#22d3ee);"></div></div>
+      </div>
+    </div>
+
+    <!-- Sensing / Perception -->
+    <div class="skill-cat-card reveal" style="transition-delay:0.18s;">
+      <div class="skill-cat-header">
+        <div class="skill-cat-icon" style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);">📡</div>
+        <div class="skill-cat-title" style="color:#22d3ee;">Perception</div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">LiDAR Processing</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="85" style="background:linear-gradient(90deg,#22d3ee,#60a5fa);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">3D Point Cloud</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="83" style="background:linear-gradient(90deg,#22d3ee,#60a5fa);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">YOLO / Detection</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="82" style="background:linear-gradient(90deg,#22d3ee,#60a5fa);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">RTAB-Map</span><span class="skill-bar-level">Intermediate</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="72" style="background:linear-gradient(90deg,#22d3ee,#60a5fa);"></div></div>
+      </div>
+    </div>
+
+    <!-- Mechanical / CAD -->
+    <div class="skill-cat-card reveal" style="transition-delay:0.24s;">
+      <div class="skill-cat-header">
+        <div class="skill-cat-icon" style="background:rgba(123,57,252,0.1);border:1px solid rgba(123,57,252,0.3);">⚙️</div>
+        <div class="skill-cat-title" style="color:#a78bfa;">Mechanical / CAD</div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">SolidWorks</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="82" style="background:linear-gradient(90deg,#7b39fc,#c084fc);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">ANSYS (FEA)</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="78" style="background:linear-gradient(90deg,#7b39fc,#c084fc);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">Genetic Algorithms</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="80" style="background:linear-gradient(90deg,#7b39fc,#c084fc);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">Dynamic Modelling</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="78" style="background:linear-gradient(90deg,#7b39fc,#c084fc);"></div></div>
+      </div>
+    </div>
+
+    <!-- Tools & Platforms -->
+    <div class="skill-cat-card reveal" style="transition-delay:0.30s;">
+      <div class="skill-cat-header">
+        <div class="skill-cat-icon" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);">🛠️</div>
+        <div class="skill-cat-title" style="color:#60a5fa;">Tools & Platforms</div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">OpenAI Gym</span><span class="skill-bar-level">Expert</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="90" style="background:linear-gradient(90deg,#60a5fa,#c084fc);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">Git / Linux</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="85" style="background:linear-gradient(90deg,#60a5fa,#c084fc);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">ChatGPT / OpenAI API</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="84" style="background:linear-gradient(90deg,#60a5fa,#c084fc);"></div></div>
+      </div>
+      <div class="skill-bar-row">
+        <div class="skill-bar-label"><span class="skill-bar-name">NumPy / SciPy</span><span class="skill-bar-level">Advanced</span></div>
+        <div class="skill-track"><div class="skill-fill" data-width="88" style="background:linear-gradient(90deg,#60a5fa,#c084fc);"></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Full Tech Cloud -->
+<div class="tech-cloud-section">
+  <div class="tech-cloud-inner">
+    <div class="reveal">
+      <p class="section-eyebrow">Full Stack</p>
+      <h2 style="font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;letter-spacing:-0.02em;margin-bottom:0.5rem;">
+        All <span class="grad-text">Technologies</span>
+      </h2>
+      <p style="color:var(--muted);font-size:0.9rem;">Hover to highlight</p>
+    </div>
+    <div class="tech-cloud reveal">
+      <span class="tech-pill" style="border-color:rgba(34,211,238,0.2);color:#22d3ee;">Python</span>
+      <span class="tech-pill" style="border-color:rgba(34,211,238,0.2);color:#22d3ee;">C++</span>
+      <span class="tech-pill" style="border-color:rgba(34,211,238,0.2);color:#22d3ee;">MATLAB</span>
+      <span class="tech-pill" style="border-color:rgba(34,211,238,0.2);color:#22d3ee;">R</span>
+      <span class="tech-pill" style="border-color:rgba(192,132,252,0.2);color:#c084fc;">PyTorch</span>
+      <span class="tech-pill" style="border-color:rgba(192,132,252,0.2);color:#c084fc;">Reinforcement Learning</span>
+      <span class="tech-pill" style="border-color:rgba(192,132,252,0.2);color:#c084fc;">Safe RL</span>
+      <span class="tech-pill" style="border-color:rgba(192,132,252,0.2);color:#c084fc;">DDPG</span>
+      <span class="tech-pill" style="border-color:rgba(192,132,252,0.2);color:#c084fc;">TD3</span>
+      <span class="tech-pill" style="border-color:rgba(192,132,252,0.2);color:#c084fc;">SAC</span>
+      <span class="tech-pill" style="border-color:rgba(192,132,252,0.2);color:#c084fc;">NAF</span>
+      <span class="tech-pill" style="border-color:rgba(192,132,252,0.2);color:#c084fc;">CMA</span>
+      <span class="tech-pill" style="border-color:rgba(96,165,250,0.2);color:#60a5fa;">ROS2</span>
+      <span class="tech-pill" style="border-color:rgba(96,165,250,0.2);color:#60a5fa;">MoveIt</span>
+      <span class="tech-pill" style="border-color:rgba(96,165,250,0.2);color:#60a5fa;">Gazebo</span>
+      <span class="tech-pill" style="border-color:rgba(96,165,250,0.2);color:#60a5fa;">Path Planning</span>
+      <span class="tech-pill" style="border-color:rgba(96,165,250,0.2);color:#60a5fa;">Computer Vision</span>
+      <span class="tech-pill" style="border-color:rgba(96,165,250,0.2);color:#60a5fa;">YOLO</span>
+      <span class="tech-pill" style="border-color:rgba(96,165,250,0.2);color:#60a5fa;">Zero-Shot Detection</span>
+      <span class="tech-pill" style="border-color:rgba(96,165,250,0.2);color:#60a5fa;">LiDAR</span>
+      <span class="tech-pill" style="border-color:rgba(96,165,250,0.2);color:#60a5fa;">3D Point Cloud</span>
+      <span class="tech-pill" style="border-color:rgba(34,211,238,0.2);color:#22d3ee;">LangChain</span>
+      <span class="tech-pill" style="border-color:rgba(34,211,238,0.2);color:#22d3ee;">ChatGPT API</span>
+      <span class="tech-pill" style="border-color:rgba(34,211,238,0.2);color:#22d3ee;">OpenAI Gym</span>
+      <span class="tech-pill" style="border-color:rgba(34,211,238,0.2);color:#22d3ee;">RTAB-Map</span>
+      <span class="tech-pill" style="border-color:rgba(34,211,238,0.2);color:#22d3ee;">Octomap</span>
+      <span class="tech-pill" style="border-color:rgba(123,57,252,0.2);color:#a78bfa;">SolidWorks</span>
+      <span class="tech-pill" style="border-color:rgba(123,57,252,0.2);color:#a78bfa;">ANSYS</span>
+      <span class="tech-pill" style="border-color:rgba(123,57,252,0.2);color:#a78bfa;">Genetic Algorithms</span>
+      <span class="tech-pill" style="border-color:rgba(123,57,252,0.2);color:#a78bfa;">ANN</span>
+      <span class="tech-pill" style="border-color:rgba(123,57,252,0.2);color:#a78bfa;">CNN</span>
+      <span class="tech-pill">Git</span>
+      <span class="tech-pill">Linux</span>
+      <span class="tech-pill">NumPy</span>
+      <span class="tech-pill">SciPy</span>
+      <span class="tech-pill">Matplotlib</span>
+    </div>
+  </div>
+</div>
+
+<!-- Certifications -->
+<div class="certs-section">
+  <div class="reveal">
+    <p class="section-eyebrow">Credentials</p>
+    <h2 style="font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;letter-spacing:-0.02em;margin-bottom:0.5rem;">
+      Certifications
+    </h2>
+  </div>
+  <div class="certs-grid">
+    <div class="cert-card reveal">
+      <div class="cert-icon" style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);">🧠</div>
+      <div>
+        <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.2rem;">Convolutional Neural Networks</div>
+        <div style="font-size:0.75rem;color:var(--muted);">deeplearning.ai</div>
+      </div>
+    </div>
+    <div class="cert-card reveal" style="transition-delay:0.05s;">
+      <div class="cert-icon" style="background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.2);">🔄</div>
+      <div>
+        <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.2rem;">Sequence Models</div>
+        <div style="font-size:0.75rem;color:var(--muted);">deeplearning.ai</div>
+      </div>
+    </div>
+    <div class="cert-card reveal" style="transition-delay:0.1s;">
+      <div class="cert-icon" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);">📊</div>
+      <div>
+        <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.2rem;">Machine Learning A-Z</div>
+        <div style="font-size:0.75rem;color:var(--muted);">Python &amp; R in Data Science</div>
+      </div>
+    </div>
+    <div class="cert-card reveal" style="transition-delay:0.15s;">
+      <div class="cert-icon" style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);">🖨️</div>
+      <div>
+        <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.2rem;">CSWA — Additive Manufacturing</div>
+        <div style="font-size:0.75rem;color:var(--muted);">Certified SolidWorks Associate</div>
+      </div>
+    </div>
+    <div class="cert-card reveal" style="transition-delay:0.2s;">
+      <div class="cert-icon" style="background:rgba(123,57,252,0.12);border:1px solid rgba(123,57,252,0.25);">⚙️</div>
+      <div>
+        <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.2rem;">CSWA — Mechanical Design</div>
+        <div style="font-size:0.75rem;color:var(--muted);">Certified SolidWorks Associate</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
+    <span style="font-size:0.82rem;font-weight:600;">Shaswat Garg</span>
+    <div style="display:flex;gap:1.5rem;">
+      <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Home</a>
+      <a href="projects.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Research</a>
+      <a href="contact.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Contact</a>
+    </div>
+    <p style="font-size:0.72rem;color:rgba(148,163,184,0.5);font-family:'Space Mono',monospace;">© 2025</p>
+  </div>
+</footer>
+
+<script src="nav.js"></script>
+</body>
+</html>

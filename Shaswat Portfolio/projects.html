@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research & Projects — Shaswat Garg</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .page-hero { padding: 7rem 1.5rem 3rem; max-width: 1200px; margin: 0 auto; }
+    .main-section { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+    }
+
+    .project-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 18px;
+      padding: 1.75rem;
+      display: flex; flex-direction: column;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .project-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(123,57,252,0.05), rgba(34,211,238,0.03));
+      opacity: 0; transition: opacity 0.3s; border-radius: 18px;
+    }
+    .project-card:hover { transform: translateY(-6px); border-color: rgba(123,57,252,0.3); box-shadow: 0 24px 48px rgba(0,0,0,0.35); }
+    .project-card:hover::before { opacity: 1; }
+
+    /* Featured large card */
+    .project-card.featured { grid-column: span 2; }
+    @media (max-width: 760px) { .project-card.featured { grid-column: span 1; } }
+
+    .project-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; margin-bottom: 1.1rem; flex-shrink: 0;
+    }
+    .project-label { font-size: 0.7rem; font-family: 'Space Mono', monospace; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .project-title { font-size: 1.05rem; font-weight: 600; margin-bottom: 0.6rem; line-height: 1.3; }
+    .project-desc { font-size: 0.82rem; color: var(--muted); line-height: 1.75; flex: 1; }
+    .project-highlight { color: #22d3ee; font-weight: 500; }
+    .project-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1.1rem; }
+
+    /* Publications section */
+    .pub-section { border-top: 1px solid rgba(255,255,255,0.06); padding: 4rem 1.5rem; }
+    .pub-inner { max-width: 1200px; margin: 0 auto; }
+    .pub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .pub-card {
+      background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 14px; padding: 1.5rem; position: relative; overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .pub-card:hover { border-color: rgba(123,57,252,0.25); transform: translateY(-3px); }
+    .pub-num {
+      font-family: 'Space Mono', monospace; font-size: 2.8rem; font-weight: 700;
+      color: rgba(123,57,252,0.1); line-height: 1; position: absolute; top: 1rem; right: 1.25rem;
+    }
+    .pub-venue {
+      font-family: 'Space Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em;
+      text-transform: uppercase; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+      display: inline-block; margin-bottom: 0.75rem;
+    }
+  </style>
+</head>
+<body class="grid-bg">
+
+  <div class="global-bg">
+    <div class="global-bg-fallback"></div>
+    <video autoplay loop muted playsinline class="global-bg-video"
+      oncanplay="this.style.opacity=1" style="opacity:0;transition:opacity 1.5s;">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260210_031346_d87182fb-b0af-4273-84d1-c6fd17d6bf0f.mp4" type="video/mp4" />
+    </video>
+  </div>
+  <div class="global-overlay"></div>
+
+<div id="nav-placeholder"></div>
+
+<div class="page-hero">
+  <div class="reveal">
+    <p class="section-eyebrow">Key Work</p>
+    <h1 style="font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;letter-spacing:-0.03em;line-height:1.05;">
+      Research & <span class="grad-text">Projects</span>
+    </h1>
+    <p style="color:var(--muted);font-size:1.05rem;margin-top:1rem;max-width:560px;line-height:1.7;">
+      Building at the frontier of safe reinforcement learning, aerial robotics, continuum robot control, and LLM-powered tools.
+    </p>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<div class="main-section">
+  <div class="reveal">
+    <p class="section-eyebrow">Projects</p>
+    <h2 style="font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;letter-spacing:-0.02em;">
+      Featured <span class="grad-text">Work</span>
+    </h2>
+  </div>
+
+  <div class="projects-grid">
+
+    <!-- RoboGPT — Featured -->
+    <div class="project-card featured reveal">
+      <div style="display:flex;align-items:start;gap:1.25rem;flex-wrap:wrap;">
+        <div class="project-icon" style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);">🤖</div>
+        <div style="flex:1;">
+          <div class="project-label" style="color:#22d3ee;">LLM × Robotics · Orangewood Labs · 2023</div>
+          <div class="project-title" style="font-size:1.25rem;">RoboGPT</div>
+          <div class="project-desc">
+            An LLM-powered robotics programming tool that reduced new use-case programming time by <span class="project-highlight">50%</span>.
+            Added audio and textual awareness using LangChain and ChatGPT APIs. Integrated zero-shot object detection
+            and YOLO for visual understanding. Plugged into MoveIt + Gazebo simulation pipeline, cutting deployment
+            time from 1 week to just 2 days.
+            <br/><br/>
+            Integrated environment pointcloud as Octomap (via RTAB-Map) in MoveIt for robot-world collision checking
+            during motion planning.
+          </div>
+          <div class="project-tags">
+            <span class="tag">LangChain</span>
+            <span class="tag">ChatGPT API</span>
+            <span class="tag">YOLO</span>
+            <span class="tag">Zero-Shot Detection</span>
+            <span class="tag">MoveIt</span>
+            <span class="tag">Gazebo</span>
+            <span class="tag">ROS2</span>
+            <span class="tag">RTAB-Map</span>
+            <span class="tag">Octomap</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UAV Safe RL Thesis -->
+    <div class="project-card reveal" style="transition-delay:0.06s;">
+      <div class="project-icon" style="background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.2);">🚁</div>
+      <div class="project-label" style="color:#c084fc;">MASc Thesis · UWaterloo · 2024–25</div>
+      <div class="project-title">UAV Path Planning via Safe Reinforcement Learning</div>
+      <div class="project-desc">
+        Vision-based path planning and control of UAVs and Aerial Manipulators using Safe RL.
+        Benchmarked off-policy RL algorithms for path planning using LiDAR —
+        <span style="color:#c084fc;font-weight:500;">accepted at ICUAS 2024</span>.
+        Developing RL trajectory tracking using 3D Point Cloud in complex obstacle environments.
+      </div>
+      <div class="project-tags">
+        <span class="tag tag-purple">Safe RL</span>
+        <span class="tag tag-purple">LiDAR</span>
+        <span class="tag tag-purple">3D Point Cloud</span>
+        <span class="tag tag-purple">ICUAS 2024</span>
+        <span class="tag tag-purple">Python</span>
+      </div>
+    </div>
+
+    <!-- Continuum Robot -->
+    <div class="project-card reveal" style="transition-delay:0.1s;">
+      <div class="project-icon" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);">🦾</div>
+      <div class="project-label" style="color:#60a5fa;">Safe RL · TMU MITACS · 2022</div>
+      <div class="project-title">Safe RL for Continuum Robot Control</div>
+      <div class="project-desc">
+        Implemented DDPG, TD3, SoftQ, SAC, NAF and constraint-based Safety Layer from scratch using PyTorch.
+        Proposed a constraint-based Safe RL method using SAC + CMA to promote efficient exploration while ensuring
+        robot safety. Built custom Gym environment based on Cosserat-rod/string models.
+      </div>
+      <div class="project-tags">
+        <span class="tag tag-blue">PyTorch</span>
+        <span class="tag tag-blue">SAC / TD3</span>
+        <span class="tag tag-blue">CMA</span>
+        <span class="tag tag-blue">OpenAI Gym</span>
+        <span class="tag tag-blue">Cosserat Model</span>
+      </div>
+    </div>
+
+    <!-- Bionic Legs -->
+    <div class="project-card reveal" style="transition-delay:0.14s;">
+      <div class="project-icon" style="background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);">🦿</div>
+      <div class="project-label" style="color:#22d3ee;">Musculoskeletal RL · UToronto · 2024</div>
+      <div class="project-title">RL for Bionic Legs Control</div>
+      <div class="project-desc">
+        Developed reinforcement learning algorithms for control of musculoskeletal systems
+        with <span class="project-highlight">Bionic Legs</span> at the University of Toronto
+        Robotics Institute, Neural Robotics Lab. Bridging RL and biomechanics.
+      </div>
+      <div class="project-tags">
+        <span class="tag">RL</span>
+        <span class="tag">Bionic Legs</span>
+        <span class="tag">Musculoskeletal</span>
+        <span class="tag">PyTorch</span>
+      </div>
+    </div>
+
+    <!-- Railhunt -->
+    <div class="project-card reveal" style="transition-delay:0.18s;">
+      <div class="project-icon" style="background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.2);">🚂</div>
+      <div class="project-label" style="color:#c084fc;">Simulation Tool · IIT Delhi · 2021–22</div>
+      <div class="project-title">Railhunt — Railway Stability Simulator</div>
+      <div class="project-desc">
+        User-friendly simulation tool built with <span style="color:#c084fc;font-weight:500;">MATLAB App-Designer</span>
+        to study hunting stability of railway vehicles. Studied effects of dissimilar rail properties using the
+        DeNOC method for a 17-DOF rail model.
+      </div>
+      <div class="project-tags">
+        <span class="tag tag-purple">MATLAB</span>
+        <span class="tag tag-purple">App-Designer</span>
+        <span class="tag tag-purple">DeNOC</span>
+        <span class="tag tag-purple">17-DOF Model</span>
+      </div>
+    </div>
+
+    <!-- ANN Milling -->
+    <div class="project-card reveal" style="transition-delay:0.22s;">
+      <div class="project-icon" style="background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);">🔬</div>
+      <div class="project-label" style="color:#60a5fa;">ANN · DTU Research · 2021</div>
+      <div class="project-title">ANN Real-Time Milling Model</div>
+      <div class="project-desc">
+        Developed an ANN model achieving <span style="color:#60a5fa;font-weight:500;">99.89% accuracy</span>
+        for predicting end milling parameters for Al6061 alloy. Presented at the International Conference
+        of Advanced Manufacturing and Materials Processing (ICAMMP 2021).
+      </div>
+      <div class="project-tags">
+        <span class="tag tag-blue">ANN</span>
+        <span class="tag tag-blue">Python</span>
+        <span class="tag tag-blue">ICAMMP 2021</span>
+        <span class="tag tag-blue">99.89% Accuracy</span>
+      </div>
+    </div>
+
+    <!-- Suspension GA -->
+    <div class="project-card reveal" style="transition-delay:0.26s;">
+      <div class="project-icon" style="background:rgba(123,57,252,0.12);border:1px solid rgba(123,57,252,0.25);">🏎️</div>
+      <div class="project-label" style="color:#a78bfa;">GA + ML · HyperX Energy · 2021</div>
+      <div class="project-title">Suspension Geometry Optimization</div>
+      <div class="project-desc">
+        Optimized Double Wishbone Suspension Geometry for off-road vehicles using
+        <span style="color:#a78bfa;font-weight:500;">Genetic Algorithm and Machine Learning</span>.
+        Published research on GA-based chassis optimization in MATLAB.
+      </div>
+      <div class="project-tags">
+        <span class="tag tag-violet">Genetic Algorithm</span>
+        <span class="tag tag-violet">MATLAB</span>
+        <span class="tag tag-violet">SolidWorks</span>
+        <span class="tag tag-violet">Published</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Publications -->
+<div class="pub-section">
+  <div class="pub-inner">
+    <div class="reveal">
+      <p class="section-eyebrow">Academic Contributions</p>
+      <h2 style="font-size:clamp(1.6rem,3.5vw,2.4rem);font-weight:700;letter-spacing:-0.02em;">
+        Publications
+      </h2>
+    </div>
+
+    <div class="pub-grid">
+
+      <div class="pub-card reveal">
+        <div class="pub-num">01</div>
+        <span class="pub-venue" style="background:rgba(192,132,252,0.1);color:#c084fc;">RL · Robotics</span>
+        <h4 style="font-size:0.9rem;font-weight:600;line-height:1.5;color:#f1f5f9;max-width:85%;margin-bottom:0.5rem;">
+          Inverse Kinematics of Tendon Driven Continuum Robots using Invertible Neural Network
+        </h4>
+        <p style="font-size:0.78rem;color:var(--muted);line-height:1.6;">Learning-based IK for soft continuum robots using invertible neural architectures.</p>
+      </div>
+
+      <div class="pub-card reveal" style="transition-delay:0.06s;">
+        <div class="pub-num">02</div>
+        <span class="pub-venue" style="background:rgba(34,211,238,0.1);color:#22d3ee;">ICUAS 2024</span>
+        <h4 style="font-size:0.9rem;font-weight:600;line-height:1.5;color:#f1f5f9;max-width:85%;margin-bottom:0.5rem;">
+          Vision-based Path Planning for UAVs using Safe Reinforcement Learning
+        </h4>
+        <p style="font-size:0.78rem;color:var(--muted);line-height:1.6;">Benchmarked off-policy RL for UAV path planning with LiDAR. Accepted at International Conference on Unmanned Aircraft Systems 2024.</p>
+      </div>
+
+      <div class="pub-card reveal" style="transition-delay:0.12s;">
+        <div class="pub-num">03</div>
+        <span class="pub-venue" style="background:rgba(96,165,250,0.1);color:#60a5fa;">ICAMMP 2021</span>
+        <h4 style="font-size:0.9rem;font-weight:600;line-height:1.5;color:#f1f5f9;max-width:85%;margin-bottom:0.5rem;">
+          Artificial Neural Networks based Real-Time Modelling while Milling Aluminium 6061 Alloy
+        </h4>
+        <p style="font-size:0.78rem;color:var(--muted);line-height:1.6;">ANN model with 99.89% accuracy for end milling parameter prediction. Presented at ICAMMP 2021.</p>
+      </div>
+
+      <div class="pub-card reveal" style="transition-delay:0.18s;">
+        <div class="pub-num">04</div>
+        <span class="pub-venue" style="background:rgba(123,57,252,0.12);color:#a78bfa;">Mech. Design</span>
+        <h4 style="font-size:0.9rem;font-weight:600;line-height:1.5;color:#f1f5f9;max-width:85%;margin-bottom:0.5rem;">
+          Optimization of Double Wishbone Suspension Geometry using Genetic Algorithm and ML
+        </h4>
+        <p style="font-size:0.78rem;color:var(--muted);line-height:1.6;">GA + ML applied to off-road vehicle suspension geometry optimization for improved performance.</p>
+      </div>
+
+      <div class="pub-card reveal" style="transition-delay:0.24s;grid-column:span 1;">
+        <div class="pub-num">05</div>
+        <span class="pub-venue" style="background:rgba(96,165,250,0.1);color:#60a5fa;">Industry 4.0</span>
+        <h4 style="font-size:0.9rem;font-weight:600;line-height:1.5;color:#f1f5f9;max-width:85%;margin-bottom:0.5rem;">
+          Transforming Manufacturing Processes with The Help of AI
+        </h4>
+        <p style="font-size:0.78rem;color:var(--muted);line-height:1.6;">Exploration of AI integration in manufacturing workflows, process automation, and intelligent production systems.</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div style="max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
+    <span style="font-size:0.82rem;font-weight:600;">Shaswat Garg</span>
+    <div style="display:flex;gap:1.5rem;">
+      <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Home</a>
+      <a href="experience.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Experience</a>
+      <a href="contact.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;">Contact</a>
+    </div>
+    <p style="font-size:0.72rem;color:rgba(148,163,184,0.5);font-family:'Space Mono',monospace;">© 2025</p>
+  </div>
+</footer>
+
+<script src="nav.js"></script>
+</body>
+</html>

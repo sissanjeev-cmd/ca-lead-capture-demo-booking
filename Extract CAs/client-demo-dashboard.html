@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Demo Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    /* ─── Theme Fusion: Midnight Galaxy base + my-logo-theme brand overlay ─── */
+    :root {
+      /* Midnight Galaxy base */
+      --bg-page:        #2b1e3e;
+      --bg-card:        #3a2a52;
+      --bg-card-hover:  #432f5e;
+      --bg-sidebar:     #231830;
+      --galaxy-mid:     #4a4e8f;
+      --galaxy-lavender:#a490c2;
+      --galaxy-silver:  #e6e6fa;
+
+      /* my-logo-theme brand accents (dark-variant) */
+      --brand-teal:     #1B7A8A;
+      --brand-teal-light:#22a0b4;
+      --brand-gold:     #C9A227;
+      --brand-gold-light:#e0b82c;
+      --brand-green:    #2E7D32;
+      --brand-green-light:#3da342;
+      --brand-red:      #C0392B;
+      --brand-navy:     #1A3A5C;
+
+      /* Typography */
+      --font-heading:   'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+      --font-body:      'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+
+      /* Text */
+      --text-primary:   #e6e6fa;
+      --text-muted:     #a490c2;
+      --text-dim:       #7a6a9a;
+
+      /* Borders */
+      --border:         rgba(164, 144, 194, 0.18);
+      --border-accent:  rgba(27, 122, 138, 0.45);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-page);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ─── Sidebar ─── */
+    .sidebar {
+      width: 230px;
+      min-height: 100vh;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      flex-shrink: 0;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 20px 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .logo-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--brand-teal) 0deg 80deg,
+        var(--brand-gold) 80deg 160deg,
+        var(--brand-green) 160deg 240deg,
+        var(--brand-red) 240deg 300deg,
+        var(--galaxy-lavender) 300deg 360deg
+      );
+      flex-shrink: 0;
+      box-shadow: 0 0 16px rgba(27,122,138,0.5);
+    }
+
+    .logo-text {
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 15px;
+      color: var(--text-primary);
+      line-height: 1.2;
+    }
+    .logo-text span {
+      display: block;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--brand-teal-light);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav-label {
+      font-family: var(--font-heading);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 0 20px 8px;
+      margin-top: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.18s;
+      border-left: 3px solid transparent;
+    }
+    .nav-item:hover {
+      background: rgba(27,122,138,0.1);
+      color: var(--text-primary);
+    }
+    .nav-item.active {
+      background: rgba(27,122,138,0.15);
+      color: var(--brand-teal-light);
+      border-left-color: var(--brand-teal);
+    }
+    .nav-item .icon {
+      width: 18px;
+      text-align: center;
+      opacity: 0.85;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .user-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand-teal), var(--galaxy-lavender));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 13px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .user-role {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* ─── Main Content ─── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Top Bar ─── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(43,30,62,0.8);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .page-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--text-primary);
+    }
+    .page-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .date-badge {
+      background: rgba(74,78,143,0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--brand-teal), #166070);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-family: var(--font-heading);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.03em;
+      box-shadow: 0 4px 14px rgba(27,122,138,0.35);
+      transition: all 0.18s;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--brand-teal-light), var(--brand-teal));
+      transform: translateY(-1px);
+    }
+
+    /* ─── Content Area ─── */
+    .content {
+      padding: 24px 28px;
+      flex: 1;
+    }
+
+    /* ─── KPI Cards ─── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .kpi-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 14px 14px 0 0;
+    }
+    .kpi-card.teal::before  { background: linear-gradient(90deg, var(--brand-teal), var(--brand-teal-light)); }
+    .kpi-card.gold::before  { background: linear-gradient(90deg, var(--brand-gold), var(--brand-gold-light)); }
+    .kpi-card.green::before { background: linear-gradient(90deg, var(--brand-green), var(--brand-green-light)); }
+    .kpi-card.lav::before   { background: linear-gradient(90deg, var(--galaxy-lavender), #c4b0e0); }
+
+    .kpi-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .kpi-label {
+      font-size: 11.5px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .kpi-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .kpi-icon.teal  { background: rgba(27,122,138,0.2); }
+    .kpi-icon.gold  { background: rgba(201,162,39,0.2); }
+    .kpi-icon.green { background: rgba(46,125,50,0.2); }
+    .kpi-icon.lav   { background: rgba(164,144,194,0.2); }
+
+    .kpi-value {
+      font-family: var(--font-heading);
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .kpi-delta {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+    }
+    .kpi-delta.up   { background: rgba(46,125,50,0.2); color: var(--brand-green-light); }
+    .kpi-delta.down { background: rgba(192,57,43,0.2); color: #e85c4a; }
+    .kpi-period {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* ─── Charts Row ─── */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .card-subtitle {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .badge-teal  { background: rgba(27,122,138,0.2); color: var(--brand-teal-light); border: 1px solid rgba(27,122,138,0.3); }
+    .badge-gold  { background: rgba(201,162,39,0.18); color: var(--brand-gold-light); border: 1px solid rgba(201,162,39,0.3); }
+    .badge-green { background: rgba(46,125,50,0.18); color: var(--brand-green-light); border: 1px solid rgba(46,125,50,0.3); }
+
+    .chart-wrap { position: relative; }
+    .chart-wrap.line { height: 240px; }
+    .chart-wrap.donut { height: 220px; }
+
+    .donut-legend {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+    }
+    .legend-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .legend-pct {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* ─── Bottom Row ─── */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 16px;
+    }
+
+    /* ─── Table ─── */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      font-family: var(--font-heading);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 0 12px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(164,144,194,0.08);
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: rgba(74,78,143,0.12); }
+    tbody td {
+      padding: 11px 12px;
+      color: var(--text-primary);
+    }
+    .td-muted { color: var(--text-muted); font-size: 12px; }
+
+    .status-pill {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+    .status-pill.paid      { background: rgba(46,125,50,0.2); color: var(--brand-green-light); }
+    .status-pill.pending   { background: rgba(201,162,39,0.2); color: var(--brand-gold-light); }
+    .status-pill.overdue   { background: rgba(192,57,43,0.2); color: #e85c4a; }
+
+    /* ─── Top Clients ─── */
+    .client-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .client-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      transition: background 0.15s;
+    }
+    .client-item:hover { background: rgba(74,78,143,0.15); }
+
+    .client-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 13px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .client-info { flex: 1; min-width: 0; }
+    .client-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .client-type { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+    .client-value {
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--brand-teal-light);
+      white-space: nowrap;
+    }
+
+    .progress-bar-wrap { margin-top: 5px; height: 3px; border-radius: 3px; background: rgba(164,144,194,0.15); }
+    .progress-bar { height: 100%; border-radius: 3px; }
+
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(164,144,194,0.25); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+  <!-- ───────────────── SIDEBAR ───────────────── -->
+  <aside class="sidebar">
+    <div class="logo-area">
+      <div class="logo-badge"></div>
+      <div class="logo-text">
+        MyBrand
+        <span>Analytics Suite</span>
+      </div>
+    </div>
+
+    <div class="nav-label">Main Menu</div>
+    <div class="nav-item active"><span class="icon">◈</span> Dashboard</div>
+    <div class="nav-item"><span class="icon">◉</span> Revenue</div>
+    <div class="nav-item"><span class="icon">◎</span> Clients</div>
+    <div class="nav-item"><span class="icon">▦</span> Invoices</div>
+    <div class="nav-item"><span class="icon">◐</span> Reports</div>
+
+    <div class="nav-label" style="margin-top:16px;">Management</div>
+    <div class="nav-item"><span class="icon">⬡</span> Team</div>
+    <div class="nav-item"><span class="icon">⊕</span> Integrations</div>
+    <div class="nav-item"><span class="icon">⚙</span> Settings</div>
+
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="avatar">SG</div>
+        <div class="user-info">
+          <div class="user-name">Sanjeev Garg</div>
+          <div class="user-role">Admin</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ───────────────── MAIN ───────────────── -->
+  <div class="main">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div>
+        <div class="page-title">Overview Dashboard</div>
+        <div class="page-subtitle">Q1 2026 · All Business Units</div>
+      </div>
+      <div class="topbar-right">
+        <div class="date-badge">Apr 1 – Apr 19, 2026</div>
+        <button class="btn-primary">+ New Report</button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card teal">
+          <div class="kpi-top">
+            <div class="kpi-label">Total Revenue</div>
+            <div class="kpi-icon teal">💰</div>
+          </div>
+          <div class="kpi-value">₹48.3L</div>
+          <span class="kpi-delta up">▲ 14.2%</span>
+          <div class="kpi-period">vs last quarter</div>
+        </div>
+        <div class="kpi-card gold">
+          <div class="kpi-top">
+            <div class="kpi-label">Active Clients</div>
+            <div class="kpi-icon gold">🏢</div>
+          </div>
+          <div class="kpi-value">247</div>
+          <span class="kpi-delta up">▲ 8.6%</span>
+          <div class="kpi-period">vs last quarter</div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-top">
+            <div class="kpi-label">Conversion Rate</div>
+            <div class="kpi-icon green">📈</div>
+          </div>
+          <div class="kpi-value">34.7%</div>
+          <span class="kpi-delta down">▼ 2.1%</span>
+          <div class="kpi-period">vs last quarter</div>
+        </div>
+        <div class="kpi-card lav">
+          <div class="kpi-top">
+            <div class="kpi-label">Monthly Recurring</div>
+            <div class="kpi-icon lav">🔄</div>
+          </div>
+          <div class="kpi-value">₹16.1L</div>
+          <span class="kpi-delta up">▲ 22.5%</span>
+          <div class="kpi-period">vs last quarter</div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+
+        <!-- Line Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Revenue Trend</div>
+              <div class="card-subtitle">Monthly billing — FY 2025–26</div>
+            </div>
+            <span class="badge badge-teal">Live</span>
+          </div>
+          <div class="chart-wrap line">
+            <canvas id="lineChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Donut Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Revenue by Segment</div>
+              <div class="card-subtitle">Q1 2026 breakdown</div>
+            </div>
+            <span class="badge badge-gold">Q1</span>
+          </div>
+          <div class="chart-wrap donut">
+            <canvas id="donutChart"></canvas>
+          </div>
+          <div class="donut-legend">
+            <div class="legend-item">
+              <div class="legend-left"><div class="legend-dot" style="background:#1B7A8A"></div>Enterprise</div>
+              <div class="legend-pct">42%</div>
+            </div>
+            <div class="legend-item">
+              <div class="legend-left"><div class="legend-dot" style="background:#C9A227"></div>SME</div>
+              <div class="legend-pct">31%</div>
+            </div>
+            <div class="legend-item">
+              <div class="legend-left"><div class="legend-dot" style="background:#2E7D32"></div>Startup</div>
+              <div class="legend-pct">18%</div>
+            </div>
+            <div class="legend-item">
+              <div class="legend-left"><div class="legend-dot" style="background:#a490c2"></div>Retail</div>
+              <div class="legend-pct">9%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="bottom-row">
+
+        <!-- Transactions Table -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Recent Invoices</div>
+              <div class="card-subtitle">Last 6 transactions</div>
+            </div>
+            <span class="badge badge-green">Updated now</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Service</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div>Infosys Ltd</div><div class="td-muted">Enterprise</div></td>
+                  <td class="td-muted">GST Filing + Audit</td>
+                  <td style="font-family:var(--font-heading);font-weight:700;">₹3,40,000</td>
+                  <td class="td-muted">18 Apr 2026</td>
+                  <td><span class="status-pill paid">Paid</span></td>
+                </tr>
+                <tr>
+                  <td><div>Razorpay</div><div class="td-muted">Startup</div></td>
+                  <td class="td-muted">Tax Advisory</td>
+                  <td style="font-family:var(--font-heading);font-weight:700;">₹1,25,000</td>
+                  <td class="td-muted">17 Apr 2026</td>
+                  <td><span class="status-pill paid">Paid</span></td>
+                </tr>
+                <tr>
+                  <td><div>Meesho Inc</div><div class="td-muted">SME</div></td>
+                  <td class="td-muted">Annual Compliance</td>
+                  <td style="font-family:var(--font-heading);font-weight:700;">₹78,500</td>
+                  <td class="td-muted">15 Apr 2026</td>
+                  <td><span class="status-pill pending">Pending</span></td>
+                </tr>
+                <tr>
+                  <td><div>DLF Homes</div><div class="td-muted">Enterprise</div></td>
+                  <td class="td-muted">Transfer Pricing</td>
+                  <td style="font-family:var(--font-heading);font-weight:700;">₹5,20,000</td>
+                  <td class="td-muted">12 Apr 2026</td>
+                  <td><span class="status-pill paid">Paid</span></td>
+                </tr>
+                <tr>
+                  <td><div>TechMahindra</div><div class="td-muted">Enterprise</div></td>
+                  <td class="td-muted">IND AS Review</td>
+                  <td style="font-family:var(--font-heading);font-weight:700;">₹2,95,000</td>
+                  <td class="td-muted">10 Apr 2026</td>
+                  <td><span class="status-pill overdue">Overdue</span></td>
+                </tr>
+                <tr>
+                  <td><div>Zomato</div><div class="td-muted">SME</div></td>
+                  <td class="td-muted">Startup Compliance</td>
+                  <td style="font-family:var(--font-heading);font-weight:700;">₹62,000</td>
+                  <td class="td-muted">08 Apr 2026</td>
+                  <td><span class="status-pill paid">Paid</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Top Clients -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Top Clients</div>
+              <div class="card-subtitle">By revenue — Q1 2026</div>
+            </div>
+          </div>
+          <div class="client-list">
+            <div class="client-item">
+              <div class="client-avatar" style="background:linear-gradient(135deg,#1B7A8A,#166070)">IN</div>
+              <div class="client-info">
+                <div class="client-name">Infosys Ltd</div>
+                <div class="client-type">Enterprise · Audit + Tax</div>
+                <div class="progress-bar-wrap"><div class="progress-bar" style="width:92%;background:var(--brand-teal)"></div></div>
+              </div>
+              <div class="client-value">₹28.4L</div>
+            </div>
+            <div class="client-item">
+              <div class="client-avatar" style="background:linear-gradient(135deg,#C9A227,#a07a1a)">DL</div>
+              <div class="client-info">
+                <div class="client-name">DLF Homes</div>
+                <div class="client-type">Enterprise · Transfer Pricing</div>
+                <div class="progress-bar-wrap"><div class="progress-bar" style="width:78%;background:var(--brand-gold)"></div></div>
+              </div>
+              <div class="client-value">₹18.2L</div>
+            </div>
+            <div class="client-item">
+              <div class="client-avatar" style="background:linear-gradient(135deg,#4a4e8f,#2b1e3e)">TM</div>
+              <div class="client-info">
+                <div class="client-name">TechMahindra</div>
+                <div class="client-type">Enterprise · IND AS</div>
+                <div class="progress-bar-wrap"><div class="progress-bar" style="width:64%;background:var(--galaxy-lavender)"></div></div>
+              </div>
+              <div class="client-value">₹14.9L</div>
+            </div>
+            <div class="client-item">
+              <div class="client-avatar" style="background:linear-gradient(135deg,#2E7D32,#1a4d1c)">RZ</div>
+              <div class="client-info">
+                <div class="client-name">Razorpay</div>
+                <div class="client-type">Startup · Advisory</div>
+                <div class="progress-bar-wrap"><div class="progress-bar" style="width:42%;background:var(--brand-green)"></div></div>
+              </div>
+              <div class="client-value">₹9.8L</div>
+            </div>
+            <div class="client-item">
+              <div class="client-avatar" style="background:linear-gradient(135deg,#C0392B,#8a2218)">ZO</div>
+              <div class="client-info">
+                <div class="client-name">Zomato</div>
+                <div class="client-type">SME · Compliance</div>
+                <div class="progress-bar-wrap"><div class="progress-bar" style="width:28%;background:var(--brand-red)"></div></div>
+              </div>
+              <div class="client-value">₹6.5L</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────────── CHARTS JS ───────────────── -->
+  <script>
+    const gridColor = 'rgba(164,144,194,0.1)';
+    const tickColor = '#7a6a9a';
+
+    // Line Chart
+    const lineCtx = document.getElementById('lineChart').getContext('2d');
+    const lineGrad = lineCtx.createLinearGradient(0, 0, 0, 240);
+    lineGrad.addColorStop(0,   'rgba(27,122,138,0.35)');
+    lineGrad.addColorStop(1,   'rgba(27,122,138,0.0)');
+
+    const lineGrad2 = lineCtx.createLinearGradient(0, 0, 0, 240);
+    lineGrad2.addColorStop(0,  'rgba(201,162,39,0.25)');
+    lineGrad2.addColorStop(1,  'rgba(201,162,39,0.0)');
+
+    new Chart(lineCtx, {
+      type: 'line',
+      data: {
+        labels: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
+        datasets: [
+          {
+            label: 'Revenue (₹L)',
+            data: [28, 32, 29, 35, 38, 42, 37, 44, 48, 41, 46, 48.3],
+            borderColor: '#1B7A8A',
+            backgroundColor: lineGrad,
+            borderWidth: 2.5,
+            pointBackgroundColor: '#1B7A8A',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            tension: 0.4,
+            fill: true,
+          },
+          {
+            label: 'Target (₹L)',
+            data: [30, 30, 32, 34, 36, 38, 40, 42, 44, 44, 44, 46],
+            borderColor: '#C9A227',
+            backgroundColor: lineGrad2,
+            borderWidth: 2,
+            pointBackgroundColor: '#C9A227',
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            borderDash: [5, 4],
+            tension: 0.4,
+            fill: true,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: {
+              color: tickColor,
+              font: { family: "'Open Sans', sans-serif", size: 11 },
+              boxWidth: 12,
+              padding: 16,
+            }
+          },
+          tooltip: {
+            backgroundColor: '#3a2a52',
+            borderColor: 'rgba(164,144,194,0.3)',
+            borderWidth: 1,
+            titleColor: '#e6e6fa',
+            bodyColor: '#a490c2',
+            padding: 10,
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: gridColor },
+            ticks: { color: tickColor, font: { size: 11 } },
+          },
+          y: {
+            grid: { color: gridColor },
+            ticks: { color: tickColor, font: { size: 11 }, callback: v => '₹' + v + 'L' },
+          }
+        }
+      }
+    });
+
+    // Donut Chart
+    const donutCtx = document.getElementById('donutChart').getContext('2d');
+    new Chart(donutCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Enterprise', 'SME', 'Startup', 'Retail'],
+        datasets: [{
+          data: [42, 31, 18, 9],
+          backgroundColor: ['#1B7A8A','#C9A227','#2E7D32','#a490c2'],
+          hoverBackgroundColor: ['#22a0b4','#e0b82c','#3da342','#c4b0e0'],
+          borderColor: '#3a2a52',
+          borderWidth: 3,
+          hoverOffset: 6,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#3a2a52',
+            borderColor: 'rgba(164,144,194,0.3)',
+            borderWidth: 1,
+            titleColor: '#e6e6fa',
+            bodyColor: '#a490c2',
+            padding: 10,
+            callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` }
+          }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

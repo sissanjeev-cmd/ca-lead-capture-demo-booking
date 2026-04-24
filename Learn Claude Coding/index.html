@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shaswat Garg — ML Engineer & Robotics Researcher</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.54/build/spline-viewer.js"></script>
+  <style>
+    /* ── VIDEO HERO (rahil1202 glass-video-hero) ── */
+
+    .video-hero {
+      position: relative;
+      width: 100%;
+      min-height: 85vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      padding-top: 1.5rem;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    .video-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    /* Aurora fallback background when video isn't loaded */
+    .video-hero-bg-fallback {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(-45deg, #030712, #0d0a1e, #0a1628, #0f0a1a, #050d1a);
+      background-size: 400% 400%;
+      animation: aurora 12s ease infinite;
+      z-index: 0;
+    }
+
+    .video-hero-bg-fallback::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(123, 57, 252, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 70%, rgba(34, 211, 238, 0.12) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 50% 90%, rgba(96, 165, 250, 0.1) 0%, transparent 60%);
+    }
+
+    /* Dark overlay on video */
+    .video-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.55);
+      z-index: 1;
+    }
+
+    .video-hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 1.5rem;
+      max-width: 1300px;
+      width: 100%;
+    }
+
+    .hero-toggle-btn {
+      position: absolute;
+      top: 80px;
+      right: 1.25rem;
+      z-index: 20;
+      padding: 10px;
+      border-radius: 10px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--purple-border);
+      background: var(--purple-glass);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .hero-toggle-btn:hover {
+      background: rgba(85, 80, 110, 0.6);
+    }
+
+    /* Instrument Serif headline (matching component) */
+    .hero-headline {
+      font-family: 'Instrument Serif', 'Georgia', serif;
+      font-size: clamp(2.8rem, 5vw, 5rem);
+      line-height: 1.05;
+      letter-spacing: 0.04em;
+      color: #f1f5f9;
+      margin: 0 0 1.5rem;
+    }
+
+    .hero-headline em {
+      font-style: italic;
+      background: linear-gradient(135deg, #c084fc, #7b39fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtext {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--muted);
+      max-width: 580px;
+      margin: 0 0 2.5rem;
+      line-height: 1.7;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 2.5rem;
+      align-items: stretch;
+    }
+
+    .hero-copy {
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .hero-3d {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .hero-3d-card {
+      width: 100%;
+      max-width: 100%;
+      min-height: 640px;
+      border-radius: 32px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.04);
+      box-shadow: 0 40px 90px rgba(0, 0, 0, 0.35), 0 0 50px rgba(79, 70, 229, 0.18);
+      position: relative;
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .hero-3d-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(59, 130, 246, 0.22), transparent 16%),
+        radial-gradient(circle at 70% 20%, rgba(168, 85, 247, 0.20), transparent 14%),
+        radial-gradient(circle at 50% 78%, rgba(16, 185, 129, 0.14), transparent 28%),
+        linear-gradient(180deg, rgba(79, 70, 229, 0.10), transparent 40%);
+      mix-blend-mode: screen;
+      opacity: 0.95;
+      filter: blur(1px);
+    }
+
+    .hero-3d-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 75px 140px rgba(0, 0, 0, 0.45), 0 0 80px rgba(168, 85, 247, 0.25), inset 0 0 0 1px rgba(123, 57, 252, 0.12);
+    }
+
+    .hero-3d-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 65px 120px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(123, 57, 252, 0.12);
+    }
+
+    .hero-3d-card spline-viewer {
+      position: absolute;
+      top: 46%;
+      left: 50%;
+      width: 132%;
+      height: 132%;
+      transform: translate(-50%, -56%);
+      display: block;
+      transition: transform 0.35s ease, filter 0.35s ease;
+      filter: saturate(1.1) contrast(0.9) brightness(1.25);
+    }
+
+    .hero-3d-card:hover spline-viewer {
+      transform: translate(-50%, -56%) scale(1.03);
+      filter: saturate(1.1) contrast(0.9) brightness(1.30);
+    }
+
+    .hero-signature-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.45rem;
+      margin: 1rem 0 1.75rem;
+      align-self: flex-end;
+      width: auto;
+    }
+
+    .hero-signature {
+      font-family: 'Dancing Script', 'Great Vibes', cursive;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: #f8fafc;
+      letter-spacing: 0;
+      line-height: 1.02;
+      display: inline-block;
+      transform: none;
+    }
+
+    .hero-signature-line {
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(135deg, #c084fc, #7b39fc);
+      border-radius: 999px;
+    }
+
+    .hero-signature-dots {
+      display: flex;
+      gap: 0.4rem;
+      justify-content: flex-end;
+      width: 100%;
+    }
+
+    .hero-signature-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #f8fafc;
+      opacity: 0.75;
+    }
+
+    .hero-secondary-panel,
+    .spline-right.hero-secondary-panel {
+      display: flex;
+      align-items: stretch;
+      justify-content: flex-start;
+      padding: 4.5rem 2.5rem 3rem;
+      border-radius: 32px;
+      background: rgba(10, 14, 24, 0.78);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      box-shadow: 0 50px 140px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(22px);
+      position: relative;
+      overflow: visible;
+    }
+
+    .hero-secondary-panel::after,
+    .spline-right.hero-secondary-panel::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(123, 57, 252, 0.12), transparent 18%),
+        radial-gradient(circle at 80% 15%, rgba(34, 211, 238, 0.10), transparent 16%);
+      mix-blend-mode: screen;
+      opacity: 0.6;
+    }
+
+    .hero-secondary-content {
+      max-width: 420px;
+      text-align: left;
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .hero-secondary-content h3 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      color: #f8fafc;
+      margin: 0 0 1rem;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-secondary-content p {
+      color: #cbd5e1;
+      font-size: 1.08rem;
+      line-height: 1.8;
+      margin-bottom: 0;
+    }
+
+    .secondary-btn-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: auto;
+      padding-top: 1.75rem;
+    }
+
+    .hero-secondary-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-content: flex-start;
+    }
+
+    .hero-secondary-badges .tag {
+      font-size: 0.72rem;
+      padding: 0.35rem 0.75rem;
+    }
+
+    .hero-scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 0.65rem;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 0.15em;
+    }
+
+    /* ── SPLINE SPLIT SECTION (serafim/splite) ── */
+    .spline-section {
+      padding: 5rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 40px;
+      background: rgba(10, 14, 28, 0.45);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .spline-card {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(3, 7, 18, 0.55);
+      border-radius: 24px;
+      overflow: visible;
+      position: relative;
+      min-height: 560px;
+      display: flex;
+      align-items: stretch;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 40px 80px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(16px);
+    }
+
+    /* Spotlight effect */
+    .spline-spotlight {
+      position: absolute;
+      pointer-events: none;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(255, 255, 255, 0.07) 0%, transparent 65%);
+      top: -100px;
+      left: -100px;
+      transition: opacity 0.3s;
+      z-index: 1;
+    }
+
+    .spline-left {
+      flex: 1;
+      padding: 3rem;
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      height: 100%;
+    }
+
+    .spline-right {
+      flex: 1;
+      position: relative;
+      min-width: 0;
+      display: flex;
+      justify-content: flex-start;
+      align-items: stretch;
+    }
+
+    spline-viewer {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Gradient fade from left panel into 3D */
+    .spline-right::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 120px;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.9), transparent);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .spline-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      background: linear-gradient(to bottom, #f8fafc, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+
+    .spline-desc {
+      color: #cbd5e1;
+      font-size: 1.08rem;
+      line-height: 1.75;
+      max-width: 340px;
+      margin-bottom: 2rem;
+    }
+
+    /* ── OVERVIEW CARDS ── */
+    .overview-section {
+      padding: 4rem 1.5rem 5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 40px;
+      background: rgba(10, 14, 28, 0.42);
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    .stat-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 3rem;
+    }
+
+    .stat-big {
+      text-align: center;
+      padding: 1.25rem 2rem;
+    }
+
+    .stat-big-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 2.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #22d3ee, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-big-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 2px;
+      letter-spacing: 0.05em;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-copy {
+        text-align: center;
+      }
+
+      .hero-copy .glass-pill,
+      .hero-actions,
+      .hero-stats {
+        justify-content: center;
+      }
+
+      .hero-3d {
+        order: -1;
+      }
+
+      .hero-3d-card {
+        min-height: 320px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .spline-card {
+        flex-direction: column;
+        height: auto;
+      }
+
+      .spline-left {
+        padding: 2rem;
+      }
+
+      .spline-right {
+        height: 300px;
+      }
+
+      .spline-right::before {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body class="grid-bg">
+
+  <!-- ── Global full-page fixed video background ── -->
+  <div class="global-bg">
+    <div class="global-bg-fallback"></div>
+    <video autoplay loop muted playsinline class="global-bg-video" id="globalBgVideo"
+      oncanplay="this.style.opacity=1" style="opacity:0;transition:opacity 1.5s;">
+      <source
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260210_031346_d87182fb-b0af-4273-84d1-c6fd17d6bf0f.mp4"
+        type="video/mp4" />
+    </video>
+  </div>
+  <div class="global-overlay"></div>
+
+  <div id="nav-placeholder"></div>
+
+  <!-- ============================================================ -->
+  <!-- GLASS VIDEO HERO (rahil1202/glass-video-hero) -->
+  <!-- ============================================================ -->
+  <section class="video-hero" id="home">
+
+    <!-- Toggle button -->
+    <button class="hero-toggle-btn" id="heroToggle" onclick="toggleHero()" title="Toggle layout">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+      </svg>
+    </button>
+
+    <!-- Hero Content -->
+    <div class="video-hero-content" style="animation: fadeUp 0.9s ease forwards;">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <!-- Headline (Instrument Serif, matching component) -->
+          <h1 class="hero-headline">
+            From Code to Intelligent Machines — Building the Future with Robotics &amp; AI
+          </h1>
+          <div class="hero-signature-wrap">
+            <div class="hero-signature">Shaswat</div>
+            <div class="hero-signature-line"></div>
+            <div class="hero-signature-dots">
+              <span></span><span></span>
+            </div>
+          </div>
+          <p class="hero-subtext">
+            Pushing the boundaries of safe reinforcement learning, UAV path planning,
+            and intelligent robotics systems. MASc graduate from the University of Waterloo.
+          </p>
+
+          <!-- CTA Buttons (matching glass-video-hero component) -->
+          <div class="hero-actions" style="display:flex;gap:1rem;justify-content:flex-start;flex-wrap:wrap;">
+            <a href="projects.html" class="glass-btn glass-btn-primary">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+              View Research
+            </a>
+            <a href="contact.html" class="glass-btn glass-btn-secondary">
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Get in Touch
+            </a>
+          </div>
+
+          <!-- Stat chips row -->
+          <div class="hero-stats"
+            style="display:flex;gap:0.75rem;justify-content:flex-start;flex-wrap:wrap;margin-top:3rem;">
+            <div class="stat-chip"><span
+                style="font-family:'Space Mono',monospace;font-weight:700;font-size:1.2rem;color:#22d3ee;">5+</span><br /><span
+                style="font-size:0.7rem;color:var(--muted);">Years Exp.</span></div>
+            <div class="stat-chip"><span
+                style="font-family:'Space Mono',monospace;font-weight:700;font-size:1.2rem;color:#c084fc;">4</span><br /><span
+                style="font-size:0.7rem;color:var(--muted);">Publications</span></div>
+            <div class="stat-chip"><span
+                style="font-family:'Space Mono',monospace;font-weight:700;font-size:1.2rem;color:#60a5fa;">10+</span><br /><span
+                style="font-size:0.7rem;color:var(--muted);">Projects</span></div>
+            <div class="stat-chip"><span
+                style="font-family:'Space Mono',monospace;font-weight:700;font-size:1.2rem;color:#22d3ee;">3</span><br /><span
+                style="font-size:0.7rem;color:var(--muted);">Awards</span></div>
+          </div>
+        </div>
+
+        <div class="hero-3d">
+          <div class="hero-3d-card">
+            <spline-viewer url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
+              style="width:100%;height:100%;" loading-anim-type="spinner-small-dark">
+            </spline-viewer>
+            <!-- Color tint overlay — mix-blend-mode:color maps hue/sat onto the robot while keeping luminosity -->
+            <div style="position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;
+              background:linear-gradient(135deg,rgba(123,57,252,0.55) 0%,rgba(34,211,238,0.30) 100%);
+              mix-blend-mode:color;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="hero-scroll-indicator bounce-down">
+      <span>SCROLL</span>
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  </section>
+
+
+  <!-- ============================================================ -->
+  <!-- SPLINE 3D SPLIT (serafim/splite)
+     Robot 3D scene on right, intro text on left
+     Dark card with spotlight mouse tracking effect -->
+  <!-- ============================================================ -->
+  <section class="spline-section">
+    <div class="orb"
+      style="width:500px;height:500px;top:-100px;left:-100px;background:radial-gradient(circle,rgba(123,57,252,0.07) 0%,transparent 70%);">
+    </div>
+    <div class="orb"
+      style="width:400px;height:400px;bottom:-100px;right:-100px;background:radial-gradient(circle,rgba(34,211,238,0.06) 0%,transparent 70%);">
+    </div>
+
+    <div class="spline-card" id="splineCard" onmousemove="moveSpotlight(event)">
+      <!-- Spotlight -->
+      <div class="spline-spotlight" id="spotlight"></div>
+
+      <!-- Left: Text content -->
+      <div class="spline-left reveal-left">
+        <p class="section-eyebrow" style="color:#c084fc;">
+          <span style="width:28px;height:1px;background:#c084fc;display:block;"></span>
+          Interactive 3D
+        </p>
+        <h2 class="spline-title">
+          Robotics &amp;<br />Intelligence
+        </h2>
+        <p class="spline-desc">
+          Explore the intersection of AI and physical systems.
+          From UAV path planning to continuum robot control —
+          building machines that think, perceive, and act.
+        </p>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:auto;padding-top:1.75rem;">
+          <a href="experience.html" class="glass-btn glass-btn-primary"
+            style="height:40px;padding:0 20px;font-size:0.85rem;">
+            View Experience
+          </a>
+          <a href="about.html" class="glass-btn glass-btn-secondary"
+            style="height:40px;padding:0 20px;font-size:0.85rem;">
+            About Me
+          </a>
+        </div>
+
+        <!-- Skill tags -->
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:1.5rem;min-height:4rem;align-content:flex-start;">
+          <span class="tag tag-violet">Safe RL</span>
+          <span class="tag">ROS2</span>
+          <span class="tag tag-purple">PyTorch</span>
+          <span class="tag tag-blue">LiDAR</span>
+          <span class="tag">UAV Control</span>
+        </div>
+      </div>
+
+      <!-- Right: Secondary highlight panel (no repeated robot) -->
+      <div class="spline-right reveal hero-secondary-panel">
+        <div class="hero-secondary-content">
+          <h3>Real systems,<br/>not just visuals</h3>
+          <p>Designing robotics solutions that blend intelligent software, robust hardware, and safe autonomy for
+            real-world deployment.</p>
+          <!-- Buttons BEFORE tags — matches left panel order so they align vertically -->
+          <div class="secondary-btn-row">
+            <button onclick="openSectionModal('essay')" class="glass-btn glass-btn-primary"
+              style="height:40px;padding:0 20px;font-size:0.85rem;">
+              Design Philosophy
+            </button>
+            <button onclick="openSectionModal('research')" class="glass-btn glass-btn-secondary"
+              style="height:40px;padding:0 20px;font-size:0.85rem;">
+              Research Highlights
+            </button>
+          </div>
+          <div class="hero-secondary-badges" style="margin-top:1.5rem;min-height:4rem;align-content:flex-start;">
+            <span class="tag tag-violet">AI</span>
+            <span class="tag tag-blue">Robotics</span>
+            <span class="tag tag-purple">Safe RL</span>
+            <span class="tag">UAV Control</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ============================================================ -->
+  <!-- EXPLORE / NAVIGATE SECTIONS -->
+  <!-- ============================================================ -->
+  <section class="overview-section">
+    <div class="reveal mb-10">
+      <p class="section-eyebrow" style="font-size:0.88rem;letter-spacing:0.18em;margin-bottom:0.85rem;">Portfolio</p>
+      <h2 style="font-size:clamp(1.8rem,4vw,2.8rem);font-weight:700;letter-spacing:-0.02em;">
+        Explore <span class="grad-text">the work</span>
+      </h2>
+      <p style="color:var(--muted);margin-top:1rem;max-width:520px;">
+        Navigate through Shaswat's background, experience, research, and technical expertise.
+      </p>
+    </div>
+
+    <div class="overview-grid">
+
+      <!-- About -->
+      <a href="about.html" class="page-nav-card reveal">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
+          <div
+            style="width:44px;height:44px;border-radius:12px;background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">
+            👤</div>
+          <svg class="pnc-arrow" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M17 7H7M17 7v10" />
+          </svg>
+        </div>
+        <h3 style="font-weight:600;margin-bottom:0.4rem;">About</h3>
+        <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;">Background, story, education & the journey from
+          Delhi to Toronto.</p>
+        <div style="margin-top:1rem;"><span class="tag" style="font-size:0.65rem;">Story</span> <span
+            class="tag tag-blue" style="font-size:0.65rem;">Education</span></div>
+      </a>
+
+      <!-- Experience -->
+      <a href="experience.html" class="page-nav-card reveal" style="transition-delay:0.06s;">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
+          <div
+            style="width:44px;height:44px;border-radius:12px;background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">
+            💼</div>
+          <svg class="pnc-arrow" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M17 7H7M17 7v10" />
+          </svg>
+        </div>
+        <h3 style="font-weight:600;margin-bottom:0.4rem;">Experience</h3>
+        <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;">ArenaX Labs, UWaterloo, UToronto, Orangewood
+          and more across industry & research.</p>
+        <div style="margin-top:1rem;"><span class="tag tag-purple" style="font-size:0.65rem;">Industry</span> <span
+            class="tag tag-purple" style="font-size:0.65rem;">Research</span></div>
+      </a>
+
+      <!-- Research -->
+      <a href="projects.html" class="page-nav-card reveal" style="transition-delay:0.12s;">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
+          <div
+            style="width:44px;height:44px;border-radius:12px;background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">
+            🔬</div>
+          <svg class="pnc-arrow" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M17 7H7M17 7v10" />
+          </svg>
+        </div>
+        <h3 style="font-weight:600;margin-bottom:0.4rem;">Research & Projects</h3>
+        <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;">RoboGPT, UAV Safe RL thesis, continuum robots,
+          4 published papers.</p>
+        <div style="margin-top:1rem;"><span class="tag tag-blue" style="font-size:0.65rem;">4 Papers</span> <span
+            class="tag tag-blue" style="font-size:0.65rem;">Projects</span></div>
+      </a>
+
+      <!-- Skills -->
+      <a href="skills.html" class="page-nav-card reveal" style="transition-delay:0.18s;">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
+          <div
+            style="width:44px;height:44px;border-radius:12px;background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">
+            ⚡</div>
+          <svg class="pnc-arrow" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M17 7H7M17 7v10" />
+          </svg>
+        </div>
+        <h3 style="font-weight:600;margin-bottom:0.4rem;">Skills & Tech</h3>
+        <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;">Python, C++, PyTorch, ROS2, RL algorithms,
+          Computer Vision and more.</p>
+        <div style="margin-top:1rem;"><span class="tag" style="font-size:0.65rem;">Python</span> <span class="tag"
+            style="font-size:0.65rem;">PyTorch</span> <span class="tag" style="font-size:0.65rem;">ROS2</span></div>
+      </a>
+
+      <!-- Contact -->
+      <a href="contact.html" class="page-nav-card reveal" style="transition-delay:0.24s;grid-column:span 1;">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:1rem;">
+          <div
+            style="width:44px;height:44px;border-radius:12px;background:rgba(123,57,252,0.1);border:1px solid rgba(123,57,252,0.3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;">
+            ✉️</div>
+          <svg class="pnc-arrow" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M17 7H7M17 7v10" />
+          </svg>
+        </div>
+        <h3 style="font-weight:600;margin-bottom:0.4rem;">Get in Touch</h3>
+        <p style="font-size:0.82rem;color:var(--muted);line-height:1.6;">Open to research collaborations, ML/robotics
+          roles, and interesting conversations.</p>
+        <div style="margin-top:1rem;"><span class="tag tag-violet" style="font-size:0.65rem;">Hire Me</span></div>
+      </a>
+
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-row reveal">
+      <div class="card stat-big">
+        <div class="stat-big-num">5+</div>
+        <div class="stat-big-label">YEARS EXPERIENCE</div>
+      </div>
+      <div class="card stat-big">
+        <div class="stat-big-num"
+          style="background:linear-gradient(135deg,#c084fc,#7b39fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+          4</div>
+        <div class="stat-big-label">PUBLICATIONS</div>
+      </div>
+      <div class="card stat-big">
+        <div class="stat-big-num"
+          style="background:linear-gradient(135deg,#60a5fa,#22d3ee);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+          10+</div>
+        <div class="stat-big-label">PROJECTS</div>
+      </div>
+      <div class="card stat-big">
+        <div class="stat-big-num">3</div>
+        <div class="stat-big-label">AWARDS</div>
+      </div>
+      <div class="card stat-big">
+        <div class="stat-big-num"
+          style="background:linear-gradient(135deg,#c084fc,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+          6</div>
+        <div class="stat-big-label">INSTITUTIONS</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- FOOTER -->
+  <!-- ============================================================ -->
+  <footer>
+    <div
+      style="max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;flex-direction:column;gap:1rem;align-items:center;text-align:center;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div
+          style="width:32px;height:32px;border-radius:8px;background:rgba(123,57,252,0.15);border:1px solid rgba(123,57,252,0.3);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;font-family:'Space Mono',monospace;color:#7b39fc;">
+          SG</div>
+        <span style="font-weight:600;font-size:0.9rem;">Shaswat Garg</span>
+      </div>
+      <p style="font-size:0.78rem;color:var(--muted);">ML Engineer · Robotics Researcher · Toronto, Canada</p>
+      <div style="display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;">
+        <a href="index.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;transition:color 0.2s;"
+          onmouseover="this.style.color='#22d3ee'" onmouseout="this.style.color='#94a3b8'">Home</a>
+        <a href="about.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;transition:color 0.2s;"
+          onmouseover="this.style.color='#22d3ee'" onmouseout="this.style.color='#94a3b8'">About</a>
+        <a href="experience.html"
+          style="color:var(--muted);text-decoration:none;font-size:0.8rem;transition:color 0.2s;"
+          onmouseover="this.style.color='#22d3ee'" onmouseout="this.style.color='#94a3b8'">Experience</a>
+        <a href="projects.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;transition:color 0.2s;"
+          onmouseover="this.style.color='#22d3ee'" onmouseout="this.style.color='#94a3b8'">Research</a>
+        <a href="skills.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;transition:color 0.2s;"
+          onmouseover="this.style.color='#22d3ee'" onmouseout="this.style.color='#94a3b8'">Skills</a>
+        <a href="contact.html" style="color:var(--muted);text-decoration:none;font-size:0.8rem;transition:color 0.2s;"
+          onmouseover="this.style.color='#22d3ee'" onmouseout="this.style.color='#94a3b8'">Contact</a>
+      </div>
+      <p style="font-size:0.72rem;color:rgba(148,163,184,0.5);font-family:'Space Mono',monospace;">© 2025 Shaswat Garg
+      </p>
+    </div>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!-- SECTION MODAL -->
+  <!-- ============================================================ -->
+  <div id="sectionModal" style="display:none;position:fixed;inset:0;z-index:9998;">
+    <!-- Full-screen background -->
+    <div style="position:absolute;inset:0;background:rgba(2,4,10,0.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);"></div>
+    <!-- Scrollable full-screen content area -->
+    <div style="position:relative;z-index:1;height:100%;overflow-y:auto;">
+      <!-- Close -->
+      <button onclick="closeSectionModal()"
+        style="position:fixed;top:1.5rem;right:1.5rem;z-index:2;background:rgba(255,255,255,0.07);
+               border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#94a3b8;
+               cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+               transition:background 0.2s;font-size:1.1rem;line-height:1;"
+        onmouseover="this.style.background='rgba(255,255,255,0.16)'"
+        onmouseout="this.style.background='rgba(255,255,255,0.07)'">✕</button>
+      <!-- Content — wide layout, minimal side margins -->
+      <div id="modalBody" style="max-width:1600px;margin:0 auto;padding:5rem 4rem 6rem;"></div>
+    </div>
+  </div>
+
+  <script src="nav.js"></script>
+  <script>
+    // ── Section Modal ──
+    const modalContents = {
+      essay: `
+        <p style="font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:#c084fc;margin-bottom:1.5rem;">Design Philosophy</p>
+        <h2 style="font-size:clamp(1.8rem,4vw,2.5rem);font-weight:700;letter-spacing:-0.02em;color:#f8fafc;line-height:1.1;margin-bottom:2rem;">
+          Real Systems,<br/><em style="font-style:italic;background:linear-gradient(135deg,#c084fc,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Not Just Visuals</em>
+        </h2>
+        <div style="width:100%;margin:0 0 2.5rem;border-radius:16px;overflow:hidden;border:1px solid rgba(123,57,252,0.25);position:relative;">
+          <img src="https://placehold.co/1600x480/080c18/111827?text=" alt="Robotics deployment — real systems in action"
+            style="width:100%;height:380px;object-fit:cover;display:block;opacity:0.9;"
+            onerror="this.parentElement.style.background='linear-gradient(135deg,#080c18,#0d0a1e,#0a1428)';this.style.display='none';" />
+          <!-- Overlay gradient + label -->
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(123,57,252,0.18) 0%,rgba(34,211,238,0.10) 50%,rgba(0,0,0,0.55) 100%);pointer-events:none;"></div>
+          <div style="position:absolute;bottom:1.25rem;left:1.5rem;display:flex;flex-direction:column;gap:0.4rem;">
+            <span style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.5);">Shaswat Garg · MASc Robotics</span>
+            <span style="font-size:1rem;font-weight:600;color:#f8fafc;">Intelligent software · Robust hardware · Safe autonomy</span>
+          </div>
+        </div>
+        <div style="color:#cbd5e1;font-size:1rem;line-height:1.85;display:flex;flex-direction:column;gap:1.25rem;">
+          <p>In robotics, the gap between demonstration and deployment is wide. A system that performs flawlessly in simulation — or in a polished video — can collapse under the weight of real-world variability: unpredictable sensor noise, mechanical tolerances, latency, and edge cases the training distribution never saw.</p>
+          <p>Building real systems demands three deeply integrated layers.</p>
+          <p><strong style="color:#f1f5f9;">Intelligent Software</strong> forms the cognitive core: perception pipelines that parse raw sensor streams into actionable state representations, planning algorithms that reason over uncertain futures, and learning-based controllers that adapt to conditions no rule-based system could anticipate. Safe reinforcement learning goes further — it doesn't just optimise for performance, it constrains behaviour within safety envelopes, ensuring that the pursuit of capability never comes at the expense of reliability.</p>
+          <p><strong style="color:#f1f5f9;">Robust Hardware</strong> is the physical contract with reality. Carbon fibre arms, high-torque actuators, redundant encoders — every component carries a margin of error, and system designers must stack those margins to build something that survives contact, vibration, and time. Hardware robustness is not about over-engineering; it is about selecting exactly the right tolerance for the expected operating envelope.</p>
+          <p><strong style="color:#f1f5f9;">Safe Autonomy</strong> is the bridge. It asks: how do we allow a machine to make thousands of real-time decisions per minute without constant human supervision, while guaranteeing that no single failure mode produces catastrophic outcomes? The answer lives in the architecture — in constrained policy search, in formal verification of safety-critical subsystems, and in hardware interlocks that respect the limits of what software can guarantee.</p>
+          <p>My work spans all three layers. From UAV trajectory planning with LiDAR-based 3D point clouds to continuum robot control via Safe RL, each project starts with the same question: <em style="color:#e2e8f0;">what does this system need to do reliably, in the real world, over time?</em> That question shapes every design decision — from algorithm choice to actuator specification to testing protocol.</p>
+          <p style="color:#94a3b8;font-style:italic;border-left:2px solid rgba(192,132,252,0.4);padding-left:1.25rem;">Visuals convince stakeholders. Real systems change the world.</p>
+        </div>`,
+      research: `
+        <p style="font-family:'Space Mono',monospace;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:#22d3ee;margin-bottom:1.5rem;">Research Highlights</p>
+        <h2 style="font-size:clamp(1.8rem,4vw,2.5rem);font-weight:700;letter-spacing:-0.02em;color:#f8fafc;line-height:1.1;margin-bottom:2rem;">
+          Key <span style="background:linear-gradient(135deg,#22d3ee,#60a5fa,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Work</span>
+        </h2>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          ${[
+            { color:'#c084fc', border:'rgba(192,132,252,0.2)', label:'MASc Thesis · ICUAS 2024', title:'UAV Safe RL with LiDAR', desc:'Benchmarked off-policy RL algorithms (DDPG, TD3, SAC) for UAV path planning using 3D LiDAR point clouds in complex obstacle environments. Accepted at ICUAS 2024.', tags:['Safe RL','LiDAR','UAV','PyTorch'] },
+            { color:'#22d3ee', border:'rgba(34,211,238,0.2)', label:'Orangewood Labs · 2023', title:'RoboGPT', desc:'LLM-powered robotics tool integrating ChatGPT API + LangChain to reduce new use-case programming time by 50%. Added zero-shot YOLO object detection and MoveIt/Gazebo simulation integration.', tags:['LLM','LangChain','YOLO','MoveIt'] },
+            { color:'#60a5fa', border:'rgba(96,165,250,0.2)', label:'MITACS · TMU · 2022', title:'Continuum Robot Safe RL', desc:'Proposed constraint-based Safe RL using SAC + CMA for efficient exploration while ensuring robot safety. Implemented DDPG, TD3, SoftQ, SAC, and NAF from scratch; built custom Cosserat-rod Gym environment.', tags:['SAC','CMA','PyTorch','OpenAI Gym'] },
+            { color:'#a78bfa', border:'rgba(167,139,250,0.2)', label:'DTU · ICAMMP 2021', title:'ANN-based Milling Prediction', desc:'ANN model achieving 99.89% accuracy for predicting end milling parameters for Al6061. Paper published at ICAMMP 2021.', tags:['ANN','Python','Manufacturing'] }
+          ].map(r => `
+            <div style="background:rgba(255,255,255,0.03);border:1px solid ${r.border};border-radius:16px;padding:1.5rem;position:relative;overflow:hidden;">
+              <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:${r.color};border-radius:3px 0 0 3px;"></div>
+              <p style="font-family:'Space Mono',monospace;font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:${r.color};margin-bottom:0.5rem;">${r.label}</p>
+              <h4 style="font-size:1.05rem;font-weight:600;color:#f1f5f9;margin-bottom:0.6rem;">${r.title}</h4>
+              <p style="font-size:0.9rem;color:#94a3b8;line-height:1.7;margin-bottom:1rem;">${r.desc}</p>
+              <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">${r.tags.map(t=>`<span style="font-size:0.65rem;padding:0.2rem 0.6rem;border-radius:999px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#94a3b8;font-family:'Space Mono',monospace;">${t}</span>`).join('')}</div>
+            </div>`).join('')}
+          <a href="projects.html" class="glass-btn glass-btn-primary" style="align-self:flex-start;height:44px;padding:0 24px;font-size:0.9rem;margin-top:0.5rem;">
+            View All Projects →
+          </a>
+        </div>`
+    };
+
+    function openSectionModal(type) {
+      document.getElementById('modalBody').innerHTML = modalContents[type];
+      const modal = document.getElementById('sectionModal');
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+      requestAnimationFrame(() => modal.querySelector('[style*="max-width:760px"]').style.opacity = '1');
+    }
+
+    function closeSectionModal() {
+      document.getElementById('sectionModal').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSectionModal(); });
+
+    // Hero toggle (full-bleed / fit)
+    let fullBleed = true;
+    function toggleHero() {
+      const hero = document.querySelector('.video-hero');
+      fullBleed = !fullBleed;
+      hero.style.minHeight = fullBleed ? '100vh' : 'auto';
+      hero.style.padding = fullBleed ? '' : '10rem 0 6rem';
+      const btn = document.getElementById('heroToggle');
+      btn.title = fullBleed ? 'Compact view' : 'Full-bleed view';
+    }
+
+    // Spline spotlight follow mouse (matching splite component)
+    function moveSpotlight(e) {
+      const card = document.getElementById('splineCard');
+      const spotlight = document.getElementById('spotlight');
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      spotlight.style.left = (x - 250) + 'px';
+      spotlight.style.top = (y - 250) + 'px';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const viewer = document.querySelector('spline-viewer');
+      if (!viewer) return;
+
+      const hideLogo = () => {
+        const logo = viewer.shadowRoot?.querySelector('#logo');
+        if (logo) {
+          logo.style.display = 'none';
+        }
+      };
+
+      hideLogo();
+      viewer.addEventListener('load-complete', hideLogo);
+    });
+  </script>
+</body>
+
+</html>
