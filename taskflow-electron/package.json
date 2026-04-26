@@ -1,0 +1,15 @@
+{
+  "name": "taskflow-desktop",
+  "version": "1.0.0",
+  "description": "TaskFlow — always-on-top desktop todo & reminder widget for macOS",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0"
+  },
+  "author": "TaskFlow",
+  "license": "MIT"
+}

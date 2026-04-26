@@ -3,71 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Interactive Financial Model — Indian Trading Firm (₹)</title>
+<title>Interactive Financial Model — Indian Firm (₹)</title>
 <style>
   :root {
     --bg: #f8f9fb; --card: #ffffff; --border: #e2e8f0;
     --accent: #1a56db; --green: #057a55; --red: #e02424;
     --amber: #d97706; --text: #1e293b; --muted: #64748b;
-    --header-bg: #1e293b; --shadow: 0 2px 8px rgba(0,0,0,0.07);
-    --saffron: #FF9933; --green-india: #138808; --navy: #000080;
+    --shadow: 0 2px 8px rgba(0,0,0,0.07);
+    --saffron: #FF9933; --green-india: #138808;
+    --ctrl-bg: #000000; --ctrl-card: #1a1a1a;
+    --ctrl-border: rgba(255,255,255,0.1);
+    --ctrl-text: rgba(255,255,255,0.88);
+    --ctrl-muted: rgba(255,255,255,0.45);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 13px; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; }
 
-  .app-header { background: var(--header-bg); color: white; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--saffron); }
-  .app-header h1 { font-size: 18px; font-weight: 700; }
-  .app-header .subtitle { font-size: 11px; color: #94a3b8; margin-top: 2px; }
   .flag-strip { display: flex; height: 4px; }
   .flag-strip div { flex: 1; }
-  .s { background: var(--saffron); } .w { background: white; } .g { background: var(--green-india); }
+  .s { background: var(--saffron); } .w { background: #fff; } .g { background: var(--green-india); }
 
-  .layout { display: grid; grid-template-columns: 290px 1fr; min-height: calc(100vh - 68px); }
+  .app-header { background: #000000; color: white; padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .app-header h1 { font-size: 18px; font-weight: 700; }
+  .app-header .subtitle { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .live-badge { background: var(--accent); color: white; font-size: 10px; padding: 3px 10px; border-radius: 999px; font-weight: 700; }
 
-  /* Controls */
-  .controls { background: var(--card); border-right: 1px solid var(--border); padding: 16px; overflow-y: auto; }
-  .controls-section { margin-bottom: 20px; }
-  .controls-section h3 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
-  .slider-group { margin-bottom: 12px; }
-  .slider-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-  .slider-label span { font-size: 12px; }
-  .slider-value { font-weight: 700; color: var(--accent); font-size: 12px; min-width: 65px; text-align: right; }
-  input[type=range] { width: 100%; height: 4px; -webkit-appearance: none; background: var(--border); border-radius: 2px; outline: none; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-  .number-input-group { margin-bottom: 10px; }
-  .number-input-group label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 3px; }
-  .number-input-group input[type=number] { width: 100%; padding: 6px 8px; border: 1px solid var(--border); border-radius: 5px; font-size: 12px; background: #fffbeb; color: #1e40af; font-weight: 600; }
-  .number-input-group input:focus { outline: none; border-color: var(--accent); }
-  .note { font-size: 10px; color: var(--muted); font-style: italic; margin-top: 2px; }
-  .reset-btn { width: 100%; padding: 8px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 6px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; margin-top: 6px; }
-  .reset-btn:hover { background: #e2e8f0; }
+  .layout { display: grid; grid-template-columns: 300px 1fr; height: calc(100vh - 72px); overflow: hidden; }
 
-  /* Main */
+  /* ── Dark Controls Panel ── */
+  .controls { background: var(--ctrl-bg); border-right: 1px solid var(--ctrl-border); padding: 16px; overflow-y: auto; color: var(--ctrl-text); }
+  .controls-section { margin-bottom: 22px; }
+  .controls-section h3 {
+    font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+    color: white; background: #1a1a1a; border: 1px solid rgba(255,255,255,0.12);
+    margin-bottom: 11px; padding: 5px 10px; border-radius: 6px; display: inline-block;
+  }
+
+  /* Tally-style slider cards — dark */
+  .slider-group {
+    margin-bottom: 8px; background: var(--ctrl-card);
+    border: 1.5px solid var(--ctrl-border); border-radius: 10px;
+    padding: 10px 12px; transition: border-color 0.15s;
+  }
+  .slider-group:hover { border-color: var(--accent); }
+  .slider-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .slider-label span { font-size: 14px; color: var(--ctrl-text); font-weight: 500; line-height: 1.3; }
+  .slider-value {
+    font-weight: 700; color: white; background: var(--accent);
+    font-size: 13px; min-width: 58px; text-align: center;
+    padding: 3px 10px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; margin-left: 8px;
+  }
+  input[type=range] { width: 100%; height: 10px; -webkit-appearance: none; appearance: none; background: rgba(255,255,255,0.18); border-radius: 5px; outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: white; cursor: pointer; border: 3px solid var(--accent); box-shadow: 0 2px 8px rgba(26,86,219,0.45); transition: transform 0.1s; }
+  input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.12); }
+
+  .number-input-group { margin-bottom: 8px; }
+  .number-input-group label { display: block; font-size: 11px; color: var(--ctrl-muted); margin-bottom: 3px; font-weight: 500; }
+  .number-input-group input[type=number] {
+    width: 100%; padding: 7px 10px; border: 1.5px solid var(--ctrl-border);
+    border-radius: 7px; font-size: 13px; color: white; background: var(--ctrl-card);
+    transition: border-color 0.15s;
+  }
+  .number-input-group input[type=number]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(26,86,219,0.2); }
+
+  /* GST pill selector */
+  .select-group { margin-bottom: 10px; }
+  .select-group > label { display: block; font-size: 13px; color: var(--ctrl-muted); margin-bottom: 6px; font-weight: 500; }
+  .gst-pills { display: flex; gap: 5px; }
+  .gst-pill { flex: 1; padding: 8px 2px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1.5px solid var(--ctrl-border); background: var(--ctrl-card); color: var(--ctrl-muted); transition: all 0.15s; }
+  .gst-pill.active { background: var(--accent); border-color: var(--accent); color: white; }
+  .gst-pill:hover:not(.active) { border-color: var(--accent); color: white; }
+
+  /* Toggle switch */
+  .toggle-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 9px 12px; background: var(--ctrl-card); border: 1.5px solid var(--ctrl-border); border-radius: 10px; }
+  .toggle-group .toggle-label { font-size: 14px; color: var(--ctrl-text); font-weight: 500; }
+  .toggle-switch { position: relative; display: inline-block; width: 40px; height: 21px; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.2); border-radius: 21px; transition: 0.25s; }
+  .toggle-slider:before { position: absolute; content: ""; height: 15px; width: 15px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.25s; }
+  input:checked + .toggle-slider { background: var(--accent); }
+  input:checked + .toggle-slider:before { transform: translateX(19px); }
+
+  .reset-btn { width: 100%; padding: 9px; background: var(--ctrl-card); border: 1px solid var(--ctrl-border); border-radius: 7px; font-size: 14px; font-weight: 600; color: var(--ctrl-muted); cursor: pointer; margin-top: 4px; transition: all 0.15s; }
+  .reset-btn:hover { background: #2a2a2a; color: white; border-color: rgba(255,255,255,0.3); }
+
+  /* ── Main area ── */
   .main { padding: 20px; overflow-y: auto; }
 
-  /* KPI */
   .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
   .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow); }
-  .kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
-  .kpi-value { font-size: 22px; font-weight: 800; margin: 5px 0 2px; letter-spacing: -0.5px; }
+  .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
+  .kpi-value { font-size: 24px; font-weight: 800; margin: 5px 0 2px; letter-spacing: -0.5px; }
   .kpi-sub { font-size: 11px; color: var(--muted); }
   .blue .kpi-value { color: var(--accent); }
   .green-card .kpi-value { color: var(--green); }
   .amber-card .kpi-value { color: var(--amber); }
   .red-card .kpi-value { color: var(--red); }
 
-  /* Tabs */
   .tabs { display: flex; gap: 3px; margin-bottom: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 4px; width: fit-content; }
-  .tab { padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--muted); border: none; background: none; transition: all 0.15s; }
+  .tab { padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); border: none; background: none; transition: all 0.15s; }
   .tab.active { background: var(--accent); color: white; }
   .tab:hover:not(.active) { background: var(--bg); }
-
   .tab-content { display: none; }
   .tab-content.active { display: block; }
 
-  /* Tables */
   .fin-table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; margin-bottom: 20px; }
-  .fin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .fin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .fin-table th { background: #f1f5f9; padding: 9px 12px; text-align: right; font-weight: 700; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
   .fin-table th:first-child { text-align: left; }
   .fin-table td { padding: 8px 12px; text-align: right; border-top: 1px solid var(--border); }
@@ -75,38 +116,41 @@
   .fin-table tr:hover td { background: #f8faff; }
   .fin-table .sec-hdr td { background: #f8fafc; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); padding: 7px 12px; border-top: 2px solid var(--border); }
   .fin-table .total-row td { font-weight: 700; border-top: 2px solid var(--border); background: #eff6ff; color: var(--accent); }
-  .fin-table .net-row td { font-weight: 800; background: #1e293b; color: white; font-size: 13px; }
+  .fin-table .net-row td { font-weight: 800; background: #000000; color: white; font-size: 14px; }
   .fin-table .subtotal-row td { font-weight: 600; background: #f0fdf4; color: var(--green); border-top: 2px solid #bbf7d0; }
-  .fin-table .indent { padding-left: 26px !important; }
-  .fin-table .indent2 { padding-left: 40px !important; }
-  .positive { color: var(--green); }
-  .negative { color: var(--red); }
-  .muted { color: var(--muted); font-style: italic; font-size: 11px; }
+  .fin-table .indent  { padding-left: 26px !important; }
+  .fin-table .indent2 { padding-left: 42px !important; }
+  .positive { color: var(--green); } .negative { color: var(--red); }
+  .muted-cell { color: var(--muted); font-style: italic; font-size: 11px; }
 
-  /* Two col layout for BS */
   .bs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-  /* Charts */
   .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
   .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); }
-  .chart-card h4 { font-size: 12px; font-weight: 700; margin-bottom: 12px; }
+  .chart-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
 
-  /* Sensitivity */
   .sens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .sens-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; box-shadow: var(--shadow); }
-  .sens-card h4 { font-size: 12px; font-weight: 700; margin-bottom: 12px; }
-  .sens-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .sens-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+  .sens-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .sens-table th { background: #f1f5f9; padding: 6px 8px; font-weight: 700; color: var(--muted); font-size: 10px; }
   .sens-table td { padding: 6px 8px; text-align: center; border: 1px solid var(--border); font-weight: 600; }
-  .s-best { background: #d1fae5; color: #065f46; }
-  .s-good { background: #dcfce7; color: #166534; }
+  .s-best { background: #d1fae5; color: #065f46; } .s-good { background: #dcfce7; color: #166534; }
   .s-base { background: #dbeafe; color: #1e40af; font-weight: 800; }
-  .s-warn { background: #fef3c7; color: #92400e; }
-  .s-bad  { background: #fee2e2; color: #991b1b; }
+  .s-warn { background: #fef3c7; color: #92400e; } .s-bad { background: #fee2e2; color: #991b1b; }
 
-  .footer-note { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 10px; color: var(--muted); margin-top: 4px; }
+  .footer-note { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-  ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  /* Left panel (dark) scrollbar */
+  .controls::-webkit-scrollbar { width: 12px; }
+  .controls::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 6px; }
+  .controls::-webkit-scrollbar-thumb { background: #1a56db; border-radius: 6px; border: 2px solid #1a1a1a; }
+  .controls::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+  /* Right panel (light) scrollbar */
+  .main::-webkit-scrollbar { width: 14px; }
+  .main::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 7px; }
+  .main::-webkit-scrollbar-thumb { background: #1a56db; border-radius: 7px; border: 3px solid #e2e8f0; }
+  .main::-webkit-scrollbar-thumb:hover { background: #1e40af; }
 </style>
 </head>
 <body>
@@ -115,127 +159,123 @@
 <div class="app-header">
   <div>
     <h1>📊 Interactive Financial Model — Trading / Retail Firm</h1>
-    <div class="subtitle">Indian Accounting | Schedule III Format | ₹ Lakhs | FY 2024–25 | Sole Proprietorship / Partnership</div>
+    <div class="subtitle">Indian Accounting | ₹ | FY 2024–25 | Sole Proprietorship / Partnership</div>
   </div>
-  <span style="background:#1a56db;color:white;font-size:10px;padding:3px 10px;border-radius:999px;font-weight:700">LIVE MODEL</span>
+  <span class="live-badge">LIVE MODEL</span>
 </div>
 
 <div class="layout">
 
-<!-- ===== CONTROLS ===== -->
+<!-- ===== CONTROLS (dark panel) ===== -->
 <div class="controls">
 
+  <!-- 1. Revenue -->
   <div class="controls-section">
     <h3>📈 Revenue</h3>
-    <div class="number-input-group">
-      <label>Base Monthly Net Sales (₹)</label>
-      <input type="number" id="baseRevenue" value="800000" step="50000" min="0">
-      <div class="note">~₹9.6L/yr base before growth</div>
+    <div class="slider-group">
+      <div class="slider-label"><span>Sales Growth (%)</span><span class="slider-value" id="salesGrowthVal">10%</span></div>
+      <input type="range" id="salesGrowth" min="-10" max="50" step="1" value="10">
     </div>
     <div class="slider-group">
-      <div class="slider-label"><span>Monthly Growth Rate</span><span class="slider-value" id="growthRateVal">2.0%</span></div>
-      <input type="range" id="growthRate" min="-5" max="20" step="0.5" value="2">
+      <div class="slider-label"><span>Monthly Sales Volume (₹)</span><span class="slider-value" id="monthlyVolumeVal">₹5.0L</span></div>
+      <input type="range" id="monthlyVolume" min="50000" max="5000000" step="50000" value="500000">
     </div>
     <div class="slider-group">
-      <div class="slider-label"><span>Festival Season Boost (Q3)</span><span class="slider-value" id="seasonalPeakVal">+35%</span></div>
-      <input type="range" id="seasonalPeak" min="0" max="100" step="5" value="35">
-      <div class="note">Diwali / festive Q3 uplift (Oct–Dec)</div>
+      <div class="slider-label"><span>Avg Selling Price / ASP (₹)</span><span class="slider-value" id="aspVal">₹1K</span></div>
+      <input type="range" id="asp" min="100" max="50000" step="100" value="1000">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>Customer / Client Count</span><span class="slider-value" id="customerCountVal">500</span></div>
+      <input type="range" id="customerCount" min="10" max="5000" step="10" value="500">
     </div>
   </div>
 
+  <!-- 2. Costs -->
   <div class="controls-section">
-    <h3>🏭 Purchase & COGS</h3>
+    <h3>🏭 Costs</h3>
     <div class="slider-group">
-      <div class="slider-label"><span>Purchase of Goods % of Sales</span><span class="slider-value" id="cogsRateVal">58%</span></div>
-      <input type="range" id="cogsRate" min="20" max="85" step="1" value="58">
+      <div class="slider-label"><span>Fixed Cost / Month (₹)</span><span class="slider-value" id="fixedCostVal">₹1.0L</span></div>
+      <input type="range" id="fixedCost" min="10000" max="1000000" step="10000" value="100000">
     </div>
     <div class="slider-group">
-      <div class="slider-label"><span>Freight Inward % of Sales</span><span class="slider-value" id="freightRateVal">3%</span></div>
-      <input type="range" id="freightRate" min="0" max="15" step="0.5" value="3">
+      <div class="slider-label"><span>Variable Cost (% of Sales)</span><span class="slider-value" id="variableCostVal">55%</span></div>
+      <input type="range" id="variableCost" min="0" max="90" step="1" value="55">
     </div>
     <div class="slider-group">
-      <div class="slider-label"><span>Returns / Discount % of Sales</span><span class="slider-value" id="returnsRateVal">3%</span></div>
-      <input type="range" id="returnsRate" min="0" max="15" step="0.5" value="3">
+      <div class="slider-label"><span>Employee Count</span><span class="slider-value" id="employeeCountVal">10</span></div>
+      <input type="range" id="employeeCount" min="1" max="200" step="1" value="10">
     </div>
     <div class="slider-group">
-      <div class="slider-label"><span>GST Input Credit % of Purchase</span><span class="slider-value" id="gstInputVal">18%</span></div>
-      <input type="range" id="gstInput" min="0" max="28" step="1" value="18">
+      <div class="slider-label"><span>Salary per Employee / Month (₹)</span><span class="slider-value" id="salaryPerEmpVal">₹25K</span></div>
+      <input type="range" id="salaryPerEmp" min="5000" max="200000" step="1000" value="25000">
     </div>
     <div class="slider-group">
-      <div class="slider-label"><span>GST Output % of Sales</span><span class="slider-value" id="gstOutputVal">18%</span></div>
-      <input type="range" id="gstOutput" min="0" max="28" step="1" value="18">
+      <div class="slider-label"><span>Marketing Spend (% of Sales)</span><span class="slider-value" id="marketingSpendVal">5%</span></div>
+      <input type="range" id="marketingSpend" min="0" max="30" step="0.5" value="5">
     </div>
   </div>
 
+  <!-- 3. Profitability -->
   <div class="controls-section">
-    <h3>💼 Operating Expenses</h3>
+    <h3>💰 Profitability</h3>
     <div class="slider-group">
-      <div class="slider-label"><span>Selling & Distribution % Sales</span><span class="slider-value" id="sellingRateVal">5%</span></div>
-      <input type="range" id="sellingRate" min="0" max="20" step="0.5" value="5">
-    </div>
-    <div class="number-input-group">
-      <label>Staff Salaries / Month (₹)</label>
-      <input type="number" id="salaries" value="120000" step="10000" min="0">
-    </div>
-    <div class="number-input-group">
-      <label>Rent / Month (₹)</label>
-      <input type="number" id="rent" value="40000" step="5000" min="0">
-    </div>
-    <div class="number-input-group">
-      <label>Proprietor / Partner Drawings / Month (₹)</label>
-      <input type="number" id="drawings" value="60000" step="5000" min="0">
-    </div>
-    <div class="number-input-group">
-      <label>Other Admin Expenses / Month (₹)</label>
-      <input type="number" id="admin" value="25000" step="5000" min="0">
+      <div class="slider-label"><span>Target Profit Margin (%)</span><span class="slider-value" id="targetMarginVal">15%</span></div>
+      <input type="range" id="targetMargin" min="0" max="50" step="1" value="15">
     </div>
     <div class="slider-group">
-      <div class="slider-label"><span>Professional Tax / Month (₹)</span><span class="slider-value" id="ptaxVal">₹200</span></div>
-      <input type="range" id="ptax" min="0" max="2500" step="100" value="200">
-    </div>
-    <div class="slider-group">
-      <div class="slider-label"><span>Depreciation % of Fixed Assets</span><span class="slider-value" id="deprRateVal">15%</span></div>
-      <input type="range" id="deprRate" min="0" max="40" step="1" value="15">
+      <div class="slider-label"><span>Break-even Buffer (₹)</span><span class="slider-value" id="breakEvenBufferVal">₹50K</span></div>
+      <input type="range" id="breakEvenBuffer" min="0" max="500000" step="10000" value="50000">
     </div>
   </div>
 
+  <!-- 4. Cash Flow -->
   <div class="controls-section">
-    <h3>💰 Finance & Tax</h3>
-    <div class="number-input-group">
-      <label>Bank Interest / Month (₹)</label>
-      <input type="number" id="interest" value="15000" step="1000" min="0">
+    <h3>💸 Cash Flow</h3>
+    <div class="slider-group">
+      <div class="slider-label"><span>Payment Collection Delay (days)</span><span class="slider-value" id="collectionDelayVal">30 days</span></div>
+      <input type="range" id="collectionDelay" min="0" max="120" step="5" value="30">
     </div>
     <div class="slider-group">
-      <div class="slider-label"><span>Income Tax Rate (ITR-3/4)</span><span class="slider-value" id="taxRateVal">30%</span></div>
-      <input type="range" id="taxRate" min="0" max="45" step="1" value="30">
+      <div class="slider-label"><span>Receivables Collection Rate (%)</span><span class="slider-value" id="collectionRateVal">85%</span></div>
+      <input type="range" id="collectionRate" min="50" max="100" step="1" value="85">
     </div>
     <div class="slider-group">
-      <div class="slider-label"><span>TDS Deducted % of Revenue</span><span class="slider-value" id="tdsRateVal">2%</span></div>
-      <input type="range" id="tdsRate" min="0" max="10" step="0.5" value="2">
+      <div class="slider-label"><span>Payables Payment Delay (days)</span><span class="slider-value" id="paymentDelayVal">45 days</span></div>
+      <input type="range" id="paymentDelay" min="0" max="120" step="5" value="45">
+    </div>
+    <div class="slider-group">
+      <div class="slider-label"><span>Cash Reserve / Buffer (₹)</span><span class="slider-value" id="cashReserveVal">₹2.0L</span></div>
+      <input type="range" id="cashReserve" min="0" max="2000000" step="25000" value="200000">
     </div>
   </div>
 
+  <!-- 5. Tax — India -->
   <div class="controls-section">
-    <h3>🏦 Balance Sheet</h3>
-    <div class="number-input-group">
-      <label>Capital Introduced (₹)</label>
-      <input type="number" id="capital" value="1500000" step="100000" min="0">
-    </div>
-    <div class="number-input-group">
-      <label>Opening Stock (₹)</label>
-      <input type="number" id="openingStock" value="300000" step="25000" min="0">
-    </div>
-    <div class="number-input-group">
-      <label>Fixed Assets / Block (₹)</label>
-      <input type="number" id="fixedAssets" value="500000" step="50000" min="0">
+    <h3>🏛️ Tax — India</h3>
+    <div class="select-group">
+      <label>GST Rate</label>
+      <div class="gst-pills">
+        <button class="gst-pill" onclick="setGST(5)">5%</button>
+        <button class="gst-pill" onclick="setGST(12)">12%</button>
+        <button class="gst-pill active" onclick="setGST(18)">18%</button>
+        <button class="gst-pill" onclick="setGST(28)">28%</button>
+      </div>
+      <input type="hidden" id="gstRate" value="18">
     </div>
     <div class="slider-group">
-      <div class="slider-label"><span>Debtors Days (Receivable)</span><span class="slider-value" id="debtorDaysVal">30 days</span></div>
-      <input type="range" id="debtorDays" min="0" max="120" step="5" value="30">
+      <div class="slider-label"><span>Input Tax Credit Utilization (%)</span><span class="slider-value" id="itcUtilVal">80%</span></div>
+      <input type="range" id="itcUtil" min="0" max="100" step="5" value="80">
+    </div>
+    <div class="toggle-group">
+      <span class="toggle-label">TDS Applicable</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="tdsToggle" checked onchange="update()">
+        <span class="toggle-slider"></span>
+      </label>
     </div>
     <div class="slider-group">
-      <div class="slider-label"><span>Creditors Days (Payable)</span><span class="slider-value" id="creditorDaysVal">45 days</span></div>
-      <input type="range" id="creditorDays" min="0" max="120" step="5" value="45">
+      <div class="slider-label"><span>Advance Tax Coverage (% of income)</span><span class="slider-value" id="advTaxCoverageVal">25%</span></div>
+      <input type="range" id="advTaxCoverage" min="0" max="100" step="5" value="25">
     </div>
   </div>
 
@@ -245,7 +285,6 @@
 <!-- ===== MAIN ===== -->
 <div class="main">
 
-  <!-- KPIs -->
   <div class="kpi-grid">
     <div class="kpi-card blue">
       <div class="kpi-label">Annual Net Sales</div>
@@ -269,21 +308,19 @@
     </div>
   </div>
 
-  <!-- Tabs -->
   <div class="tabs">
-    <button class="tab active" onclick="showTab('pl', this)">Trading & P&L</button>
-    <button class="tab" onclick="showTab('bs', this)">Balance Sheet</button>
-    <button class="tab" onclick="showTab('charts', this)">Charts</button>
-    <button class="tab" onclick="showTab('sensitivity', this)">Sensitivity</button>
+    <button class="tab active" onclick="showTab('pl',this)">P&L Statement</button>
+    <button class="tab" onclick="showTab('bs',this)">Balance Sheet</button>
+    <button class="tab" onclick="showTab('charts',this)">Charts</button>
+    <button class="tab" onclick="showTab('sensitivity',this)">Sensitivity</button>
   </div>
 
-  <!-- P&L Tab -->
   <div class="tab-content active" id="tab-pl">
     <div class="fin-table-wrap">
       <table class="fin-table">
         <thead>
           <tr>
-            <th style="min-width:220px;text-align:left">Particulars</th>
+            <th style="min-width:230px;text-align:left">Particulars</th>
             <th>Q1 (Apr–Jun)</th><th>Q2 (Jul–Sep)</th><th>Q3 (Oct–Dec)</th><th>Q4 (Jan–Mar)</th>
             <th style="background:#dbeafe;color:#1e40af">FY Total</th>
           </tr>
@@ -293,7 +330,6 @@
     </div>
   </div>
 
-  <!-- Balance Sheet Tab -->
   <div class="tab-content" id="tab-bs">
     <div class="bs-grid">
       <div class="fin-table-wrap">
@@ -309,537 +345,435 @@
         </table>
       </div>
     </div>
-    <div id="bsCheckDiv" style="font-size:11px;color:var(--muted);margin-top:4px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;"></div>
+    <div id="bsCheckDiv" style="font-size:12px;color:var(--muted);margin-top:4px;padding:8px 12px;background:var(--card);border:1px solid var(--border);border-radius:6px;"></div>
   </div>
 
-  <!-- Charts Tab -->
   <div class="tab-content" id="tab-charts">
     <div class="chart-grid">
-      <div class="chart-card">
-        <h4>Quarterly Revenue vs Gross Profit (₹ Lakhs)</h4>
-        <canvas id="chartRevGP" height="200"></canvas>
-      </div>
-      <div class="chart-card">
-        <h4>Quarterly Net Profit (₹ Lakhs)</h4>
-        <canvas id="chartNet" height="200"></canvas>
-      </div>
-      <div class="chart-card">
-        <h4>P&L Waterfall — Full Year (₹ Lakhs)</h4>
-        <canvas id="chartWaterfall" height="200"></canvas>
-      </div>
-      <div class="chart-card">
-        <h4>Cost Breakdown — Full Year</h4>
-        <canvas id="chartCosts" height="200"></canvas>
-      </div>
+      <div class="chart-card"><h4>Quarterly Revenue vs Gross Profit (₹ Lakhs)</h4><canvas id="chartRevGP" height="200"></canvas></div>
+      <div class="chart-card"><h4>Quarterly Net Profit (₹ Lakhs)</h4><canvas id="chartNet" height="200"></canvas></div>
+      <div class="chart-card"><h4>P&L Waterfall — Full Year (₹ Lakhs)</h4><canvas id="chartWaterfall" height="200"></canvas></div>
+      <div class="chart-card"><h4>Cost Breakdown — Full Year</h4><canvas id="chartCosts" height="200"></canvas></div>
     </div>
   </div>
 
-  <!-- Sensitivity Tab -->
   <div class="tab-content" id="tab-sensitivity">
     <div class="sens-grid" id="sensitivityGrid"></div>
   </div>
 
   <div class="footer-note">
-    ⚠️ This model is for planning purposes. Consult a Chartered Accountant before filing ITR-3/ITR-4 or using these figures for statutory purposes. GST treatment is indicative only. | Indian Accounting Standards (Ind AS / AS) apply for formal reporting.
+    ⚠️ For planning purposes only. Consult a CA before filing ITR-3/ITR-4. GST treatment is indicative. Income Tax Rate assumed at 30% for proprietorship/partnership. Q3 includes +25% festive season uplift.
   </div>
 </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-// ── DEFAULTS ─────────────────────────────────────────────────────────────────
 const DEFAULTS = {
-  baseRevenue:800000, growthRate:2, seasonalPeak:35,
-  cogsRate:58, freightRate:3, returnsRate:3, gstInput:18, gstOutput:18,
-  sellingRate:5, salaries:120000, rent:40000, drawings:60000, admin:25000, ptax:200, deprRate:15,
-  interest:15000, taxRate:30, tdsRate:2,
-  capital:1500000, openingStock:300000, fixedAssets:500000, debtorDays:30, creditorDays:45
+  monthlyVolume:500000, salesGrowth:10, asp:1000, customerCount:500,
+  fixedCost:100000, variableCost:55, employeeCount:10, salaryPerEmp:25000, marketingSpend:5,
+  targetMargin:15, breakEvenBuffer:50000,
+  collectionDelay:30, collectionRate:85, paymentDelay:45, cashReserve:200000,
+  gstRate:18, itcUtil:80, advTaxCoverage:25
 };
 
-// ── INDIAN NUMBER FORMAT ──────────────────────────────────────────────────────
-function fmtINR(v, showSymbol=true) {
-  if (v === null || v === undefined || isNaN(v)) return '—';
-  const neg = v < 0;
-  const abs = Math.abs(v);
+function fmtINR(v) {
+  if (v===null||v===undefined||isNaN(v)) return '—';
+  const neg=v<0, abs=Math.abs(v);
   let s;
-  if (abs >= 1e7)      s = (abs/1e7).toFixed(2) + ' Cr';
-  else if (abs >= 1e5) s = (abs/1e5).toFixed(2) + ' L';
-  else if (abs >= 1e3) s = (abs/1e3).toFixed(1) + 'K';
-  else                 s = abs.toFixed(0);
-  const sym = showSymbol ? '₹' : '';
-  return neg ? `(${sym}${s})` : `${sym}${s}`;
+  if (abs>=1e7)      s=(abs/1e7).toFixed(2)+' Cr';
+  else if (abs>=1e5) s=(abs/1e5).toFixed(2)+' L';
+  else if (abs>=1e3) s=(abs/1e3).toFixed(1)+'K';
+  else               s=abs.toFixed(0);
+  return neg?`(₹${s})`:`₹${s}`;
 }
 function fmtFull(v) {
-  if (isNaN(v) || v===null) return '—';
-  const neg = v < 0;
-  const abs = Math.abs(v);
-  // Indian comma system: xx,xx,xxx
-  const intPart = Math.round(abs).toString();
-  let result = '';
-  if (intPart.length > 3) {
-    result = ',' + intPart.slice(-3);
-    let rest = intPart.slice(0, -3);
-    while (rest.length > 2) { result = ',' + rest.slice(-2) + result; rest = rest.slice(0,-2); }
-    result = rest + result;
-  } else { result = intPart; }
-  return neg ? `(₹${result})` : `₹${result}`;
+  if (isNaN(v)||v===null) return '—';
+  const neg=v<0, abs=Math.abs(v);
+  const ip=Math.round(abs).toString();
+  let r='';
+  if (ip.length>3) {
+    r=','+ip.slice(-3); let rest=ip.slice(0,-3);
+    while(rest.length>2){r=','+rest.slice(-2)+r; rest=rest.slice(0,-2);}
+    r=rest+r;
+  } else r=ip;
+  return neg?`(₹${r})`:`₹${r}`;
 }
-function pct(v) { return (v*100).toFixed(1)+'%'; }
-function colorCls(v) { return v >= 0 ? 'positive' : 'negative'; }
-function get(id) { return parseFloat(document.getElementById(id).value)||0; }
-function getSl(id) { return parseFloat(document.getElementById(id).value)||0; }
+function pct(v){return(v*100).toFixed(1)+'%';}
+function cc(v){return v>=0?'positive':'negative';}
+function get(id){return parseFloat(document.getElementById(id).value)||0;}
+function getSl(id){return parseFloat(document.getElementById(id).value)||0;}
+function sum4(a){return a.reduce((x,y)=>x+y,0);}
+function fmtSl(v){
+  if(v>=1e7) return '₹'+(v/1e7).toFixed(1)+'Cr';
+  if(v>=1e5) return '₹'+(v/1e5).toFixed(1)+'L';
+  if(v>=1e3) return '₹'+(v/1e3).toFixed(0)+'K';
+  return '₹'+Math.round(v);
+}
 
-// ── SEASONAL WEIGHTS (Indian fiscal year Apr-Mar, festive in Oct-Dec = Q3) ──
-// Q-weights: Q3 gets festival boost
+function setGST(val) {
+  document.getElementById('gstRate').value=val;
+  document.querySelectorAll('.gst-pill').forEach(b=>b.classList.toggle('active',parseInt(b.textContent)===val));
+  update();
+}
+
 function computeModel() {
-  const baseRev   = get('baseRevenue');
-  const growth    = getSl('growthRate')/100;
-  const seasonal  = getSl('seasonalPeak')/100;
-  const cogsR     = getSl('cogsRate')/100;
-  const freightR  = getSl('freightRate')/100;
-  const returnsR  = getSl('returnsRate')/100;
-  const gstInR    = getSl('gstInput')/100;
-  const gstOutR   = getSl('gstOutput')/100;
-  const sellingR  = getSl('sellingRate')/100;
-  const salaries  = get('salaries');
-  const rent      = get('rent');
-  const drawings  = get('drawings');
-  const adminExp  = get('admin');
-  const ptax      = getSl('ptax');
-  const deprRate  = getSl('deprRate')/100;
-  const interest  = get('interest');
-  const taxR      = getSl('taxRate')/100;
-  const tdsR      = getSl('tdsRate')/100;
-  const capital   = get('capital');
-  const openStock = get('openingStock');
-  const fixedAss  = get('fixedAssets');
-  const debtorD   = getSl('debtorDays');
-  const creditorD = getSl('creditorDays');
+  const vol     = get('monthlyVolume');
+  const growth  = getSl('salesGrowth')/100;
+  const varPct  = getSl('variableCost')/100;
+  const fixMo   = get('fixedCost');
+  const empCnt  = get('employeeCount');
+  const salPer  = get('salaryPerEmp');
+  const mktPct  = getSl('marketingSpend')/100;
+  const tgtMgn  = getSl('targetMargin')/100;
+  const cDelay  = getSl('collectionDelay');
+  const cRate   = getSl('collectionRate')/100;
+  const pDelay  = getSl('paymentDelay');
+  const cashRes = get('cashReserve');
+  const gstR    = parseFloat(document.getElementById('gstRate').value)/100;
+  const itcU    = getSl('itcUtil')/100;
+  const tdsOn   = document.getElementById('tdsToggle').checked;
+  const advTax  = getSl('advTaxCoverage')/100;
+  const taxR    = 0.30;
 
-  // Quarterly revenue with growth and Q3 festive boost
-  // Q1=Apr-Jun, Q2=Jul-Sep, Q3=Oct-Dec (festive), Q4=Jan-Mar
-  const baseQRevArr = [
-    baseRev * 3,                          // Q1 baseline (3 months)
-    baseRev * 3 * (1 + growth),           // Q2
-    baseRev * 3 * (1 + growth*2) * (1 + seasonal), // Q3 festive
-    baseRev * 3 * (1 + growth*3)          // Q4
-  ];
-  // Net Sales (after returns/discounts)
-  const sales = baseQRevArr.map(r => r * (1 - returnsR));
-  const returns = baseQRevArr.map(r => r * returnsR);
-  const grossSales = baseQRevArr;
+  // Quarterly gross sales (Q3 = Oct-Dec festive +25%)
+  const baseQ     = [0,1,2,3].map(q=>vol*3*Math.pow(1+growth/4,q));
+  const grossSales = baseQ.map((r,i)=>i===2?r*1.25:r);
 
-  // Trading Account
-  const purchases = sales.map(s => s * cogsR);
-  const freight   = sales.map(s => s * freightR);
-  const closingStock = openStock; // simplified: closing = opening (no stock build)
-  const cogs = purchases.map((p, i) => p + freight[i]);
-  const grossProfit = sales.map((s, i) => s - cogs[i]);
+  // ── Cash Flow impact on P&L ──────────────────────────────────────────────
+  // 1. Collection Rate: uncollected portion becomes bad debt expense
+  const badDebtQ  = grossSales.map(s=>s*(1-cRate));
+  const sales     = grossSales.map((s,i)=>s-badDebtQ[i]); // effective revenue
 
-  // GST (net position per quarter)
-  const gstInputAmt  = purchases.map(p => p * gstInR);
-  const gstOutputAmt = sales.map(s => s * gstOutR);
-  const gstNetPayable = gstOutputAmt.map((o, i) => o - gstInputAmt[i]);
+  // 2. Net WC gap: if you collect slower than you pay, finance the gap at 15% p.a.
+  const netWCDays  = Math.max(0, cDelay-pDelay);
+  const wcCostMo   = vol * netWCDays/365 * 0.15;
+  const wcCostQ    = [0,1,2,3].map(()=>wcCostMo*3);
 
-  // P&L expenses
-  const sellingExp  = sales.map(s => s * sellingR);
-  const salariesQ   = [1,2,3,4].map(() => salaries * 3);
-  const rentQ       = [1,2,3,4].map(() => rent * 3);
-  const drawingsQ   = [1,2,3,4].map(() => drawings * 3);
-  const adminQ      = [1,2,3,4].map(() => adminExp * 3);
-  const ptaxQ       = [1,2,3,4].map(() => ptax * 3);
-  const annualDepr  = fixedAss * deprRate;
-  const deprQ       = [1,2,3,4].map(() => annualDepr / 4);
+  // 3. Cash Reserve opportunity cost: idle cash earns 4% p.a. (savings rate)
+  const cashOppMo  = cashRes * 0.04/12;
+  const cashOppQ   = [0,1,2,3].map(()=>cashOppMo*3); // income, offsets costs
+  // ─────────────────────────────────────────────────────────────────────────
 
-  const totalOpex = sales.map((_, i) =>
-    sellingExp[i] + salariesQ[i] + rentQ[i] + drawingsQ[i] + adminQ[i] + ptaxQ[i] + deprQ[i]
-  );
+  const moSal   = empCnt*salPer;
+  const moFixed = fixMo+moSal;
+  const salQ    = [0,1,2,3].map(()=>moSal*3);
+  const fixQ    = [0,1,2,3].map(()=>fixMo*3);
+  const varQ    = grossSales.map(s=>s*varPct); // COGS on gross (you stock what you sell)
+  const mktQ    = sales.map(s=>s*mktPct);
+  const gp      = sales.map((s,i)=>s-varQ[i]);
+  // OpEx now includes working capital financing cost
+  const opex    = [0,1,2,3].map(i=>salQ[i]+fixQ[i]+mktQ[i]+wcCostQ[i]-cashOppQ[i]);
+  const ebit    = gp.map((g,i)=>g-opex[i]);
+  const ebt     = [...ebit];
+  const taxQ2   = ebt.map(e=>Math.max(0,e)*taxR);
+  const netPA   = ebt.map((e,i)=>e-taxQ2[i]);
+  const advQ    = ebt.map(e=>Math.max(0,e)*taxR*advTax);
 
-  const ebit  = grossProfit.map((gp, i) => gp - totalOpex[i]);
-  const intQ  = [1,2,3,4].map(() => interest * 3);
-  const ebt   = ebit.map((e, i) => e - intQ[i]);
-  const taxQ  = ebt.map(e => Math.max(0, e) * taxR);
-  const netProfitAT = ebt.map((e, i) => e - taxQ[i]);
-  const tdsDeducted = sales.map(s => s * tdsR);
+  const gstOut  = grossSales.map(s=>s*gstR);
+  const gstInR  = varQ.map(v=>v*gstR);
+  const gstIn   = gstInR.map(v=>v*itcU);
+  const gstNet  = gstOut.map((o,i)=>o-gstIn[i]);
+  const tdsRate = tdsOn?0.02:0;
+  const tds     = sales.map(s=>s*tdsRate);
 
-  // Totals
-  const sum = arr => arr.reduce((a,b)=>a+b,0);
-  const totSales       = sum(sales);
-  const totGrossProfit = sum(grossProfit);
-  const totEBIT        = sum(ebit);
-  const totEBT         = sum(ebt);
-  const totNetPA       = sum(netProfitAT);
-  const totOpex        = sum(totalOpex);
-  const totTax         = sum(taxQ);
-  const totTDS         = sum(tdsDeducted);
-  const totGSTNet      = sum(gstNetPayable);
-  const totInterest    = sum(intQ);
-  const totDepr        = sum(deprQ);
-  const totDrawings    = sum(drawingsQ);
+  const tS=sum4(sales),tGP=sum4(gp),tEBIT=sum4(ebit),tEBT=sum4(ebt);
+  const tNet=sum4(netPA),tTax=sum4(taxQ2),tTDS=sum4(tds),tGST=sum4(gstNet);
 
-  // Balance Sheet (year-end simplified)
-  // Sources
-  const capitalAccount = capital + totNetPA - totDrawings;
-  const bankLoan       = 500000; // placeholder
-  const creditors      = sum(purchases) / 365 * creditorD;
-  const gstPayable     = Math.max(0, totGSTNet);
-  const tdsPayable     = totTDS * 0.5; // estimated outstanding
-  const totalSources   = capitalAccount + bankLoan + creditors + gstPayable + tdsPayable;
+  // Break-even
+  const moContrib = vol*(1-varPct-mktPct);
+  const beMos     = moContrib>0 ? moFixed/moContrib : Infinity;
 
-  // Application
-  const fixedAssNet    = fixedAss - sum(deprQ);
-  const debtors        = totSales / 365 * debtorD;
-  const stock          = openStock;
-  const gstInputCredit = Math.max(0, -totGSTNet);
-  const cashBalance    = Math.max(0, totalSources - fixedAssNet - debtors - stock - gstInputCredit - 50000);
-  const bankBalance    = 50000;
-  const totalApp       = fixedAssNet + debtors + stock + gstInputCredit + cashBalance + bankBalance;
+  // Balance Sheet — always balanced by construction (cash is the plug figure)
+  const paidInCapital = Math.max(cashRes, sum4(grossSales)*0.1);
+  const totalEquity   = paidInCapital + tNet;
+  const creditors     = sum4(varQ)/365*pDelay;
+  const gstPay        = Math.max(0, tGST);
+  const tdsPay        = tTDS*0.5;
+  const bankLoanBase  = 300000;
+  const faNet         = 200000;
+  const debtors       = sum4(grossSales)/365*cDelay;
+  const stock         = varQ[3]*0.4;
+  const gstCred       = Math.max(0, -tGST);
+  const knownAssets   = faNet + debtors + stock + gstCred;
+  const totalLiabBase = bankLoanBase + creditors + gstPay + tdsPay;
+  const rawCash       = totalEquity + totalLiabBase - knownAssets;
+  const addBorrow     = Math.max(0, -rawCash);
+  const bankLoan      = bankLoanBase + addBorrow;
+  const cashBal       = Math.max(0, rawCash);
+  const totSrc        = totalEquity + bankLoan + creditors + gstPay + tdsPay;
+  const totApp        = knownAssets + cashBal;
 
   return {
-    sales, returns, grossSales, purchases, freight, cogs, grossProfit,
-    gstInputAmt, gstOutputAmt, gstNetPayable,
-    sellingExp, salariesQ, rentQ, drawingsQ, adminQ, ptaxQ, deprQ,
-    totalOpex, ebit, intQ, ebt, taxQ, netProfitAT, tdsDeducted,
-    totSales, totGrossProfit, totEBIT, totEBT, totNetPA, totOpex,
-    totTax, totTDS, totGSTNet, totInterest, totDepr, totDrawings, totDrawings,
-    // BS
-    capitalAccount, bankLoan, creditors, gstPayable, tdsPayable, totalSources,
-    fixedAssNet, debtors, stock, gstInputCredit, cashBalance, bankBalance, totalApp,
-    openStock, capital
+    grossSales, sales, badDebtQ, varQ, mktQ, gp,
+    salQ, fixQ, wcCostQ, cashOppQ, opex, ebit, ebt,
+    taxQ:taxQ2, netPA, advQ, tds, gstOut, gstIn, gstNet,
+    tS,tGP,tEBIT,tEBT,tNet,tTax,tTDS,tGST,
+    paidInCapital,totalEquity,bankLoanBase,addBorrow,bankLoan,creditors,gstPay,tdsPay,totSrc,
+    faNet,debtors,stock,gstCred,cashBal,totApp,
+    beMos, tgtMgn, taxR
   };
 }
 
-// ── RENDER P&L ───────────────────────────────────────────────────────────────
 function renderPL(d) {
-  const Q = ['Q1','Q2','Q3','Q4'];
-  const sum = arr => arr.reduce((a,b)=>a+b,0);
-
-  function row(label, arr, cls='', indent='indent', bold=false) {
-    const tot = sum(arr);
-    const cells = arr.map(v=>`<td class="${colorCls(v)}">${fmtFull(v)}</td>`).join('');
-    return `<tr><td class="${indent}"${bold?' style="font-weight:700"':''}>${label}</td>${cells}
-      <td class="${colorCls(tot)}" style="font-weight:${bold?700:600}">${fmtFull(tot)}</td></tr>`;
+  function row(lbl,arr,indent,neg=false,cls=''){
+    const tot=sum4(arr);
+    const disp=neg?arr.map(v=>-v):arr;
+    const cells=disp.map(v=>`<td class="${cls||cc(v)}">${fmtFull(v)}</td>`).join('');
+    const tcls=cls||(neg?'negative':cc(tot));
+    return `<tr><td class="${indent}">${lbl}</td>${cells}<td class="${tcls}" style="font-weight:600">${fmtFull(neg?-tot:tot)}</td></tr>`;
   }
-  function secHdr(label) {
-    return `<tr class="sec-hdr"><td colspan="6">${label}</td></tr>`;
+  function sh(lbl){return `<tr class="sec-hdr"><td colspan="6">${lbl}</td></tr>`;}
+  function tr2(lbl,arr,style=''){
+    const tot=sum4(arr);
+    const cells=arr.map(v=>`<td class="${cc(v)}">${fmtFull(v)}</td>`).join('');
+    return `<tr class="total-row"><td style="${style}">${lbl}</td>${cells}<td style="font-weight:800">${fmtFull(tot)}</td></tr>`;
   }
-  function totalRow(label, arr, cls='', extraStyle='') {
-    const tot = sum(arr);
-    const cells = arr.map(v=>`<td class="${colorCls(v)}">${fmtFull(v)}</td>`).join('');
-    return `<tr class="total-row ${cls}"><td style="${extraStyle}">${label}</td>${cells}
-      <td style="font-weight:800">${fmtFull(tot)}</td></tr>`;
+  function sub(lbl,arr){
+    const tot=sum4(arr);
+    const cells=arr.map(v=>`<td class="${cc(v)}">${fmtFull(v)}</td>`).join('');
+    return `<tr class="subtotal-row"><td>${lbl}</td>${cells}<td>${fmtFull(tot)}</td></tr>`;
   }
-  function netRow(label, arr) {
-    const tot = sum(arr);
-    const cells = arr.map(v=>`<td>${fmtFull(v)}</td>`).join('');
-    return `<tr class="net-row"><td>${label}</td>${cells}<td>${fmtFull(tot)}</td></tr>`;
+  function nr(lbl,arr){
+    const tot=sum4(arr);
+    const cells=arr.map(v=>`<td>${fmtFull(v)}</td>`).join('');
+    return `<tr class="net-row"><td>${lbl}</td>${cells}<td>${fmtFull(tot)}</td></tr>`;
   }
-  function pctRow(label, num, denom) {
-    const cells = num.map((v,i)=>`<td class="muted">${denom[i]?pct(v/denom[i]):'—'}</td>`).join('');
-    const totN=sum(num), totD=sum(denom);
-    return `<tr><td class="muted indent2">${label}</td>${cells}<td class="muted">${totD?pct(totN/totD):'—'}</td></tr>`;
+  function pr(lbl,num,den){
+    const cells=num.map((v,i)=>`<td class="muted-cell">${den[i]?pct(v/den[i]):'—'}</td>`).join('');
+    const tn=sum4(num),td=sum4(den);
+    return `<tr><td class="muted-cell indent2">${lbl}</td>${cells}<td class="muted-cell">${td?pct(tn/td):'—'}</td></tr>`;
   }
 
-  let html = '';
-  // TRADING ACCOUNT
-  html += secHdr('TRADING ACCOUNT');
-  html += row('Gross Sales / Turnover', d.grossSales);
-  html += row('Less: Sales Returns & Discounts', d.returns.map(v=>-v), 'negative');
-  html += totalRow('Net Sales (Turnover)', d.sales);
-  html += row('Less: Opening Stock', [-d.openStock, 0, 0, 0].map(v=>v));
-  html += row('Add: Purchases of Goods', d.purchases.map(v=>-v), 'negative');
-  html += row('Add: Freight Inward', d.freight.map(v=>-v), 'negative');
-  // Closing stock same as opening (simplified)
-  html += row('Less: Closing Stock', [d.openStock/4, d.openStock/4, d.openStock/4, d.openStock/4]);
-  html += `<tr class="subtotal-row"><td>GROSS PROFIT (Trading Account)</td>
-    ${d.grossProfit.map(v=>`<td class="${colorCls(v)}">${fmtFull(v)}</td>`).join('')}
-    <td>${fmtFull(sum(d.grossProfit))}</td></tr>`;
-  html += pctRow('Gross Margin %', d.grossProfit, d.sales);
+  let h='';
+  h+=sh('REVENUE');
+  h+=row('Gross Sales / Turnover',d.grossSales,'indent');
+  const hasBadDebt = sum4(d.badDebtQ) > 0;
+  if(hasBadDebt) h+=row('Less: Bad Debt / Uncollected Receivables',d.badDebtQ,'indent',true,'negative');
+  h+=sub('Effective Net Revenue',d.sales);
+  h+=sh('COST OF GOODS SOLD');
+  h+=row('Variable Costs (COGS / Purchases)',d.varQ,'indent',true,'negative');
+  h+=sub('GROSS PROFIT',d.gp);
+  h+=pr('Gross Margin %',d.gp,d.sales);
 
-  // P&L ACCOUNT
-  html += secHdr('PROFIT & LOSS ACCOUNT');
-  html += row('Gross Profit b/d', d.grossProfit, 'positive');
+  h+=sh('OPERATING EXPENSES');
+  h+=row('Employee Salaries & Wages',d.salQ,'indent',true,'negative');
+  h+=row('Fixed Overhead (Rent, Admin, etc.)',d.fixQ,'indent',true,'negative');
+  h+=row('Marketing & Advertising',d.mktQ,'indent',true,'negative');
+  const hasWC = sum4(d.wcCostQ) > 0;
+  if(hasWC) h+=row('Working Capital Financing Cost',d.wcCostQ,'indent',true,'negative');
+  const hasOpp = sum4(d.cashOppQ) > 0;
+  if(hasOpp) h+=row('Cash Reserve Interest Income',d.cashOppQ,'indent',false,'positive');
+  h+=tr2('Total Operating Expenses',d.opex.map(v=>-v),'color:#dc2626');
 
-  html += secHdr('Less: Operating Expenses');
-  html += row('Selling & Distribution Expenses', d.sellingExp.map(v=>-v), 'negative');
-  html += row('Staff Salaries & Wages', d.salariesQ.map(v=>-v), 'negative');
-  html += row('Rent & Rates', d.rentQ.map(v=>-v), 'negative');
-  html += row('Proprietor / Partner Drawings', d.drawingsQ.map(v=>-v), 'negative');
-  html += row('Office & Administration', d.adminQ.map(v=>-v), 'negative');
-  html += row('Professional Tax', d.ptaxQ.map(v=>-v), 'negative');
-  html += row('Depreciation', d.deprQ.map(v=>-v), 'negative');
-  html += totalRow('Total Operating Expenses', d.totalOpex.map(v=>-v), '', 'color:#dc2626');
+  h+=sub('OPERATING PROFIT (EBIT)',d.ebit);
+  h+=pr('Operating Margin %',d.ebit,d.sales);
 
-  html += `<tr class="subtotal-row"><td>OPERATING PROFIT (EBIT)</td>
-    ${d.ebit.map(v=>`<td class="${colorCls(v)}">${fmtFull(v)}</td>`).join('')}
-    <td>${fmtFull(sum(d.ebit))}</td></tr>`;
-  html += pctRow('Operating Margin %', d.ebit, d.sales);
+  h+=sh('TAX & COMPLIANCE');
+  h+=row('Income Tax Provision (30%)',d.taxQ,'indent',true,'negative');
+  h+=row('TDS Deducted at Source',d.tds,'indent',true,'negative');
+  h+=row('Advance Tax Paid',d.advQ,'indent',true,'negative');
+  h+=nr('NET PROFIT AFTER TAX',d.netPA);
+  h+=pr('Net Margin %',d.netPA,d.sales);
 
-  html += secHdr('Less: Finance Charges');
-  html += row('Bank Interest & Finance Charges', d.intQ.map(v=>-v), 'negative');
+  h+=sh('GST SUMMARY (Indicative)');
+  h+=row('GST Output Collected',d.gstOut,'indent');
+  h+=row('GST Input Credit (ITC Utilised)',d.gstIn,'indent',true,'negative');
+  h+=row('Net GST Payable',d.gstNet,'indent');
 
-  html += `<tr class="subtotal-row"><td>NET PROFIT BEFORE TAX</td>
-    ${d.ebt.map(v=>`<td class="${colorCls(v)}">${fmtFull(v)}</td>`).join('')}
-    <td>${fmtFull(sum(d.ebt))}</td></tr>`;
-
-  html += secHdr('Less: Income Tax Provision');
-  html += row('Income Tax (ITR-3/4)', d.taxQ.map(v=>-v), 'negative');
-  html += row('TDS Deducted at Source', d.tdsDeducted.map(v=>-v), 'negative');
-
-  html += netRow('NET PROFIT AFTER TAX', d.netProfitAT);
-  html += pctRow('Net Margin %', d.netProfitAT, d.sales);
-
-  html += secHdr('GST SUMMARY (Indicative)');
-  html += row('GST Output Collected', d.gstOutputAmt);
-  html += row('GST Input Credit', d.gstInputAmt.map(v=>-v));
-  html += row('Net GST Payable', d.gstNetPayable, '', 'indent');
-
-  document.getElementById('plBody').innerHTML = html;
+  document.getElementById('plBody').innerHTML=h;
 }
 
-// ── RENDER BALANCE SHEET ──────────────────────────────────────────────────────
 function renderBS(d) {
-  function row(label, val, indent=true, bold=false, cls='') {
-    return `<tr><td class="${indent?'indent':''}"${bold?' style="font-weight:700"':''}>${label}</td>
-      <td class="${cls||colorCls(val)}"${bold?' style="font-weight:700"':''}>${fmtFull(val)}</td></tr>`;
+  function row(lbl,val,indent=true,cls=''){
+    return `<tr><td class="${indent?'indent':''}">${lbl}</td><td class="${cls||cc(val)}">${fmtFull(val)}</td></tr>`;
   }
-  function secHdr(lbl) { return `<tr class="sec-hdr"><td colspan="2">${lbl}</td></tr>`; }
-  function totRow(lbl, val) {
-    return `<tr class="total-row"><td>${lbl}</td><td style="font-weight:800">${fmtFull(val)}</td></tr>`;
-  }
+  function sh(lbl){return `<tr class="sec-hdr"><td colspan="2">${lbl}</td></tr>`;}
+  function tr2(lbl,val){return `<tr class="total-row"><td>${lbl}</td><td style="font-weight:800">${fmtFull(val)}</td></tr>`;}
 
-  let src = '';
-  src += secHdr("PROPRIETOR'S / PARTNERS' CAPITAL");
-  src += row('Capital Introduced', d.capital);
-  src += row('Add: Net Profit After Tax', d.totNetPA, true, false, 'positive');
-  src += row('Less: Drawings', -d.totDrawings, true, false, 'negative');
-  src += totRow("Capital Account (Net)", d.capitalAccount);
+  let src='';
+  src+=sh("PROPRIETOR'S / PARTNERS' CAPITAL");
+  src+=row('Capital Introduced',d.paidInCapital);
+  src+=row('Add: Net Profit After Tax',d.tNet,true,d.tNet>=0?'positive':'negative');
+  src+=tr2('Capital Account (Net)',d.totalEquity);
+  src+=sh('LOAN FUNDS');
+  src+=row('Bank Term Loan',d.bankLoanBase);
+  if(d.addBorrow>0) src+=row('Additional Working Capital Loan',d.addBorrow,true,'negative');
+  src+=tr2('Total Loan Funds',d.bankLoan);
+  src+=sh('CURRENT LIABILITIES');
+  src+=row('Trade Creditors / Payables',d.creditors);
+  src+=row('GST Payable',d.gstPay,true,d.gstPay>0?'negative':'');
+  src+=row('TDS Payable',d.tdsPay,true,'negative');
+  src+=tr2('Total Current Liabilities',d.creditors+d.gstPay+d.tdsPay);
+  src+=`<tr class="net-row"><td>TOTAL SOURCES OF FUNDS</td><td>${fmtFull(d.totSrc)}</td></tr>`;
+  document.getElementById('bsSourcesBody').innerHTML=src;
 
-  src += secHdr('LOAN FUNDS');
-  src += row('Bank Overdraft / Term Loan', d.bankLoan);
-  src += totRow('Total Loan Funds', d.bankLoan);
+  let app='';
+  app+=sh('FIXED ASSETS');
+  app+=row('Net Block (WDV)',d.faNet);
+  app+=tr2('Total Fixed Assets',d.faNet);
+  app+=sh('CURRENT ASSETS');
+  app+=row('Closing Stock',d.stock);
+  app+=row('Trade Debtors / Receivables',d.debtors);
+  app+=row('GST Input Credit Receivable',d.gstCred,true,d.gstCred>0?'positive':'');
+  app+=row('Cash & Bank Balance',d.cashBal);
+  app+=tr2('Total Current Assets',d.stock+d.debtors+d.gstCred+d.cashBal);
+  app+=`<tr class="net-row"><td>TOTAL APPLICATION OF FUNDS</td><td>${fmtFull(d.totApp)}</td></tr>`;
+  document.getElementById('bsAppBody').innerHTML=app;
 
-  src += secHdr('CURRENT LIABILITIES');
-  src += row('Sundry Creditors (Trade Payables)', d.creditors);
-  src += row('GST Payable', d.gstPayable, true, false, d.gstPayable>0?'negative':'');
-  src += row('TDS Payable', d.tdsPayable, true, false, 'negative');
-  src += totRow('Total Current Liabilities', d.creditors + d.gstPayable + d.tdsPayable);
-
-  src += `<tr class="net-row"><td>TOTAL SOURCES OF FUNDS</td><td>${fmtFull(d.totalSources)}</td></tr>`;
-  document.getElementById('bsSourcesBody').innerHTML = src;
-
-  let app = '';
-  app += secHdr('FIXED ASSETS');
-  app += row('Gross Block', get('fixedAssets'));
-  app += row('Less: Accumulated Depreciation', -sum4(d.deprQ), true, false, 'negative');
-  app += totRow('Net Block (WDV)', d.fixedAssNet);
-
-  app += secHdr('CURRENT ASSETS');
-  app += row('Closing Stock', d.stock);
-  app += row('Sundry Debtors (Trade Receivables)', d.debtors);
-  app += row('GST Input Credit Receivable', d.gstInputCredit, true, false, d.gstInputCredit>0?'positive':'');
-  app += row('Cash in Hand', d.cashBalance);
-  app += row('Cash at Bank', d.bankBalance);
-  app += totRow('Total Current Assets', d.stock + d.debtors + d.gstInputCredit + d.cashBalance + d.bankBalance);
-
-  app += `<tr class="net-row"><td>TOTAL APPLICATION OF FUNDS</td><td>${fmtFull(d.totalApp)}</td></tr>`;
-  document.getElementById('bsAppBody').innerHTML = app;
-
-  const diff = d.totalSources - d.totalApp;
-  const chkDiv = document.getElementById('bsCheckDiv');
-  if (Math.abs(diff) < 1000) {
-    chkDiv.innerHTML = '✅ Balance Sheet balances — Sources = Application';
-    chkDiv.style.color = '#057a55';
+  const diff=Math.abs(d.totSrc-d.totApp), chk=document.getElementById('bsCheckDiv');
+  if(diff<1){
+    chk.innerHTML='✅ Balance Sheet balances — Total Sources = Total Application';
+    chk.style.color='#057a55';
   } else {
-    chkDiv.innerHTML = `⚠️ Difference: ${fmtFull(Math.abs(diff))} — Simplified model; bank balance adjusted for reconciliation`;
-    chkDiv.style.color = '#d97706';
+    chk.innerHTML=`⚠️ Out of balance by ${fmtFull(diff)} — please report this as a bug`;
+    chk.style.color='#d97706';
   }
 }
-function sum4(arr) { return arr.reduce((a,b)=>a+b,0); }
 
-// ── RENDER KPIs ───────────────────────────────────────────────────────────────
 function renderKPIs(d) {
-  document.getElementById('kpiRevenue').textContent    = fmtINR(d.totSales);
-  document.getElementById('kpiRevenueSub').textContent = 'FY 2024–25';
-  document.getElementById('kpiGrossProfit').textContent = fmtINR(d.totGrossProfit);
-  document.getElementById('kpiGPMargin').textContent    = 'Gross Margin: ' + pct(d.totGrossProfit/d.totSales);
-  document.getElementById('kpiEBT').textContent         = fmtINR(d.totEBT);
-  document.getElementById('kpiEBTMargin').textContent   = 'PBT Margin: ' + pct(d.totEBT/d.totSales);
-  document.getElementById('kpiNet').textContent         = fmtINR(d.totNetPA);
-  document.getElementById('kpiNetMargin').textContent   = 'PAT Margin: ' + pct(d.totNetPA/d.totSales);
-  const nc = document.getElementById('kpiNetCard');
-  nc.className = 'kpi-card ' + (d.totNetPA >= 0 ? 'green-card' : 'red-card');
+  const act=d.tNet/d.tS;
+  const vs=act>=d.tgtMgn?`vs target ✅ ${pct(d.tgtMgn)}`:`vs target ⚠️ ${pct(d.tgtMgn)}`;
+  document.getElementById('kpiRevenue').textContent    =fmtINR(d.tS);
+  document.getElementById('kpiRevenueSub').textContent ='FY 2024–25';
+  document.getElementById('kpiGrossProfit').textContent=fmtINR(d.tGP);
+  document.getElementById('kpiGPMargin').textContent   ='Gross Margin: '+pct(d.tGP/d.tS);
+  document.getElementById('kpiEBT').textContent        =fmtINR(d.tEBT);
+  document.getElementById('kpiEBTMargin').textContent  ='PBT Margin: '+pct(d.tEBT/d.tS);
+  document.getElementById('kpiNet').textContent        =fmtINR(d.tNet);
+  document.getElementById('kpiNetMargin').textContent  ='PAT '+pct(act)+' | '+vs;
+  const nc=document.getElementById('kpiNetCard');
+  nc.className='kpi-card '+(d.tNet>=0?'green-card':'red-card');
 }
 
-// ── CHARTS ────────────────────────────────────────────────────────────────────
-let charts = {};
-function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
-function toL(v) { return +(v/1e5).toFixed(2); }
+let charts={};
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function toL(v){return+(v/1e5).toFixed(2);}
 
 function renderCharts(d) {
-  const QLABELS = ['Q1 (Apr–Jun)', 'Q2 (Jul–Sep)', 'Q3 (Oct–Dec)', 'Q4 (Jan–Mar)'];
+  const QL=['Q1 (Apr–Jun)','Q2 (Jul–Sep)','Q3 (Oct–Dec)','Q4 (Jan–Mar)'];
+  dc('chartRevGP');
+  charts['chartRevGP']=new Chart(document.getElementById('chartRevGP'),{type:'bar',data:{labels:QL,datasets:[
+    {label:'Net Sales',data:d.sales.map(toL),backgroundColor:'rgba(26,86,219,0.15)',borderColor:'#1a56db',borderWidth:2},
+    {label:'Gross Profit',data:d.gp.map(toL),backgroundColor:'rgba(5,122,85,0.7)',borderColor:'#057a55',borderWidth:1}
+  ]},options:{responsive:true,plugins:{legend:{position:'bottom'}},scales:{y:{ticks:{callback:v=>'₹'+v+'L'}}}}});
 
-  destroyChart('chartRevGP');
-  charts['chartRevGP'] = new Chart(document.getElementById('chartRevGP'), {
-    type: 'bar',
-    data: { labels: QLABELS, datasets: [
-      { label: 'Net Sales', data: d.sales.map(toL), backgroundColor: 'rgba(26,86,219,0.15)', borderColor:'#1a56db', borderWidth:2 },
-      { label: 'Gross Profit', data: d.grossProfit.map(toL), backgroundColor: 'rgba(5,122,85,0.7)', borderColor:'#057a55', borderWidth:1 }
-    ]},
-    options: { responsive:true, plugins:{legend:{position:'bottom'}}, scales:{y:{ticks:{callback:v=>'₹'+v+'L'}}} }
-  });
+  dc('chartNet');
+  charts['chartNet']=new Chart(document.getElementById('chartNet'),{type:'bar',data:{labels:QL,datasets:[
+    {label:'Net Profit (PAT)',data:d.netPA.map(toL),backgroundColor:d.netPA.map(v=>v>=0?'rgba(5,122,85,0.75)':'rgba(224,36,36,0.75)'),borderWidth:0}
+  ]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'₹'+v+'L'}}}}});
 
-  destroyChart('chartNet');
-  const niColors = d.netProfitAT.map(v => v>=0 ? 'rgba(5,122,85,0.75)' : 'rgba(224,36,36,0.75)');
-  charts['chartNet'] = new Chart(document.getElementById('chartNet'), {
-    type: 'bar',
-    data: { labels: QLABELS, datasets: [{ label: 'Net Profit (PAT)', data: d.netProfitAT.map(toL), backgroundColor: niColors, borderWidth:0 }]},
-    options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{ticks:{callback:v=>'₹'+v+'L'}}} }
-  });
+  dc('chartWaterfall');
+  charts['chartWaterfall']=new Chart(document.getElementById('chartWaterfall'),{type:'bar',data:{
+    labels:['Net Sales','Gross Profit','EBIT','PBT','PAT'],
+    datasets:[{data:[d.tS,d.tGP,d.tEBIT,d.tEBT,d.tNet].map(toL),
+      backgroundColor:['#1a56db','#057a55','#d97706',d.tEBT>=0?'#059669':'#dc2626',d.tNet>=0?'#057a55':'#dc2626'],borderRadius:6}]
+  },options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>'₹'+v+'L'}}}}});
 
-  destroyChart('chartWaterfall');
-  charts['chartWaterfall'] = new Chart(document.getElementById('chartWaterfall'), {
-    type: 'bar',
-    data: { labels: ['Net Sales', 'Gross Profit', 'EBIT', 'PBT', 'PAT'],
-      datasets: [{ data: [d.totSales,d.totGrossProfit,d.totEBIT,d.totEBT,d.totNetPA].map(toL),
-        backgroundColor: ['#1a56db','#057a55','#d97706',d.totEBT>=0?'#059669':'#dc2626',d.totNetPA>=0?'#057a55':'#dc2626'],
-        borderRadius:6 }]},
-    options: { responsive:true, plugins:{legend:{display:false}}, scales:{y:{ticks:{callback:v=>'₹'+v+'L'}}} }
-  });
-
-  destroyChart('chartCosts');
-  charts['chartCosts'] = new Chart(document.getElementById('chartCosts'), {
-    type: 'doughnut',
-    data: { labels: ['Purchases','Freight','Selling & Dist','Salaries','Rent','Drawings','Admin','Depreciation','Interest'],
-      datasets: [{ data: [
-        sum4(d.purchases), sum4(d.freight), sum4(d.sellingExp),
-        sum4(d.salariesQ), sum4(d.rentQ), sum4(d.drawingsQ),
-        sum4(d.adminQ), sum4(d.deprQ), sum4(d.intQ)
-      ], backgroundColor: ['#1a56db','#7c3aed','#0ea5e9','#06b6d4','#f97316','#eab308','#84cc16','#94a3b8','#ef4444'], borderWidth:2 }]},
-    options: { responsive:true, plugins:{legend:{position:'right',labels:{font:{size:10}}}} }
-  });
+  dc('chartCosts');
+  charts['chartCosts']=new Chart(document.getElementById('chartCosts'),{type:'doughnut',data:{
+    labels:['Variable Costs','Salaries','Fixed Overhead','Marketing'],
+    datasets:[{data:[sum4(d.varQ),sum4(d.salQ),sum4(d.fixQ),sum4(d.mktQ)],
+      backgroundColor:['#1a56db','#7c3aed','#0ea5e9','#f97316'],borderWidth:2}]
+  },options:{responsive:true,plugins:{legend:{position:'right',labels:{font:{size:11}}}}}});
 }
 
-// ── SENSITIVITY ───────────────────────────────────────────────────────────────
 function renderSensitivity(d) {
-  const baseNet = d.totNetPA;
-  const baseRev = d.totSales;
-  const cogsR   = getSl('cogsRate')/100 + getSl('freightRate')/100;
-  const opexFix = sum4(d.salariesQ) + sum4(d.rentQ) + sum4(d.drawingsQ) + sum4(d.adminQ) + sum4(d.ptaxQ) + sum4(d.deprQ);
-  const selR    = getSl('sellingRate')/100;
-  const intAnn  = get('interest')*12;
-  const taxR    = getSl('taxRate')/100;
+  const baseNet=d.tNet, baseRev=d.tS;
+  const varP=getSl('variableCost')/100, mktP=getSl('marketingSpend')/100;
+  const fixAnn=sum4(d.salQ)+sum4(d.fixQ);
+  const baseGM=1-varP;
 
-  function calcNet(revM, gm, opexM, taxOvr) {
-    const rev = baseRev * revM;
-    const gp  = rev * gm;
-    const opex = (opexFix + rev*selR) * opexM;
-    const ebt = gp - opex - intAnn;
-    return ebt - Math.max(0,ebt)*(taxOvr!==undefined?taxOvr:taxR);
+  function calc(rm,gm,om,taxOvr){
+    const rev=baseRev*rm, gp=rev*gm;
+    const opex=(fixAnn+rev*mktP)*om;
+    const ebt=gp-opex;
+    return ebt-Math.max(0,ebt)*(taxOvr!==undefined?taxOvr:d.taxR);
   }
-  const baseGM = 1 - cogsR;
-
-  function cellCls(v) {
-    const d = v - baseNet;
-    if (Math.abs(d) < 5000) return 's-base';
-    if (d > baseNet*0.25) return 's-best';
-    if (d > 0)            return 's-good';
-    if (d > -baseNet*0.25) return 's-warn';
+  function cls(v){
+    const diff=v-baseNet;
+    if(Math.abs(diff)<5000) return 's-base';
+    if(diff>baseNet*0.25)   return 's-best';
+    if(diff>0)              return 's-good';
+    if(diff>-baseNet*0.25)  return 's-warn';
     return 's-bad';
   }
-
-  function table(title, icon, rowLabels, rowVals, colLabels, colVals, rKey, cKey) {
-    const baseRI = rowVals.indexOf(1.0) >= 0 ? rowVals.indexOf(1.0) : Math.floor(rowVals.length/2);
-    const baseCI = colVals.indexOf(0)   >= 0 ? colVals.indexOf(0)   : Math.floor(colVals.length/2);
-    let html = `<div class="sens-card"><h4>${icon} ${title}</h4>
-      <table class="sens-table"><thead><tr><th style="text-align:left">Scenario</th><th>Net Profit (PAT)</th></tr></thead><tbody>`;
-    rowLabels.forEach((lbl, ri) => {
-      let kw = {revM:1, gm:baseGM, opexM:1};
-      if (rKey==='revM') kw.revM = rowVals[ri];
-      if (rKey==='gm')   kw.gm   = rowVals[ri];
-      if (rKey==='opexM') kw.opexM = rowVals[ri];
-      const v = calcNet(kw.revM, kw.gm, kw.opexM);
-      const cls = cellCls(v);
-      html += `<tr><td style="text-align:left;font-weight:${ri===baseRI?700:400}">${lbl}</td><td class="${cls}">${fmtFull(v)}</td></tr>`;
+  function tbl(title,rows){
+    let h=`<div class="sens-card"><h4>${title}</h4><table class="sens-table">
+      <thead><tr><th style="text-align:left">Scenario</th><th>Net Profit (PAT)</th></tr></thead><tbody>`;
+    rows.forEach(([lbl,val,base])=>{
+      h+=`<tr><td style="text-align:left;font-weight:${base?700:400}">${lbl}</td><td class="${cls(val)}">${fmtFull(val)}</td></tr>`;
     });
-    html += `</tbody></table><div style="margin-top:8px;font-size:10px;color:#94a3b8">Base PAT: ${fmtFull(baseNet)}</div></div>`;
-    return html;
+    h+=`</tbody></table><div style="margin-top:8px;font-size:10px;color:#94a3b8">Base PAT: ${fmtFull(baseNet)}</div></div>`;
+    return h;
   }
 
-  const revLabels = ['-30% Sales','-20% Sales','-10% Sales','Base Sales','+10% Sales','+20% Sales','+30% Sales'];
-  const revVals   = [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3];
-  const gmLabels  = ['GM 20%','GM 25%','GM 30%','Base GM','GM 40%','GM 45%','GM 50%'];
-  const gmVals    = [0.20, 0.25, 0.30, baseGM, 0.40, 0.45, 0.50];
-  const opexLabels= ['OpEx -30%','OpEx -20%','OpEx -10%','Base OpEx','OpEx +10%','OpEx +20%','OpEx +30%'];
-  const opexVals  = [0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3];
-
-  let html = '';
-  html += table('Sales Volume Sensitivity', '📈', revLabels, revVals, [], [], 'revM', '');
-  html += table('Gross Margin Sensitivity', '💰', gmLabels, gmVals, [], [], 'gm', '');
-  html += table('Operating Cost Sensitivity', '💼', opexLabels, opexVals, [], [], 'opexM', '');
-
-  // Tax rate table
-  const taxLabels = ['Tax 0% (Loss Year)','Tax 5%','Tax 15%','Tax 20%','Tax 30% (Base)','Tax 35%','Tax 42.74% (Surcharge)'];
-  const taxVals   = [0, 0.05, 0.15, 0.20, 0.30, 0.35, 0.4274];
-  let taxHtml = `<div class="sens-card"><h4>🏛️ Income Tax Rate Sensitivity</h4>
-    <table class="sens-table"><thead><tr><th style="text-align:left">Tax Scenario</th><th>Net Profit (PAT)</th></tr></thead><tbody>`;
-  taxLabels.forEach((lbl,i)=>{
-    const v = calcNet(1, baseGM, 1, taxVals[i]);
-    taxHtml += `<tr><td style="text-align:left">${lbl}</td><td class="${cellCls(v)}">${fmtFull(v)}</td></tr>`;
-  });
-  taxHtml += `</tbody></table><div style="margin-top:8px;font-size:10px;color:#94a3b8">Base PAT: ${fmtFull(baseNet)}</div></div>`;
-  html += taxHtml;
-
-  document.getElementById('sensitivityGrid').innerHTML = html;
+  document.getElementById('sensitivityGrid').innerHTML=
+    tbl('📈 Revenue Sensitivity',[
+      ['-30% Sales',calc(0.7,baseGM,1),false],['-20% Sales',calc(0.8,baseGM,1),false],['-10% Sales',calc(0.9,baseGM,1),false],
+      ['Base Sales', calc(1.0,baseGM,1),true], ['+10% Sales',calc(1.1,baseGM,1),false],['+20% Sales',calc(1.2,baseGM,1),false],['+30% Sales',calc(1.3,baseGM,1),false]
+    ])+
+    tbl('💰 Gross Margin Sensitivity',[
+      ['Margin 20%',calc(1,0.20,1),false],['Margin 25%',calc(1,0.25,1),false],['Margin 30%',calc(1,0.30,1),false],
+      ['Base Margin',calc(1,baseGM,1),true],
+      ['Margin 45%',calc(1,0.45,1),false],['Margin 55%',calc(1,0.55,1),false],['Margin 65%',calc(1,0.65,1),false]
+    ])+
+    tbl('💼 OpEx Sensitivity',[
+      ['OpEx -30%',calc(1,baseGM,0.7),false],['OpEx -15%',calc(1,baseGM,0.85),false],
+      ['Base OpEx', calc(1,baseGM,1.0),true],
+      ['OpEx +15%',calc(1,baseGM,1.15),false],['OpEx +30%',calc(1,baseGM,1.30),false],['OpEx +50%',calc(1,baseGM,1.50),false]
+    ])+
+    tbl('🏛️ Tax Rate Sensitivity',[
+      ['Tax 0% (Loss Year)',calc(1,baseGM,1,0),false],['Tax 5%',calc(1,baseGM,1,0.05),false],
+      ['Tax 15%',calc(1,baseGM,1,0.15),false],['Tax 30% (Base)',calc(1,baseGM,1,0.30),true],
+      ['Tax 35%',calc(1,baseGM,1,0.35),false],['Tax 42.74% (Surcharge)',calc(1,baseGM,1,0.4274),false]
+    ]);
 }
 
-// ── SLIDER LABELS ─────────────────────────────────────────────────────────────
 function updateLabels() {
-  document.getElementById('growthRateVal').textContent    = getSl('growthRate').toFixed(1)+'%';
-  document.getElementById('seasonalPeakVal').textContent  = '+'+getSl('seasonalPeak').toFixed(0)+'%';
-  document.getElementById('cogsRateVal').textContent      = getSl('cogsRate').toFixed(0)+'%';
-  document.getElementById('freightRateVal').textContent   = getSl('freightRate').toFixed(1)+'%';
-  document.getElementById('returnsRateVal').textContent   = getSl('returnsRate').toFixed(1)+'%';
-  document.getElementById('gstInputVal').textContent      = getSl('gstInput').toFixed(0)+'%';
-  document.getElementById('gstOutputVal').textContent     = getSl('gstOutput').toFixed(0)+'%';
-  document.getElementById('sellingRateVal').textContent   = getSl('sellingRate').toFixed(1)+'%';
-  document.getElementById('ptaxVal').textContent          = '₹'+getSl('ptax').toFixed(0);
-  document.getElementById('deprRateVal').textContent      = getSl('deprRate').toFixed(0)+'%';
-  document.getElementById('taxRateVal').textContent       = getSl('taxRate').toFixed(0)+'%';
-  document.getElementById('tdsRateVal').textContent       = getSl('tdsRate').toFixed(1)+'%';
-  document.getElementById('debtorDaysVal').textContent    = getSl('debtorDays').toFixed(0)+' days';
-  document.getElementById('creditorDaysVal').textContent  = getSl('creditorDays').toFixed(0)+' days';
+  document.getElementById('salesGrowthVal').textContent     =getSl('salesGrowth').toFixed(0)+'%';
+  document.getElementById('monthlyVolumeVal').textContent   =fmtSl(getSl('monthlyVolume'));
+  document.getElementById('aspVal').textContent             =fmtSl(getSl('asp'));
+  document.getElementById('customerCountVal').textContent   =getSl('customerCount').toFixed(0);
+  document.getElementById('fixedCostVal').textContent       =fmtSl(getSl('fixedCost'));
+  document.getElementById('variableCostVal').textContent    =getSl('variableCost').toFixed(0)+'%';
+  document.getElementById('employeeCountVal').textContent   =getSl('employeeCount').toFixed(0);
+  document.getElementById('salaryPerEmpVal').textContent    =fmtSl(getSl('salaryPerEmp'));
+  document.getElementById('marketingSpendVal').textContent  =getSl('marketingSpend').toFixed(1)+'%';
+  document.getElementById('targetMarginVal').textContent    =getSl('targetMargin').toFixed(0)+'%';
+  document.getElementById('breakEvenBufferVal').textContent =fmtSl(getSl('breakEvenBuffer'));
+  document.getElementById('collectionDelayVal').textContent =getSl('collectionDelay').toFixed(0)+' days';
+  document.getElementById('collectionRateVal').textContent  =getSl('collectionRate').toFixed(0)+'%';
+  document.getElementById('paymentDelayVal').textContent    =getSl('paymentDelay').toFixed(0)+' days';
+  document.getElementById('cashReserveVal').textContent     =fmtSl(getSl('cashReserve'));
+  document.getElementById('itcUtilVal').textContent         =getSl('itcUtil').toFixed(0)+'%';
+  document.getElementById('advTaxCoverageVal').textContent  =getSl('advTaxCoverage').toFixed(0)+'%';
 }
 
-// ── TABS ──────────────────────────────────────────────────────────────────────
-function showTab(id, btn) {
+function showTab(id,btn) {
   document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   btn.classList.add('active');
-  if (id==='charts') setTimeout(()=>update(),50);
+  if(id==='charts') setTimeout(()=>update(),50);
 }
 
-// ── RESET ─────────────────────────────────────────────────────────────────────
 function resetDefaults() {
-  Object.entries(DEFAULTS).forEach(([k,v])=>{ const el=document.getElementById(k); if(el)el.value=v; });
+  Object.entries(DEFAULTS).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v;});
+  setGST(18);
+  document.getElementById('tdsToggle').checked=true;
   update();
 }
 
-// ── MAIN UPDATE ───────────────────────────────────────────────────────────────
 function update() {
   updateLabels();
-  const d = computeModel();
-  renderKPIs(d);
-  renderPL(d);
-  renderBS(d);
-  renderCharts(d);
-  renderSensitivity(d);
+  const d=computeModel();
+  renderKPIs(d); renderPL(d); renderBS(d); renderCharts(d); renderSensitivity(d);
 }
 
 document.querySelectorAll('input[type=range],input[type=number]').forEach(el=>{
-  el.addEventListener('input', update);
-  el.addEventListener('change', update);
+  el.addEventListener('input',update);
+  el.addEventListener('change',update);
 });
 
 update();

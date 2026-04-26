@@ -18,6 +18,19 @@ const sseConnections = new Map();
   if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
 });
 
+// IP allowlist — reads ALLOWED_IPS from .env; loopback is always permitted
+const ALLOWED_IPS = new Set(
+  ['127.0.0.1', '::1', '::ffff:127.0.0.1'].concat(
+    (process.env.ALLOWED_IPS || '').split(',').map(s => s.trim()).filter(Boolean)
+  )
+);
+app.use((req, res, next) => {
+  const raw = req.ip || req.socket.remoteAddress || '';
+  const ip = raw.replace(/^::ffff:/, '');
+  if (ALLOWED_IPS.has(ip) || ALLOWED_IPS.has(raw)) return next();
+  res.status(403).json({ error: 'Access denied' });
+});
+
 app.use(cors());
 app.use(express.json());
 app.use('/outputs', express.static(path.join(__dirname, 'outputs')));
@@ -63,8 +76,8 @@ app.use('/process', require('./routes/process'));
 
 app.get('/', (_req, res) => res.json({ status: 'ok', service: 'ca-automation' }));
 
-const server = app.listen(PORT, () => {
-  console.log(`CA Automation backend running on http://localhost:${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`CA Automation backend running on http://192.168.1.3:${PORT}`);
 });
 
 // Graceful error handling — no more unhandled crash on port conflict

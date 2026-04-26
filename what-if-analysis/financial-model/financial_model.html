@@ -22,36 +22,38 @@
     --shadow: 0 2px 8px rgba(0,0,0,0.07);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 16px; }
 
   /* Header */
   .app-header { background: var(--header-bg); color: var(--header-text); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; }
-  .app-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
-  .app-header .subtitle { font-size: 12px; color: #94a3b8; margin-top: 2px; }
-  .badge { background: #2563eb; color: white; font-size: 11px; padding: 3px 10px; border-radius: 999px; font-weight: 600; }
+  .app-header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .app-header .subtitle { font-size: 14px; color: #94a3b8; margin-top: 2px; }
+  .badge { background: #2563eb; color: white; font-size: 12px; padding: 3px 10px; border-radius: 999px; font-weight: 600; }
 
   /* Layout */
-  .layout { display: grid; grid-template-columns: 300px 1fr; min-height: calc(100vh - 60px); }
+  .layout { display: grid; grid-template-columns: 320px 1fr; height: calc(100vh - 60px); overflow: hidden; }
 
   /* Controls Panel */
   .controls { background: var(--card); border-right: 1px solid var(--border); padding: 20px; overflow-y: auto; }
-  .controls-section { margin-bottom: 24px; }
-  .controls-section h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .controls-section { margin-bottom: 28px; }
+  .controls-section h3 { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--header-text); background: var(--header-bg); margin-bottom: 14px; padding: 5px 10px; border-radius: 6px; display: inline-block; }
 
-  .slider-group { margin-bottom: 14px; }
-  .slider-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-  .slider-label span { font-size: 13px; color: var(--text); }
-  .slider-value { font-weight: 700; color: var(--accent); font-size: 13px; min-width: 60px; text-align: right; }
-  input[type=range] { width: 100%; height: 4px; -webkit-appearance: none; background: var(--border); border-radius: 2px; outline: none; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 2px solid white; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-  input[type=range]:hover::-webkit-slider-thumb { background: #1d4ed8; }
+  /* Tally-style slider cards */
+  .slider-group { margin-bottom: 10px; background: #f8f9fb; border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 14px; transition: border-color 0.15s; }
+  .slider-group:hover { border-color: var(--accent); }
+  .slider-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .slider-label span { font-size: 14px; color: var(--text); font-weight: 500; }
+  .slider-value { font-weight: 700; color: white; background: var(--accent); font-size: 12px; min-width: 58px; text-align: center; padding: 3px 10px; border-radius: 999px; letter-spacing: 0.2px; }
+  input[type=range] { width: 100%; height: 6px; -webkit-appearance: none; background: var(--border); border-radius: 3px; outline: none; cursor: pointer; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: white; cursor: pointer; border: 2.5px solid var(--accent); box-shadow: 0 2px 6px rgba(37,99,235,0.25); transition: transform 0.1s; }
+  input[type=range]:hover::-webkit-slider-thumb { transform: scale(1.15); }
 
   .number-input-group { margin-bottom: 12px; }
-  .number-input-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-  .number-input-group input[type=number] { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; color: var(--text); background: var(--bg); }
-  .number-input-group input[type=number]:focus { outline: none; border-color: var(--accent); }
+  .number-input-group label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; font-weight: 500; }
+  .number-input-group input[type=number] { width: 100%; padding: 9px 12px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 15px; color: var(--text); background: var(--bg); transition: border-color 0.15s; }
+  .number-input-group input[type=number]:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 
-  .reset-btn { width: 100%; padding: 9px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; margin-top: 8px; transition: all 0.15s; }
+  .reset-btn { width: 100%; padding: 10px; background: #f1f5f9; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; margin-top: 8px; transition: all 0.15s; }
   .reset-btn:hover { background: #e2e8f0; color: var(--text); }
 
   /* Main Content */
@@ -60,9 +62,9 @@
   /* KPI Cards */
   .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
   .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; box-shadow: var(--shadow); }
-  .kpi-card .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
-  .kpi-card .kpi-value { font-size: 26px; font-weight: 800; margin: 6px 0 2px; letter-spacing: -0.5px; }
-  .kpi-card .kpi-delta { font-size: 12px; font-weight: 600; }
+  .kpi-card .kpi-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
+  .kpi-card .kpi-value { font-size: 28px; font-weight: 800; margin: 6px 0 2px; letter-spacing: -0.5px; }
+  .kpi-card .kpi-delta { font-size: 13px; font-weight: 600; }
   .kpi-card.green .kpi-value { color: var(--green); }
   .kpi-card.blue .kpi-value { color: var(--accent); }
   .kpi-card.amber .kpi-value { color: var(--amber); }
@@ -72,7 +74,7 @@
 
   /* Tabs */
   .tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: fit-content; }
-  .tab { padding: 8px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--muted); border: none; background: none; transition: all 0.15s; }
+  .tab { padding: 9px 20px; border-radius: 7px; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--muted); border: none; background: none; transition: all 0.15s; }
   .tab.active { background: var(--tab-active); color: white; }
   .tab:hover:not(.active) { background: var(--bg); color: var(--text); }
 
@@ -82,34 +84,34 @@
 
   /* Table */
   .fin-table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; margin-bottom: 24px; }
-  .fin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .fin-table th { background: #f1f5f9; padding: 10px 14px; text-align: right; font-weight: 700; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+  .fin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .fin-table th { background: #f1f5f9; padding: 11px 14px; text-align: right; font-weight: 700; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
   .fin-table th:first-child { text-align: left; }
-  .fin-table td { padding: 9px 14px; text-align: right; border-top: 1px solid var(--border); white-space: nowrap; }
+  .fin-table td { padding: 10px 14px; text-align: right; border-top: 1px solid var(--border); white-space: nowrap; }
   .fin-table td:first-child { text-align: left; color: var(--text); }
   .fin-table tr:hover td { background: #f8faff; }
   .fin-table .section-header td { background: #f8fafc; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); padding: 8px 14px; border-top: 2px solid var(--border); }
   .fin-table .total-row td { font-weight: 700; border-top: 2px solid var(--border); background: #f0f4ff; color: var(--accent); }
-  .fin-table .net-row td { font-weight: 800; background: #1e293b; color: white; font-size: 14px; }
+  .fin-table .net-row td { font-weight: 800; background: #1e293b; color: white; font-size: 15px; }
   .fin-table .indent { padding-left: 28px !important; }
   .positive { color: var(--green); }
   .negative { color: var(--red); }
-  .margin-row td { font-style: italic; color: var(--muted); font-size: 12px; }
+  .margin-row td { font-style: italic; color: var(--muted); font-size: 13px; }
   .fin-table .subtotal-row td { font-weight: 600; border-top: 1px solid var(--border); color: var(--text); }
 
   /* Charts */
   .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
   .chart-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; box-shadow: var(--shadow); }
-  .chart-card h4 { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
+  .chart-card h4 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 14px; }
   canvas { width: 100% !important; }
 
   /* Sensitivity */
   .sens-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .sens-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; box-shadow: var(--shadow); }
-  .sens-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
-  .sens-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  .sens-table th { background: #f1f5f9; padding: 7px 10px; text-align: center; font-weight: 700; color: var(--muted); font-size: 11px; }
-  .sens-table td { padding: 7px 10px; text-align: center; border: 1px solid var(--border); font-weight: 600; }
+  .sens-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+  .sens-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .sens-table th { background: #f1f5f9; padding: 8px 10px; text-align: center; font-weight: 700; color: var(--muted); font-size: 12px; }
+  .sens-table td { padding: 8px 10px; text-align: center; border: 1px solid var(--border); font-weight: 600; }
   .sens-cell-best { background: #dcfce7; color: #166534; }
   .sens-cell-good { background: #d1fae5; color: #065f46; }
   .sens-cell-base { background: #dbeafe; color: #1e40af; font-weight: 800; }
@@ -117,7 +119,7 @@
   .sens-cell-bad { background: #fee2e2; color: #991b1b; }
 
   /* Footer */
-  .model-footer { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .model-footer { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; font-size: 13px; color: var(--muted); margin-top: 4px; }
 
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -143,7 +145,7 @@
     <div class="controls-section">
       <h3>📈 Revenue</h3>
       <div class="number-input-group">
-        <label>Base Monthly Revenue (Jan, $)</label>
+        <label>Base Monthly Revenue (Jan, ₹)</label>
         <input type="number" id="baseRevenue" value="500000" step="10000" min="0">
       </div>
       <div class="slider-group">
@@ -179,11 +181,11 @@
         <input type="range" id="marketingRate" min="0" max="30" step="0.5" value="12">
       </div>
       <div class="number-input-group">
-        <label>Fixed Payroll / Month ($)</label>
+        <label>Fixed Payroll / Month (₹)</label>
         <input type="number" id="payroll" value="80000" step="5000" min="0">
       </div>
       <div class="number-input-group">
-        <label>Fixed Overhead / Month ($)</label>
+        <label>Fixed Overhead / Month (₹)</label>
         <input type="number" id="overhead" value="30000" step="1000" min="0">
       </div>
       <div class="slider-group">
@@ -195,7 +197,7 @@
     <div class="controls-section">
       <h3>💰 Finance & Tax</h3>
       <div class="slider-group">
-        <div class="slider-label"><span>Interest Expense / Month ($)</span><span class="slider-value" id="interestVal">$5,000</span></div>
+        <div class="slider-label"><span>Interest Expense / Month (₹)</span><span class="slider-value" id="interestVal">₹5,000</span></div>
         <input type="range" id="interest" min="0" max="50000" step="1000" value="5000">
       </div>
       <div class="slider-group">
@@ -207,11 +209,11 @@
     <div class="controls-section">
       <h3>🏦 Balance Sheet</h3>
       <div class="number-input-group">
-        <label>Opening Cash ($)</label>
+        <label>Opening Cash (₹)</label>
         <input type="number" id="openingCash" value="250000" step="10000" min="0">
       </div>
       <div class="number-input-group">
-        <label>Opening Inventory ($)</label>
+        <label>Opening Inventory (₹)</label>
         <input type="number" id="openingInventory" value="180000" step="10000" min="0">
       </div>
       <div class="slider-group">
@@ -356,15 +358,15 @@ function fmt(v, decimals=0) {
   if (v === null || v === undefined || isNaN(v)) return '—';
   const abs = Math.abs(v);
   let s;
-  if (abs >= 1e6) s = '$' + (abs/1e6).toFixed(1) + 'M';
-  else if (abs >= 1e3) s = '$' + (abs/1e3).toFixed(0) + 'K';
-  else s = '$' + abs.toFixed(decimals);
+  if (abs >= 1e6) s = '₹' + (abs/1e6).toFixed(1) + 'M';
+  else if (abs >= 1e3) s = '₹' + (abs/1e3).toFixed(0) + 'K';
+  else s = '₹' + abs.toFixed(decimals);
   return v < 0 ? '(' + s + ')' : s;
 }
 function fmtFull(v) {
   if (isNaN(v)) return '—';
   const abs = Math.abs(v);
-  const s = '$' + abs.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+  const s = '₹' + abs.toLocaleString('en-IN', {minimumFractionDigits:0, maximumFractionDigits:0});
   return v < 0 ? '(' + s + ')' : s;
 }
 function pct(v) { return (v*100).toFixed(1) + '%'; }
@@ -632,7 +634,7 @@ function renderCharts(d) {
         { label: 'Gross Profit', data: d.grossProfit, backgroundColor: 'rgba(22,163,74,0.7)', borderColor: '#16a34a', borderWidth: 1, type: 'bar' }
       ]
     },
-    options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { ticks: { callback: v => '$' + (v/1000).toFixed(0)+'K' } } } }
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } }, scales: { y: { ticks: { callback: v => '₹' + (v/1000).toFixed(0)+'K' } } } }
   });
 
   // Chart 2: Net Income
@@ -644,7 +646,7 @@ function renderCharts(d) {
       labels: MONTHS,
       datasets: [{ label: 'Net Income', data: d.netIncome, backgroundColor: niColors, borderWidth: 0 }]
     },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$' + (v/1000).toFixed(0)+'K' } } } }
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '₹' + (v/1000).toFixed(0)+'K' } } } }
   });
 
   // Chart 3: Margin Waterfall
@@ -662,7 +664,7 @@ function renderCharts(d) {
         backgroundColor: ['#2563eb', '#16a34a', '#d97706', totalNet>=0?'#16a34a':'#dc2626'],
         borderRadius: 6 }]
     },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '$' + (v/1e6).toFixed(2)+'M' } } } }
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => '₹' + (v/1e6).toFixed(2)+'M' } } } }
   });
 
   // Chart 4: OpEx Pie
@@ -825,7 +827,7 @@ function updateSliderLabels() {
   document.getElementById('returnsRateVal').textContent = getSlider('returnsRate').toFixed(1) + '%';
   document.getElementById('marketingRateVal').textContent = getSlider('marketingRate').toFixed(1) + '%';
   document.getElementById('techRateVal').textContent = getSlider('techRate').toFixed(1) + '%';
-  document.getElementById('interestVal').textContent = '$' + getSlider('interest').toLocaleString();
+  document.getElementById('interestVal').textContent = '₹' + getSlider('interest').toLocaleString('en-IN');
   document.getElementById('taxRateVal').textContent = getSlider('taxRate').toFixed(0) + '%';
   document.getElementById('arDaysVal').textContent = getSlider('arDays').toFixed(0) + ' days';
   document.getElementById('apDaysVal').textContent = getSlider('apDays').toFixed(0) + ' days';

@@ -2,8 +2,8 @@
   "name": "ca-automation-frontend",
   "version": "1.0.0",
   "scripts": {
-    "dev": "find .next/static/webpack -name '*.hot-update.*' -delete 2>/dev/null; next dev",
-    "fresh": "rm -rf .next && next dev",
+    "dev": "find .next/static/webpack -name '*.hot-update.*' -delete 2>/dev/null; next dev -H 0.0.0.0",
+    "fresh": "rm -rf .next && next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
