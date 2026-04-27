@@ -74,12 +74,15 @@ def read_contacts(excel_path: str):
     full_df = pd.read_excel(excel_path, dtype=str)
     full_df.columns = full_df.columns.str.strip()
 
-    required = {"first_name", "phone", "Phone_type", "Message Sent"}
+    required = {"first_name", "phone", "Phone_type", "Message_Sent"}
     missing = required - set(full_df.columns)
     if missing:
         raise ValueError(f"Missing columns: {missing}. Found: {list(full_df.columns)}")
 
-    contacts = full_df[full_df["Phone_type"].str.strip().str.upper() == "M"].copy()
+    sent_mask = full_df["Message_Sent"].fillna("").str.strip().str.upper() == "YES"
+    contacts = full_df[
+        (full_df["Phone_type"].str.strip().str.upper() == "M") & ~sent_mask
+    ].copy()
     contacts = contacts[["first_name", "phone"]].rename(
         columns={"first_name": "Name", "phone": "Mobile"}
     )
@@ -91,8 +94,8 @@ def read_contacts(excel_path: str):
 
 
 def mark_sent(full_df: pd.DataFrame, row_idx: int, excel_path: str) -> None:
-    """Write 'Yes' into the 'Message Sent' cell and immediately save the file."""
-    full_df.at[row_idx, "Message Sent"] = "Yes"
+    """Write 'Yes' into the 'Message_Sent' cell and immediately save the file."""
+    full_df.at[row_idx, "Message_Sent"] = "Yes"
     full_df.to_excel(excel_path, index=False, engine="openpyxl")
 
 
@@ -192,14 +195,22 @@ def main():
         message = personalise(template, name)
         logger.info(f"[{idx+1:>3}] SEND  {name:<30} | {phone}")
 
+        send_ok = False
         try:
             send_via_desktop(phone, message, CHAT_LOAD_WAIT)
-            mark_sent(full_df, idx, EXCEL_FILE)
-            logger.info(f"       ✓ Sent  (Message Sent = Yes)")
-            sent += 1
+            send_ok = True
         except Exception as e:
-            logger.error(f"       ✗ Failed: {e}")
+            logger.error(f"       ✗ Send error: {e}")
             failed += 1
+
+        if send_ok:
+            try:
+                mark_sent(full_df, idx, EXCEL_FILE)
+                logger.info(f"       ✓ Sent  (Message Sent = Yes)")
+                sent += 1
+            except Exception as e:
+                logger.error(f"       ✗ Could not update Excel: {e}")
+                sent += 1  # message was sent; user must update manually
 
     logger.info("=" * 60)
     logger.info(f"DONE — Sent: {sent}  |  Failed: {failed}  |  Skipped: {skipped}")
