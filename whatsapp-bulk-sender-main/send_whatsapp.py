@@ -1,159 +1,182 @@
 """
-WhatsApp Bulk Message Sender
-============================
-Reads contacts from Excel, personalizes message from Word template,
-and sends via WhatsApp Web using pywhatkit.
+WhatsApp Bulk Message Sender — Desktop App Edition
+===================================================
+Uses the macOS WhatsApp desktop app (already logged in) to send
+personalised messages one by one, fully automated.
+
+How it works:
+  1. Opens each contact's chat via whatsapp:// URL scheme with the
+     message pre-filled in the input box.
+  2. Activates WhatsApp via AppleScript and presses Return to send.
+  3. No browser, no QR scan, no human intervention required.
 
 Requirements:
-    pip install pandas openpyxl python-docx pywhatkit
+    pip install pandas openpyxl python-docx
 
 Usage:
     python send_whatsapp.py
-
-Notes:
-    - WhatsApp Web must be logged in (it opens automatically on first run)
-    - Keep your phone connected / WhatsApp active
-    - Numbers are treated as Indian (+91). Edit COUNTRY_CODE below if needed.
 """
 
-import time
 import re
 import sys
+import time
 import logging
-from datetime import datetime
-from pathlib import Path
+import subprocess
+import urllib.parse
 
-# ── third-party (install once with pip) ──────────────────────────────────────
 try:
     import pandas as pd
     from docx import Document
-    import pywhatkit as kit
 except ImportError as e:
     print(f"\n[ERROR] Missing library: {e}")
-    print("Run:  pip install pandas openpyxl python-docx pywhatkit\n")
+    print("Run:  pip install pandas openpyxl python-docx\n")
     sys.exit(1)
 
 # ═══════════════════════ CONFIGURATION ═══════════════════════════════════════
 
-EXCEL_FILE   = r"/Volumes/NO NAME/Claude/CA_Delhi_Contacts V2.0.xlsx"
-WORD_FILE    = r"/Volumes/NO NAME/Claude/Message Draft.docx"
-LOG_FILE     = r"/Volumes/NO NAME/Claude/whatsapp_send_log.txt"
+EXCEL_FILE   = r"/Users/sanjeevgarg/My Projects/whatsapp-bulk-sender-main/CA Firms.xlsx"
+WORD_FILE    = r"/Users/sanjeevgarg/My Projects/whatsapp-bulk-sender-main/Message Draft.docx"
+LOG_FILE     = r"/Users/sanjeevgarg/My Projects/whatsapp-bulk-sender-main/whatsapp_send_log.txt"
 
-COUNTRY_CODE = "+91"          # India — change if needed (e.g. "+1" for USA)
+COUNTRY_CODE   = "+91"   # India — change if needed (e.g. "+1" for USA)
 
-# Seconds to wait after opening each WhatsApp Web tab before closing it.
-# Increase if your internet is slow.
-WAIT_TIME    = 20             # seconds per message
+# Seconds to wait after opening the chat before pressing Send.
+# Increase if WhatsApp takes longer to load a chat on your machine.
+CHAT_LOAD_WAIT = 5
 
-# Set to True to do a DRY RUN (print messages without actually sending)
-DRY_RUN      = False
+# Set to True to preview messages without sending.
+DRY_RUN = False
 
 # ═════════════════════════════════════════════════════════════════════════════
 
 
 def setup_logging(log_path: str) -> logging.Logger:
-    """Configure logger to write to both console and a log file."""
-    logger = logging.getLogger("wa_sender")
+    logger = logging.getLogger("wa_desktop")
     logger.setLevel(logging.DEBUG)
     fmt = logging.Formatter("%(asctime)s  %(levelname)-8s  %(message)s",
                             datefmt="%Y-%m-%d %H:%M:%S")
-
     ch = logging.StreamHandler(sys.stdout)
     ch.setFormatter(fmt)
     logger.addHandler(ch)
-
     fh = logging.FileHandler(log_path, encoding="utf-8")
     fh.setFormatter(fmt)
     logger.addHandler(fh)
     return logger
 
 
-def read_contacts(excel_path: str) -> pd.DataFrame:
-    """Load Excel contacts, keeping only rows with a valid mobile number."""
-    df = pd.read_excel(excel_path, dtype=str)
-    df.columns = df.columns.str.strip()
+def read_contacts(excel_path: str):
+    """
+    Returns:
+        full_df   — complete DataFrame (all rows/columns) used for writing back
+        contacts  — filtered rows (Phone_type=M) with original indices kept so
+                    full_df.at[idx, ...] maps correctly after a successful send
+    """
+    full_df = pd.read_excel(excel_path, dtype=str)
+    full_df.columns = full_df.columns.str.strip()
 
-    # Flexible column detection
-    name_col   = next((c for c in df.columns if "name"   in c.lower()), None)
-    mobile_col = next((c for c in df.columns if "mobile" in c.lower()
-                        or "phone" in c.lower()
-                        or "number" in c.lower()), None)
+    required = {"first_name", "phone", "Phone_type", "Message Sent"}
+    missing = required - set(full_df.columns)
+    if missing:
+        raise ValueError(f"Missing columns: {missing}. Found: {list(full_df.columns)}")
 
-    if not name_col or not mobile_col:
-        raise ValueError(
-            f"Could not find Name/Mobile columns. Found: {list(df.columns)}"
-        )
-
-    df = df[[name_col, mobile_col]].rename(
-        columns={name_col: "Name", mobile_col: "Mobile"}
+    contacts = full_df[full_df["Phone_type"].str.strip().str.upper() == "M"].copy()
+    contacts = contacts[["first_name", "phone"]].rename(
+        columns={"first_name": "Name", "phone": "Mobile"}
     )
-    df.dropna(subset=["Mobile"], inplace=True)
-    df["Mobile"] = df["Mobile"].str.strip()
-    df.dropna(subset=["Name"], inplace=True)
-    df["Name"] = df["Name"].str.strip()
-    return df.reset_index(drop=True)
+    contacts.dropna(subset=["Mobile", "Name"], inplace=True)
+    contacts["Mobile"] = contacts["Mobile"].str.strip()
+    contacts["Name"]   = contacts["Name"].str.strip()
+    # Do NOT reset_index — original indices must stay intact to map back to full_df
+    return full_df, contacts
+
+
+def mark_sent(full_df: pd.DataFrame, row_idx: int, excel_path: str) -> None:
+    """Write 'Yes' into the 'Message Sent' cell and immediately save the file."""
+    full_df.at[row_idx, "Message Sent"] = "Yes"
+    full_df.to_excel(excel_path, index=False, engine="openpyxl")
 
 
 def read_template(word_path: str) -> str:
-    """Extract full text from a Word document, preserving line breaks."""
+    """Extract full text from a Word document, preserving paragraph breaks."""
     doc = Document(word_path)
-    lines = []
-    for para in doc.paragraphs:
-        lines.append(para.text)
-    return "\n".join(lines)
+    return "\n".join(p.text for p in doc.paragraphs)
 
 
 def personalise(template: str, name: str) -> str:
-    """Replace all {{Name}} (case-insensitive) placeholders with the contact name."""
+    """Replace {{Name}} placeholder with the contact's first name."""
     return re.sub(r"\{\{\s*[Nn]ame\s*\}\}", name, template)
 
 
 def format_number(raw: str, country_code: str) -> str:
-    """
-    Ensure the number has the country code prefix and contains only digits after +.
-    E.g.  '9212007566' → '+919212007566'
-         '+919212007566' → '+919212007566'
-    """
-    digits = re.sub(r"\D", "", raw)        # strip spaces, dashes, etc.
+    """Normalise number to E.164 format, e.g. '098109 02950' → '+919810902950'."""
+    digits    = re.sub(r"\D", "", raw)
     cc_digits = re.sub(r"\D", "", country_code)
-
     if digits.startswith(cc_digits):
         return "+" + digits
     return country_code + digits
 
 
-def send_message(phone: str, message: str, wait: int, logger: logging.Logger):
-    """Send a single WhatsApp message via pywhatkit (instant mode)."""
-    # pywhatkit.sendwhatmsg_instantly opens WhatsApp Web and sends immediately.
-    kit.sendwhatmsg_instantly(
-        phone_no   = phone,
-        message    = message,
-        wait_time  = wait,      # seconds to wait for WhatsApp Web to load
-        tab_close  = True,      # close the tab after sending
-        close_time = 3          # seconds after sending before tab closes
+def send_via_desktop(phone: str, message: str, chat_load_wait: int) -> None:
+    """
+    Open the WhatsApp desktop chat for `phone` with `message` pre-filled,
+    then use AppleScript to activate the app and press Return to send.
+    """
+    encoded = urllib.parse.quote(message)
+    url = f"whatsapp://send?phone={phone}&text={encoded}"
+
+    # Open the chat (launches WhatsApp if not already running)
+    subprocess.run(["open", url], check=True)
+
+    # Wait for WhatsApp to open the chat and render the input box
+    time.sleep(chat_load_wait)
+
+    # Activate WhatsApp and press the Return key (key code 36) to send
+    script = (
+        'tell application "WhatsApp" to activate\n'
+        'delay 0.8\n'
+        'tell application "System Events"\n'
+        '    key code 36\n'
+        'end tell'
     )
+    result = subprocess.run(
+        ["osascript", "-e", script],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        raise RuntimeError(f"AppleScript error: {result.stderr.strip()}")
+
+    # Brief pause to let the message fully send before moving on
+    time.sleep(2.0)
 
 
 def main():
     logger = setup_logging(LOG_FILE)
     logger.info("=" * 60)
-    logger.info("WhatsApp Bulk Sender — started")
+    logger.info("WhatsApp Desktop Sender — started")
     logger.info(f"Excel  : {EXCEL_FILE}")
     logger.info(f"Word   : {WORD_FILE}")
     logger.info(f"Dry run: {DRY_RUN}")
     logger.info("=" * 60)
 
-    # ── Load contacts ─────────────────────────────────────────────────────────
-    logger.info("Reading contacts …")
-    contacts = read_contacts(EXCEL_FILE)
-    logger.info(f"  → {len(contacts)} contacts loaded")
+    full_df, contacts = read_contacts(EXCEL_FILE)
+    logger.info(f"Contacts with Phone_type=M: {len(contacts)}")
 
-    # ── Load message template ─────────────────────────────────────────────────
-    logger.info("Reading message template …")
     template = read_template(WORD_FILE)
-    logger.info(f"  → Template preview: {template[:80].strip()} …")
+    logger.info(f"Template preview: {template[:80].strip()} …")
 
-    # ── Send loop ─────────────────────────────────────────────────────────────
+    if DRY_RUN:
+        for idx, row in contacts.iterrows():
+            phone = format_number(row["Mobile"], COUNTRY_CODE)
+            msg   = personalise(template, row["Name"])
+            logger.info(f"[{idx+1:>3}] DRY   {row['Name']:<30} | {phone}")
+            logger.debug(f"        {msg[:120]} …")
+        logger.info("Dry run complete.")
+        return
+
+    # Ensure WhatsApp desktop is running before the loop starts
+    subprocess.run(["open", "-a", "WhatsApp"], capture_output=True)
+    time.sleep(3)
+
     sent = 0; failed = 0; skipped = 0
 
     for idx, row in contacts.iterrows():
@@ -161,36 +184,26 @@ def main():
         mobile = str(row["Mobile"]).strip()
         phone  = format_number(mobile, COUNTRY_CODE)
 
-        # Basic sanity check — must have at least 10 digits after country code
         if len(re.sub(r"\D", "", phone)) < 10:
             logger.warning(f"[{idx+1:>3}] SKIP  {name:<30} | invalid number: {mobile}")
             skipped += 1
             continue
 
         message = personalise(template, name)
-
-        if DRY_RUN:
-            logger.info(f"[{idx+1:>3}] DRY   {name:<30} | {phone}")
-            logger.debug(f"          Message preview:\n{message[:120]} …\n")
-            sent += 1
-            continue
-
         logger.info(f"[{idx+1:>3}] SEND  {name:<30} | {phone}")
+
         try:
-            send_message(phone, message, WAIT_TIME, logger)
-            logger.info(f"       ✓ Sent successfully")
+            send_via_desktop(phone, message, CHAT_LOAD_WAIT)
+            mark_sent(full_df, idx, EXCEL_FILE)
+            logger.info(f"       ✓ Sent  (Message Sent = Yes)")
             sent += 1
         except Exception as e:
             logger.error(f"       ✗ Failed: {e}")
             failed += 1
 
-        # Brief pause between messages to avoid rate-limiting
-        time.sleep(5)
-
-    # ── Summary ───────────────────────────────────────────────────────────────
     logger.info("=" * 60)
     logger.info(f"DONE — Sent: {sent}  |  Failed: {failed}  |  Skipped: {skipped}")
-    logger.info(f"Full log saved to: {LOG_FILE}")
+    logger.info(f"Log saved to: {LOG_FILE}")
     logger.info("=" * 60)
 
 
