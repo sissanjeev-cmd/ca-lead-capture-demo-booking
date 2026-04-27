@@ -357,12 +357,37 @@
     .has-err select { border-color: var(--error) !important; }
     .has-err .cb-list { outline: 1.5px solid var(--error); border-radius: 8px; padding: 4px; }
 
+    /* ── Button row ── */
+    .btn-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .back-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.35); }
+
     /* ── OK button ── */
     .ok-btn {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      margin-top: 24px;
+      margin-top: 0;
       background: var(--accent);
       color: #fff;
       border: none;
@@ -498,37 +523,49 @@
         <li>Email address</li>
         <li>Mobile number</li>
       </ul>
-      <button class="ok-btn" onclick="go(1)">Start &rarr;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">Start &rarr;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
 
   <div class="screen" data-idx="2" data-type="q" data-s="1" data-qi="1" data-qt="5" data-req="true" data-vtype="text" data-field="firm-name">
     <div class="content">
+      <div class="sec-pills"><div class="sp active"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div></div>
       <div class="q-progress"><span class="q-tag">Question 1 of 5</span><span class="q-sec-name">Basic Firm Information</span></div>
       <div class="q-dots"><div class="qd active"></div><div class="qd"></div><div class="qd"></div><div class="qd"></div><div class="qd"></div></div>
       <p class="q-text">What is the name of your CA firm? <span class="required-star">*</span></p>
       <input type="text" id="firm-name" placeholder="e.g. Sharma &amp; Associates" autocomplete="off" />
       <div class="err">Please enter your firm name.</div>
-      <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
 
   <div class="screen" data-idx="3" data-type="q" data-s="1" data-qi="2" data-qt="5" data-req="true" data-vtype="text" data-field="contact-name">
     <div class="content">
+      <div class="sec-pills"><div class="sp active"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div></div>
       <div class="q-progress"><span class="q-tag">Question 2 of 5</span><span class="q-sec-name">Basic Firm Information</span></div>
       <div class="q-dots"><div class="qd done"></div><div class="qd active"></div><div class="qd"></div><div class="qd"></div><div class="qd"></div></div>
       <p class="q-text">Your full name (Contact Person) <span class="required-star">*</span></p>
       <input type="text" id="contact-name" placeholder="e.g. Rajesh Sharma" autocomplete="off" />
       <div class="err">Please enter your full name.</div>
-      <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
 
   <div class="screen" data-idx="4" data-type="q" data-s="1" data-qi="3" data-qt="5" data-vtype="select" data-field="role">
     <div class="content">
+      <div class="sec-pills"><div class="sp active"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div></div>
       <div class="q-progress"><span class="q-tag">Question 3 of 5</span><span class="q-sec-name">Basic Firm Information</span></div>
       <div class="q-dots"><div class="qd done"></div><div class="qd done"></div><div class="qd active"></div><div class="qd"></div><div class="qd"></div></div>
       <p class="q-text">What is your role in the firm?</p>
@@ -545,32 +582,43 @@
         </select>
         <span class="sel-arrow">&#9660;</span>
       </div><br/>
-      <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
 
   <div class="screen" data-idx="5" data-type="q" data-s="1" data-qi="4" data-qt="5" data-req="true" data-vtype="email" data-field="email">
     <div class="content">
+      <div class="sec-pills"><div class="sp active"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div></div>
       <div class="q-progress"><span class="q-tag">Question 4 of 5</span><span class="q-sec-name">Basic Firm Information</span></div>
       <div class="q-dots"><div class="qd done"></div><div class="qd done"></div><div class="qd done"></div><div class="qd active"></div><div class="qd"></div></div>
       <p class="q-text">Your email address <span class="required-star">*</span></p>
       <p class="q-sub">Used for your demo booking confirmation</p>
       <input type="email" id="email" placeholder="name@example.com" autocomplete="email" />
       <div class="err">Please enter a valid email address.</div>
-      <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
 
   <div class="screen" data-idx="6" data-type="q" data-s="1" data-qi="5" data-qt="5" data-req="true" data-vtype="tel" data-field="phone">
     <div class="content">
+      <div class="sec-pills"><div class="sp active"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div></div>
       <div class="q-progress"><span class="q-tag">Question 5 of 5</span><span class="q-sec-name">Basic Firm Information</span></div>
       <div class="q-dots"><div class="qd done"></div><div class="qd done"></div><div class="qd done"></div><div class="qd done"></div><div class="qd active"></div></div>
       <p class="q-text">Your mobile number <span class="required-star">*</span></p>
       <input type="tel" id="phone" placeholder="+91 98765 43210" autocomplete="tel" />
       <div class="err">Please enter your mobile number.</div>
-      <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
@@ -588,13 +636,17 @@
         <li>Number of clients you currently handle</li>
         <li>Size of your team</li>
       </ul>
-      <button class="ok-btn" onclick="go(1)">Start &rarr;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">Start &rarr;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
 
   <div class="screen" data-idx="8" data-type="q" data-s="2" data-qi="1" data-qt="2" data-req="true" data-vtype="select" data-field="clients">
     <div class="content">
+      <div class="sec-pills"><div class="sp done"></div><div class="sp active"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div></div>
       <div class="q-progress"><span class="q-tag">Question 1 of 2</span><span class="q-sec-name">Firm Size &amp; Scale</span></div>
       <div class="q-dots"><div class="qd active"></div><div class="qd"></div></div>
       <p class="q-text">How many clients does your firm currently handle? <span class="required-star">*</span></p>
@@ -610,13 +662,17 @@
         <span class="sel-arrow">&#9660;</span>
       </div>
       <div class="err">Please select a range.</div><br/>
-      <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
 
   <div class="screen" data-idx="9" data-type="q" data-s="2" data-qi="2" data-qt="2" data-req="true" data-vtype="select" data-field="team">
     <div class="content">
+      <div class="sec-pills"><div class="sp done"></div><div class="sp active"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div></div>
       <div class="q-progress"><span class="q-tag">Question 2 of 2</span><span class="q-sec-name">Firm Size &amp; Scale</span></div>
       <div class="q-dots"><div class="qd done"></div><div class="qd active"></div></div>
       <p class="q-text">How many team members does your firm have? <span class="required-star">*</span></p>
@@ -632,7 +688,10 @@
         <span class="sel-arrow">&#9660;</span>
       </div>
       <div class="err">Please select a range.</div><br/>
-      <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
@@ -649,13 +708,17 @@
       <ul class="sec-preview">
         <li>Which services your firm provides to clients</li>
       </ul>
-      <button class="ok-btn" onclick="go(1)">Start &rarr;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">Start &rarr;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
 
   <div class="screen" data-idx="11" data-type="q" data-s="3" data-qi="1" data-qt="1" data-req="true" data-vtype="checkbox" data-cname="services">
     <div class="content">
+      <div class="sec-pills"><div class="sp done"></div><div class="sp done"></div><div class="sp active"></div><div class="sp"></div><div class="sp"></div></div>
       <div class="q-progress"><span class="q-tag">Question 1 of 1</span><span class="q-sec-name">Services Offered</span></div>
       <div class="q-dots"><div class="qd active"></div></div>
       <p class="q-text">Which services does your firm offer? <span class="required-star">*</span></p>
@@ -672,7 +735,10 @@
         <label class="cb-opt"><input type="checkbox" name="services" value="Others"><div class="cb-key">I</div>Others</label>
       </div>
       <div class="err">Please select at least one service.</div>
-      <button class="ok-btn" onclick="go(1)" style="margin-top:18px">OK &#10003;</button>
+      <div class="btn-row" style="margin-top:18px">
+        <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
@@ -689,13 +755,17 @@
       <ul class="sec-preview">
         <li>Activities that consume the most time in your firm</li>
       </ul>
-      <button class="ok-btn" onclick="go(1)">Start &rarr;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">Start &rarr;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
 
   <div class="screen" data-idx="13" data-type="q" data-s="4" data-qi="1" data-qt="1" data-req="true" data-vtype="checkbox" data-cname="pain">
     <div class="content">
+      <div class="sec-pills"><div class="sp done"></div><div class="sp done"></div><div class="sp done"></div><div class="sp active"></div><div class="sp"></div></div>
       <div class="q-progress"><span class="q-tag">Question 1 of 1</span><span class="q-sec-name">Pain Points</span></div>
       <div class="q-dots"><div class="qd active"></div></div>
       <p class="q-text">Which activities take the most time in your firm? <span class="required-star">*</span></p>
@@ -711,7 +781,10 @@
         <label class="cb-opt"><input type="checkbox" name="pain" value="Others"><div class="cb-key">H</div>Others</label>
       </div>
       <div class="err">Please select at least one activity.</div>
-      <button class="ok-btn" onclick="go(1)" style="margin-top:18px">OK &#10003;</button>
+      <div class="btn-row" style="margin-top:18px">
+        <button class="ok-btn" onclick="go(1)">OK &#10003;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
@@ -728,19 +801,26 @@
       <ul class="sec-preview">
         <li>The one process you'd most like to automate</li>
       </ul>
-      <button class="ok-btn" onclick="go(1)">Start &rarr;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">Start &rarr;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Enter ↵</kbd></span>
     </div>
   </div>
 
   <div class="screen" data-idx="15" data-type="q" data-s="5" data-qi="1" data-qt="1" data-req="true" data-vtype="textarea" data-field="automate">
     <div class="content">
+      <div class="sec-pills"><div class="sp done"></div><div class="sp done"></div><div class="sp done"></div><div class="sp done"></div><div class="sp active"></div></div>
       <div class="q-progress"><span class="q-tag">Question 1 of 1</span><span class="q-sec-name">Priority Automation</span></div>
       <div class="q-dots"><div class="qd active"></div></div>
       <p class="q-text">If you could automate just one process for the demo, which would it be? <span class="required-star">*</span></p>
       <textarea id="automate" placeholder="Describe the process you'd most like to automate…"></textarea>
       <div class="err">Please describe the process you'd like to automate.</div>
-      <button class="ok-btn" onclick="go(1)">Submit &rarr;</button>
+      <div class="btn-row">
+        <button class="ok-btn" onclick="go(1)">Submit &rarr;</button>
+        <button class="back-btn" onclick="go(-1)">&#8592; Back</button>
+      </div>
       <span class="key-hint">Press <kbd>Ctrl + Enter</kbd> to submit</span>
     </div>
   </div>
@@ -750,9 +830,9 @@
     <div class="content">
       <div class="ty-check">&#10003;</div>
       <h2 class="ty-title">Thank you! Your information<br>has been received.</h2>
-      <p class="ty-desc">Click below to book your free 30-minute live demo. Pick a slot that works — a Zoom link will be sent instantly.</p>
+      <p class="ty-desc">Click below to book a 30-minute conversation.<br><br>We can use the shared automation examples as a starting point and then discuss how AI can be designed and adapted specifically for your firm's operations.</p>
       <a class="cal-btn" href="https://calendly.com/learnyourway-ai/new-meeting" target="_blank" rel="noopener">
-        &#128197; Book Your Free 30-Minute Live Demo
+        &#128197; Book Your Slot
       </a>
     </div>
   </div>
