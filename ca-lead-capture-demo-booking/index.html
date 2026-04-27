@@ -440,46 +440,71 @@
     /* ══════════════════════════════════════════
        THANK YOU SCREEN
        ══════════════════════════════════════════ */
-    /* thank-you screen scrolls independently */
+    /* thank-you screen */
     [data-type="end"] {
       overflow-y: auto;
       align-items: flex-start;
-      padding-top: 48px;
-      padding-bottom: 60px;
+      padding-top: 40px;
+      padding-bottom: 48px;
+    }
+    [data-type="end"] .content {
+      max-width: 1080px;
+      display: block;
+    }
+    .ty-layout {
+      display: flex;
+      gap: 48px;
+      align-items: flex-start;
+    }
+    .ty-left {
+      flex: 0 0 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .ty-right {
+      flex: 1;
+      min-width: 0;
     }
     .ty-check {
-      width: 60px; height: 60px;
+      width: 56px; height: 56px;
       border-radius: 50%;
       background: rgba(26,115,232,0.15);
       border: 2px solid #1a73e8;
       display: flex; align-items: center; justify-content: center;
-      font-size: 24px;
-      margin-bottom: 28px;
+      font-size: 22px;
+      margin-bottom: 22px;
     }
     .ty-title {
-      font-size: clamp(20px, 3vw, 32px);
+      font-size: clamp(18px, 2.4vw, 28px);
       font-weight: 700;
       line-height: 1.3;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
     .ty-desc {
-      font-size: 20px;
+      font-size: 16px;
       color: var(--muted);
-      line-height: 1.8;
-      max-width: 560px;
-      margin-bottom: 36px;
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+    .ty-bold {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 28px;
     }
     /* Google Calendar booking button */
     .cal-btn {
       display: inline-flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       background: #1a73e8;
       color: #fff;
       text-decoration: none;
-      padding: 16px 32px;
+      padding: 13px 24px;
       border-radius: 8px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       transition: background 0.18s, transform 0.1s;
       box-shadow: 0 2px 12px rgba(26,115,232,0.35);
@@ -491,9 +516,7 @@
     /* Embedded Google Calendar iframe */
     .cal-embed-wrap {
       width: 100%;
-      max-width: 680px;
-      margin: 0 auto 32px;
-      border-radius: 16px;
+      border-radius: 14px;
       overflow: hidden;
       box-shadow: 0 4px 24px rgba(0,0,0,0.25);
       background: #fff;
@@ -501,8 +524,12 @@
     .cal-embed-wrap iframe {
       display: block;
       width: 100%;
-      height: 580px;
+      height: 540px;
       border: none;
+    }
+    @media (max-width: 780px) {
+      .ty-layout { flex-direction: column; }
+      .ty-left { align-items: center; text-align: center; width: 100%; }
     }
 
     /* ══════════════════════════════════════════
@@ -878,28 +905,34 @@
 
   <!-- ══ 16: THANK YOU ══ -->
   <div class="screen" data-idx="16" data-type="end">
-    <div class="content" style="text-align:center; display:flex; flex-direction:column; align-items:center;">
-      <div class="ty-check">&#10003;</div>
-      <h2 class="ty-title">Thank you! Your information<br>has been received.</h2>
-      <p class="ty-desc">Pick a slot below to book a 30-minute Google Meet conversation.<br><br>We can use the shared automation examples as a starting point and then discuss how AI can be designed and adapted specifically for your firm's operations.</p>
+    <div class="content">
+      <div class="ty-layout">
 
-      <!-- Embedded Google Calendar Appointment Scheduler -->
-      <div class="cal-embed-wrap">
-        <iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ32NhhvWG8GKQP9IFIdPWpPtGyd4Q42BoT1Rng1QKEiEEoOdpl527SuGN26LHw2osUwWfuA9ItX?gv=true"
-                title="Book a 30-minute slot"
-                loading="lazy"></iframe>
+        <div class="ty-left">
+          <div class="ty-check">&#10003;</div>
+          <h2 class="ty-title">Thank you! Your information<br>has been received.</h2>
+          <p class="ty-desc">Please pick a slot below to book a 45-minute Google Meet conversation.</p>
+          <p class="ty-bold">We can use the shared automation examples as a starting point and then explore how AI can be tailored and adapted to your firm's specific operations.</p>
+          <a class="cal-btn" href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ32NhhvWG8GKQP9IFIdPWpPtGyd4Q42BoT1Rng1QKEiEEoOdpl527SuGN26LHw2osUwWfuA9ItX" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="4" width="18" height="18" rx="2" stroke="white" stroke-width="2"/>
+              <path d="M3 9h18" stroke="white" stroke-width="2"/>
+              <path d="M8 2v4M16 2v4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <circle cx="12" cy="15" r="2" fill="white"/>
+            </svg>
+            Open in Google Calendar
+          </a>
+        </div>
+
+        <div class="ty-right">
+          <div class="cal-embed-wrap">
+            <iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ32NhhvWG8GKQP9IFIdPWpPtGyd4Q42BoT1Rng1QKEiEEoOdpl527SuGN26LHw2osUwWfuA9ItX?gv=true"
+                    title="Book a 45-minute slot"
+                    loading="lazy"></iframe>
+          </div>
+        </div>
+
       </div>
-
-      <!-- Fallback button if iframe is blocked -->
-      <a class="cal-btn" href="https://calendar.google.com/calendar/appointments/schedules/AcZssZ32NhhvWG8GKQP9IFIdPWpPtGyd4Q42BoT1Rng1QKEiEEoOdpl527SuGN26LHw2osUwWfuA9ItX" target="_blank" rel="noopener">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="3" y="4" width="18" height="18" rx="2" stroke="white" stroke-width="2"/>
-          <path d="M3 9h18" stroke="white" stroke-width="2"/>
-          <path d="M8 2v4M16 2v4" stroke="white" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="12" cy="15" r="2" fill="white"/>
-        </svg>
-        Open in Google Calendar
-      </a>
     </div>
   </div>
 
