@@ -29,73 +29,65 @@
     }
 
     /* ══════════════════════════════════════════
-       PROGRESS HEADER
+       INLINE SECTION PROGRESS (on section screens)
        ══════════════════════════════════════════ */
-    #prog-header {
-      flex-shrink: 0;
-      padding: 18px 32px 14px;
-      display: none;
-      flex-direction: column;
-      gap: 10px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(15,22,36,0.95);
-      backdrop-filter: blur(8px);
-      position: relative;
-      z-index: 20;
-    }
-
-    /* 5 segment pills */
-    .seg-row {
+    .sec-pills {
       display: flex;
-      gap: 6px;
-      align-items: center;
+      gap: 8px;
+      margin-bottom: 22px;
     }
-    .seg {
-      flex: 1;
-      height: 5px;
+    .sp {
+      width: 36px;
+      height: 6px;
       border-radius: 99px;
       background: var(--border);
-      transition: background 0.4s ease;
-      position: relative;
-      overflow: hidden;
+      transition: background 0.3s;
     }
-    .seg.done   { background: var(--done); }
-    .seg.active { background: var(--accent); }
-    .seg.active::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 99px;
-      background: linear-gradient(90deg, var(--accent), #a78bfa);
-      animation: shimmer 1.8s ease-in-out infinite alternate;
-    }
-    @keyframes shimmer {
-      from { opacity: 0.8; }
-      to   { opacity: 1; }
+    .sp.done   { background: var(--done); }
+    .sp.active {
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(79,142,247,0.5);
     }
 
-    .prog-meta {
+    /* ══════════════════════════════════════════
+       INLINE QUESTION PROGRESS (on question screens)
+       ══════════════════════════════════════════ */
+    .q-progress {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
       flex-wrap: wrap;
-      gap: 6px;
     }
-    #prog-section-label {
-      font-size: 12px;
-      font-weight: 600;
+    .q-tag {
+      background: var(--acc-dim);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+      letter-spacing: 0.02em;
+    }
+    .q-sec-name {
+      font-size: 14px;
+      font-weight: 500;
       color: var(--muted);
-      letter-spacing: 0.04em;
     }
-    #prog-section-label span { color: var(--accent); }
-    #prog-q-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      letter-spacing: 0.04em;
-      display: none;
+    /* mini dot bar for questions within section */
+    .q-dots {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      margin-bottom: 16px;
     }
-    #prog-q-label span { color: var(--text); }
+    .qd {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.2s;
+    }
+    .qd.done   { background: var(--done); }
+    .qd.active { background: var(--accent); }
 
     /* ══════════════════════════════════════════
        SCREENS
@@ -136,14 +128,14 @@
       margin-bottom: 18px;
     }
     .welcome-title {
-      font-size: clamp(24px, 4vw, 42px);
+      font-size: clamp(30px, 4.5vw, 52px);
       font-weight: 700;
       line-height: 1.22;
       margin-bottom: 18px;
     }
     .welcome-title em { font-style: italic; color: var(--accent); }
     .welcome-desc {
-      font-size: 16px;
+      font-size: 19px;
       color: var(--muted);
       line-height: 1.75;
       max-width: 480px;
@@ -170,7 +162,7 @@
        SECTION TITLE SCREEN
        ══════════════════════════════════════════ */
     .sec-eyebrow {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 700;
       letter-spacing: 0.14em;
       text-transform: uppercase;
@@ -189,7 +181,7 @@
       border-radius: 2px;
     }
     .sec-title {
-      font-size: clamp(26px, 4vw, 44px);
+      font-size: clamp(38px, 5.5vw, 64px);
       font-weight: 700;
       line-height: 1.2;
       margin-bottom: 28px;
@@ -205,7 +197,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 14px;
+      font-size: 17px;
       color: var(--muted);
     }
     .sec-preview li::before {
@@ -238,13 +230,13 @@
       font-weight: 700;
     }
     .q-text {
-      font-size: clamp(18px, 2.8vw, 28px);
+      font-size: clamp(22px, 3.5vw, 36px);
       font-weight: 600;
       line-height: 1.35;
       margin-bottom: 8px;
     }
     .q-sub {
-      font-size: 14px;
+      font-size: 17px;
       color: var(--muted);
       margin-bottom: 28px;
     }
@@ -258,11 +250,11 @@
       border: none;
       border-bottom: 2px solid var(--border);
       color: #fff;
-      font-size: 22px;
+      font-size: 26px;
       font-family: inherit;
-      padding: 8px 2px;
+      padding: 10px 2px;
       width: 100%;
-      max-width: 460px;
+      max-width: 480px;
       outline: none;
       transition: border-color 0.2s;
       caret-color: var(--accent);
@@ -276,11 +268,11 @@
       border: none;
       border-bottom: 2px solid var(--border);
       color: #fff;
-      font-size: 18px;
+      font-size: 20px;
       font-family: inherit;
-      padding: 8px 2px;
+      padding: 10px 2px;
       width: 100%;
-      max-width: 520px;
+      max-width: 540px;
       outline: none;
       resize: none;
       min-height: 80px;
@@ -299,9 +291,9 @@
       border: 1.5px solid var(--border);
       border-radius: 8px;
       color: #fff;
-      font-size: 15px;
+      font-size: 17px;
       font-family: inherit;
-      padding: 12px 42px 12px 16px;
+      padding: 14px 42px 14px 18px;
       outline: none;
       cursor: pointer;
       appearance: none;
@@ -328,7 +320,7 @@
       border: 1.5px solid var(--border);
       border-radius: 8px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 16px;
       user-select: none;
       transition: border-color 0.15s, background 0.15s;
     }
@@ -376,7 +368,7 @@
       border: none;
       padding: 11px 22px;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       font-family: inherit;
@@ -472,23 +464,6 @@
 <body>
 
 <!-- ════════════════════════════════════════════
-     PROGRESS HEADER
-     ════════════════════════════════════════════ -->
-<header id="prog-header">
-  <div class="seg-row">
-    <div class="seg" id="seg-1"></div>
-    <div class="seg" id="seg-2"></div>
-    <div class="seg" id="seg-3"></div>
-    <div class="seg" id="seg-4"></div>
-    <div class="seg" id="seg-5"></div>
-  </div>
-  <div class="prog-meta">
-    <div id="prog-section-label"><span></span></div>
-    <div id="prog-q-label">Question <span></span></div>
-  </div>
-</header>
-
-<!-- ════════════════════════════════════════════
      SCREENS
      ════════════════════════════════════════════ -->
 <div id="screens">
@@ -514,6 +489,7 @@
 
   <div class="screen" data-idx="1" data-type="section" data-s="1">
     <div class="content">
+      <div class="sec-pills"><div class="sp active"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div></div>
       <div class="sec-eyebrow">Section 1 of 5</div>
       <h2 class="sec-title">Basic Firm<br>Information</h2>
       <ul class="sec-preview">
@@ -529,7 +505,8 @@
 
   <div class="screen" data-idx="2" data-type="q" data-s="1" data-qi="1" data-qt="5" data-req="true" data-vtype="text" data-field="firm-name">
     <div class="content">
-      <div class="q-eyebrow"><span class="q-num">Q1 of 5</span> Basic Firm Information</div>
+      <div class="q-progress"><span class="q-tag">Question 1 of 5</span><span class="q-sec-name">Basic Firm Information</span></div>
+      <div class="q-dots"><div class="qd active"></div><div class="qd"></div><div class="qd"></div><div class="qd"></div><div class="qd"></div></div>
       <p class="q-text">What is the name of your CA firm? <span class="required-star">*</span></p>
       <input type="text" id="firm-name" placeholder="e.g. Sharma &amp; Associates" autocomplete="off" />
       <div class="err">Please enter your firm name.</div>
@@ -540,7 +517,8 @@
 
   <div class="screen" data-idx="3" data-type="q" data-s="1" data-qi="2" data-qt="5" data-req="true" data-vtype="text" data-field="contact-name">
     <div class="content">
-      <div class="q-eyebrow"><span class="q-num">Q2 of 5</span> Basic Firm Information</div>
+      <div class="q-progress"><span class="q-tag">Question 2 of 5</span><span class="q-sec-name">Basic Firm Information</span></div>
+      <div class="q-dots"><div class="qd done"></div><div class="qd active"></div><div class="qd"></div><div class="qd"></div><div class="qd"></div></div>
       <p class="q-text">Your full name (Contact Person) <span class="required-star">*</span></p>
       <input type="text" id="contact-name" placeholder="e.g. Rajesh Sharma" autocomplete="off" />
       <div class="err">Please enter your full name.</div>
@@ -551,7 +529,8 @@
 
   <div class="screen" data-idx="4" data-type="q" data-s="1" data-qi="3" data-qt="5" data-vtype="select" data-field="role">
     <div class="content">
-      <div class="q-eyebrow"><span class="q-num">Q3 of 5</span> Basic Firm Information</div>
+      <div class="q-progress"><span class="q-tag">Question 3 of 5</span><span class="q-sec-name">Basic Firm Information</span></div>
+      <div class="q-dots"><div class="qd done"></div><div class="qd done"></div><div class="qd active"></div><div class="qd"></div><div class="qd"></div></div>
       <p class="q-text">What is your role in the firm?</p>
       <p class="q-sub">Optional</p>
       <div class="sel-wrap">
@@ -573,7 +552,8 @@
 
   <div class="screen" data-idx="5" data-type="q" data-s="1" data-qi="4" data-qt="5" data-req="true" data-vtype="email" data-field="email">
     <div class="content">
-      <div class="q-eyebrow"><span class="q-num">Q4 of 5</span> Basic Firm Information</div>
+      <div class="q-progress"><span class="q-tag">Question 4 of 5</span><span class="q-sec-name">Basic Firm Information</span></div>
+      <div class="q-dots"><div class="qd done"></div><div class="qd done"></div><div class="qd done"></div><div class="qd active"></div><div class="qd"></div></div>
       <p class="q-text">Your email address <span class="required-star">*</span></p>
       <p class="q-sub">Used for your demo booking confirmation</p>
       <input type="email" id="email" placeholder="name@example.com" autocomplete="email" />
@@ -585,7 +565,8 @@
 
   <div class="screen" data-idx="6" data-type="q" data-s="1" data-qi="5" data-qt="5" data-req="true" data-vtype="tel" data-field="phone">
     <div class="content">
-      <div class="q-eyebrow"><span class="q-num">Q5 of 5</span> Basic Firm Information</div>
+      <div class="q-progress"><span class="q-tag">Question 5 of 5</span><span class="q-sec-name">Basic Firm Information</span></div>
+      <div class="q-dots"><div class="qd done"></div><div class="qd done"></div><div class="qd done"></div><div class="qd done"></div><div class="qd active"></div></div>
       <p class="q-text">Your mobile number <span class="required-star">*</span></p>
       <input type="tel" id="phone" placeholder="+91 98765 43210" autocomplete="tel" />
       <div class="err">Please enter your mobile number.</div>
@@ -600,6 +581,7 @@
 
   <div class="screen" data-idx="7" data-type="section" data-s="2">
     <div class="content">
+      <div class="sec-pills"><div class="sp done"></div><div class="sp active"></div><div class="sp"></div><div class="sp"></div><div class="sp"></div></div>
       <div class="sec-eyebrow">Section 2 of 5</div>
       <h2 class="sec-title">Firm Size<br>&amp; Scale</h2>
       <ul class="sec-preview">
@@ -613,7 +595,8 @@
 
   <div class="screen" data-idx="8" data-type="q" data-s="2" data-qi="1" data-qt="2" data-req="true" data-vtype="select" data-field="clients">
     <div class="content">
-      <div class="q-eyebrow"><span class="q-num">Q1 of 2</span> Firm Size &amp; Scale</div>
+      <div class="q-progress"><span class="q-tag">Question 1 of 2</span><span class="q-sec-name">Firm Size &amp; Scale</span></div>
+      <div class="q-dots"><div class="qd active"></div><div class="qd"></div></div>
       <p class="q-text">How many clients does your firm currently handle? <span class="required-star">*</span></p>
       <div class="sel-wrap">
         <select id="clients">
@@ -634,7 +617,8 @@
 
   <div class="screen" data-idx="9" data-type="q" data-s="2" data-qi="2" data-qt="2" data-req="true" data-vtype="select" data-field="team">
     <div class="content">
-      <div class="q-eyebrow"><span class="q-num">Q2 of 2</span> Firm Size &amp; Scale</div>
+      <div class="q-progress"><span class="q-tag">Question 2 of 2</span><span class="q-sec-name">Firm Size &amp; Scale</span></div>
+      <div class="q-dots"><div class="qd done"></div><div class="qd active"></div></div>
       <p class="q-text">How many team members does your firm have? <span class="required-star">*</span></p>
       <div class="sel-wrap">
         <select id="team">
@@ -659,6 +643,7 @@
 
   <div class="screen" data-idx="10" data-type="section" data-s="3">
     <div class="content">
+      <div class="sec-pills"><div class="sp done"></div><div class="sp done"></div><div class="sp active"></div><div class="sp"></div><div class="sp"></div></div>
       <div class="sec-eyebrow">Section 3 of 5</div>
       <h2 class="sec-title">Services<br>Offered</h2>
       <ul class="sec-preview">
@@ -671,7 +656,8 @@
 
   <div class="screen" data-idx="11" data-type="q" data-s="3" data-qi="1" data-qt="1" data-req="true" data-vtype="checkbox" data-cname="services">
     <div class="content">
-      <div class="q-eyebrow"><span class="q-num">Q1 of 1</span> Services Offered</div>
+      <div class="q-progress"><span class="q-tag">Question 1 of 1</span><span class="q-sec-name">Services Offered</span></div>
+      <div class="q-dots"><div class="qd active"></div></div>
       <p class="q-text">Which services does your firm offer? <span class="required-star">*</span></p>
       <p class="q-sub">Select all that apply — use letter keys or click</p>
       <div class="cb-list">
@@ -697,6 +683,7 @@
 
   <div class="screen" data-idx="12" data-type="section" data-s="4">
     <div class="content">
+      <div class="sec-pills"><div class="sp done"></div><div class="sp done"></div><div class="sp done"></div><div class="sp active"></div><div class="sp"></div></div>
       <div class="sec-eyebrow">Section 4 of 5</div>
       <h2 class="sec-title">Pain<br>Points</h2>
       <ul class="sec-preview">
@@ -709,7 +696,8 @@
 
   <div class="screen" data-idx="13" data-type="q" data-s="4" data-qi="1" data-qt="1" data-req="true" data-vtype="checkbox" data-cname="pain">
     <div class="content">
-      <div class="q-eyebrow"><span class="q-num">Q1 of 1</span> Pain Points</div>
+      <div class="q-progress"><span class="q-tag">Question 1 of 1</span><span class="q-sec-name">Pain Points</span></div>
+      <div class="q-dots"><div class="qd active"></div></div>
       <p class="q-text">Which activities take the most time in your firm? <span class="required-star">*</span></p>
       <p class="q-sub">Select all that apply — use letter keys or click</p>
       <div class="cb-list">
@@ -734,6 +722,7 @@
 
   <div class="screen" data-idx="14" data-type="section" data-s="5">
     <div class="content">
+      <div class="sec-pills"><div class="sp done"></div><div class="sp done"></div><div class="sp done"></div><div class="sp done"></div><div class="sp active"></div></div>
       <div class="sec-eyebrow">Section 5 of 5</div>
       <h2 class="sec-title">Priority<br>Automation</h2>
       <ul class="sec-preview">
@@ -746,7 +735,8 @@
 
   <div class="screen" data-idx="15" data-type="q" data-s="5" data-qi="1" data-qt="1" data-req="true" data-vtype="textarea" data-field="automate">
     <div class="content">
-      <div class="q-eyebrow"><span class="q-num">Q1 of 1</span> Priority Automation</div>
+      <div class="q-progress"><span class="q-tag">Question 1 of 1</span><span class="q-sec-name">Priority Automation</span></div>
+      <div class="q-dots"><div class="qd active"></div></div>
       <p class="q-text">If you could automate just one process for the demo, which would it be? <span class="required-star">*</span></p>
       <textarea id="automate" placeholder="Describe the process you'd most like to automate…"></textarea>
       <div class="err">Please describe the process you'd like to automate.</div>
@@ -776,10 +766,9 @@
 </div>
 
 <script>
-  const screens   = Array.from(document.querySelectorAll('.screen'));
-  const TOTAL     = screens.length;
-  const SEC_NAMES = ['','Basic Firm Information','Firm Size & Scale','Services Offered','Pain Points','Priority Automation'];
-  let current = 0;
+  const screens = Array.from(document.querySelectorAll('.screen'));
+  const TOTAL   = screens.length;
+  let current   = 0;
 
   /* ── Checkbox click ── */
   document.querySelectorAll('.cb-opt').forEach(opt => {
@@ -790,41 +779,12 @@
     });
   });
 
-  /* ── Update progress header ── */
+  /* ── Update nav arrows ── */
   function updateHeader() {
-    const s   = screens[current];
-    const typ = s.dataset.type;
-    const hdr = document.getElementById('prog-header');
-
-    if (typ === 'welcome' || typ === 'end') {
-      hdr.style.display = 'none';
-    } else {
-      hdr.style.display = 'flex';
-      const secNum = parseInt(s.dataset.s);
-
-      for (let i = 1; i <= 5; i++) {
-        const seg = document.getElementById('seg-' + i);
-        seg.classList.remove('done', 'active');
-        if (i < secNum)       seg.classList.add('done');
-        else if (i === secNum) seg.classList.add('active');
-      }
-
-      document.getElementById('prog-section-label').innerHTML =
-        `Section <span>${secNum} of 5</span> — ${SEC_NAMES[secNum]}`;
-
-      const qLabel = document.getElementById('prog-q-label');
-      if (typ === 'q') {
-        qLabel.style.display = 'block';
-        qLabel.innerHTML = `Question <span>${s.dataset.qi} of ${s.dataset.qt}</span>`;
-      } else {
-        qLabel.style.display = 'none';
-      }
-    }
-
+    const typ = screens[current].dataset.type;
     document.getElementById('btn-prev').disabled = current === 0;
     document.getElementById('btn-next').disabled = current >= TOTAL - 1;
-    document.getElementById('nav-arrows').style.display =
-      typ === 'end' ? 'none' : 'flex';
+    document.getElementById('nav-arrows').style.display = typ === 'end' ? 'none' : 'flex';
   }
 
   /* ── Focus first input ── */
