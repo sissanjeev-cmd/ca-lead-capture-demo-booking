@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>From Spreadsheets To Smart Workflows — CA Firm Demo Request</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #1a1a2e;
+      --surface: #16213e;
+      --accent: #4f8ef7;
+      --accent-dark: #3a72d8;
+      --text: #ffffff;
+      --muted: rgba(255,255,255,0.55);
+      --border: rgba(255,255,255,0.18);
+      --error: #ff6b6b;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Progress bar ── */
+    #progress-wrap {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(255,255,255,0.1);
+      z-index: 50;
+    }
+    #progress-bar {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+      width: 0%;
+    }
+
+    /* ── Navigation arrows (bottom right) ── */
+    #nav-arrows {
+      position: fixed;
+      bottom: 28px;
+      right: 32px;
+      display: flex;
+      gap: 8px;
+      z-index: 50;
+    }
+    .nav-arrow {
+      width: 40px; height: 40px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.12);
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .nav-arrow:hover { background: rgba(255,255,255,0.22); }
+    .nav-arrow:disabled { opacity: 0.25; cursor: default; }
+
+    /* ── Step counter ── */
+    #step-counter {
+      position: fixed;
+      bottom: 36px;
+      left: 32px;
+      font-size: 13px;
+      color: var(--muted);
+      z-index: 50;
+    }
+
+    /* ── Screens ── */
+    #screens {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px 100px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(60px);
+      transition: opacity 0.45s cubic-bezier(0.4,0,0.2,1),
+                  transform 0.45s cubic-bezier(0.4,0,0.2,1);
+    }
+    .screen.active {
+      opacity: 1;
+      pointer-events: all;
+      transform: translateY(0);
+    }
+    .screen.exit-up {
+      opacity: 0;
+      transform: translateY(-60px);
+    }
+
+    .content {
+      width: 100%;
+      max-width: 640px;
+    }
+
+    /* ── Welcome screen ── */
+    .welcome-label {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .welcome-title {
+      font-size: clamp(26px, 4vw, 40px);
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 18px;
+    }
+    .welcome-title em { font-style: italic; color: var(--accent); }
+    .welcome-desc {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 500px;
+    }
+    .time-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-bottom: 36px;
+    }
+
+    /* ── Question screens ── */
+    .q-number {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .q-arrow { font-size: 11px; }
+    .q-text {
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 8px;
+    }
+    .q-hint {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .required-star { color: var(--error); }
+
+    /* ── Input fields ── */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"] {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--border);
+      color: #fff;
+      font-size: 22px;
+      font-family: inherit;
+      padding: 8px 0;
+      width: 100%;
+      max-width: 480px;
+      outline: none;
+      transition: border-color 0.2s;
+      caret-color: var(--accent);
+    }
+    input[type="text"]::placeholder,
+    input[type="email"]::placeholder,
+    input[type="tel"]::placeholder { color: rgba(255,255,255,0.25); }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="tel"]:focus { border-bottom-color: var(--accent); }
+
+    /* Textarea */
+    textarea {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--border);
+      color: #fff;
+      font-size: 18px;
+      font-family: inherit;
+      padding: 8px 0;
+      width: 100%;
+      max-width: 520px;
+      outline: none;
+      resize: none;
+      min-height: 80px;
+      transition: border-color 0.2s;
+      caret-color: var(--accent);
+      line-height: 1.6;
+    }
+    textarea::placeholder { color: rgba(255,255,255,0.25); }
+    textarea:focus { border-bottom-color: var(--accent); }
+
+    /* Select (dropdown) */
+    .select-wrap {
+      position: relative;
+      max-width: 360px;
+    }
+    select {
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 16px;
+      font-family: inherit;
+      padding: 12px 44px 12px 16px;
+      width: 100%;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      transition: border-color 0.2s;
+    }
+    select option { background: #1e2a45; color: #fff; }
+    select:focus { border-color: var(--accent); }
+    .select-arrow {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Checkboxes */
+    .checkbox-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 520px;
+    }
+    .cb-option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 13px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      font-size: 15px;
+      user-select: none;
+    }
+    .cb-option:hover { border-color: var(--accent); background: rgba(79,142,247,0.07); }
+    .cb-option.checked { border-color: var(--accent); background: rgba(79,142,247,0.13); }
+    .cb-key {
+      width: 24px; height: 24px;
+      border: 1.5px solid var(--border);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+    }
+    .cb-option.checked .cb-key {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: #fff;
+    }
+    .cb-option input[type="checkbox"] { display: none; }
+
+    /* OK button */
+    .ok-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 24px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .ok-btn:hover { background: var(--accent-dark); }
+    .ok-btn:active { transform: scale(0.97); }
+    .ok-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+    }
+    .ok-hint kbd {
+      display: inline-block;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: inherit;
+      font-size: 11px;
+    }
+
+    /* ── Error ── */
+    .error-msg {
+      color: var(--error);
+      font-size: 13px;
+      margin-top: 10px;
+      display: none;
+    }
+    .show-error .error-msg { display: block; }
+    .show-error input,
+    .show-error textarea,
+    .show-error select { border-color: var(--error) !important; }
+
+    /* ── Thank you screen ── */
+    .ty-icon {
+      width: 64px; height: 64px;
+      background: rgba(79,142,247,0.15);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 28px;
+    }
+    .ty-title {
+      font-size: clamp(22px, 3vw, 32px);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .ty-desc {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 36px;
+      max-width: 460px;
+    }
+    .calendly-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent);
+      color: #fff;
+      text-decoration: none;
+      padding: 15px 32px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .calendly-btn:hover { background: var(--accent-dark); }
+    .calendly-btn:active { transform: scale(0.97); }
+
+    @media (max-width: 500px) {
+      .screen { padding: 50px 20px 110px; }
+      #nav-arrows { bottom: 20px; right: 20px; }
+      #step-counter { bottom: 28px; left: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Progress -->
+<div id="progress-wrap"><div id="progress-bar"></div></div>
+
+<!-- Step counter -->
+<div id="step-counter"></div>
+
+<!-- Nav arrows -->
+<div id="nav-arrows">
+  <button class="nav-arrow" id="btn-up" onclick="navigate(-1)" title="Previous">&#8679;</button>
+  <button class="nav-arrow" id="btn-down" onclick="navigate(1)" title="Next">&#8681;</button>
+</div>
+
+<div id="screens">
+
+  <!-- ══ 0: WELCOME ══ -->
+  <div class="screen active" data-index="0">
+    <div class="content">
+      <div class="time-badge">⏱ Takes 2 minutes</div>
+      <div class="welcome-label">CA Firm Demo Request</div>
+      <h1 class="welcome-title">Welcome to <em>From Spreadsheets<br>To Smart Workflows</em></h1>
+      <p class="welcome-desc">Tell us about your CA firm and book a free 30-minute live demo in under 3 minutes.</p>
+      <button class="ok-btn" onclick="navigate(1)">Let's get started <span>&#8594;</span></button>
+      <p class="ok-hint">Press <kbd>Enter ↵</kbd> to begin</p>
+    </div>
+  </div>
+
+  <!-- ══ 1: Firm Name ══ -->
+  <div class="screen" data-index="1" data-required="true">
+    <div class="content">
+      <div class="q-number">1 <span class="q-arrow">&#8594;</span></div>
+      <p class="q-text">What is the name of your CA firm? <span class="required-star">*</span></p>
+      <input type="text" id="firm-name" placeholder="Type your answer here…" autocomplete="off" />
+      <div class="error-msg">Please enter your firm name.</div>
+      <button class="ok-btn" onclick="navigate(1)">OK <span>&#10003;</span></button>
+      <p class="ok-hint">Press <kbd>Enter ↵</kbd></p>
+    </div>
+  </div>
+
+  <!-- ══ 2: Contact Person ══ -->
+  <div class="screen" data-index="2" data-required="true">
+    <div class="content">
+      <div class="q-number">2 <span class="q-arrow">&#8594;</span></div>
+      <p class="q-text">Your full name (Contact Person) <span class="required-star">*</span></p>
+      <input type="text" id="contact-name" placeholder="Type your answer here…" autocomplete="off" />
+      <div class="error-msg">Please enter your full name.</div>
+      <button class="ok-btn" onclick="navigate(1)">OK <span>&#10003;</span></button>
+      <p class="ok-hint">Press <kbd>Enter ↵</kbd></p>
+    </div>
+  </div>
+
+  <!-- ══ 3: Role ══ -->
+  <div class="screen" data-index="3">
+    <div class="content">
+      <div class="q-number">3 <span class="q-arrow">&#8594;</span></div>
+      <p class="q-text">What is your role in the firm?</p>
+      <p class="q-hint">Optional</p>
+      <div class="select-wrap">
+        <select id="role">
+          <option value="">— Select your role —</option>
+          <option>Partner</option>
+          <option>Senior CA</option>
+          <option>Junior CA</option>
+          <option>Manager</option>
+          <option>Accounts Executive</option>
+          <option>Other</option>
+        </select>
+        <span class="select-arrow">&#9660;</span>
+      </div>
+      <br/>
+      <button class="ok-btn" onclick="navigate(1)">OK <span>&#10003;</span></button>
+      <p class="ok-hint">Press <kbd>Enter ↵</kbd></p>
+    </div>
+  </div>
+
+  <!-- ══ 4: Email ══ -->
+  <div class="screen" data-index="4" data-required="true" data-type="email">
+    <div class="content">
+      <div class="q-number">4 <span class="q-arrow">&#8594;</span></div>
+      <p class="q-text">Your email address <span class="required-star">*</span></p>
+      <p class="q-hint">Used for your demo booking confirmation</p>
+      <input type="email" id="email" placeholder="name@example.com" autocomplete="email" />
+      <div class="error-msg">Please enter a valid email address.</div>
+      <button class="ok-btn" onclick="navigate(1)">OK <span>&#10003;</span></button>
+      <p class="ok-hint">Press <kbd>Enter ↵</kbd></p>
+    </div>
+  </div>
+
+  <!-- ══ 5: Phone ══ -->
+  <div class="screen" data-index="5" data-required="true">
+    <div class="content">
+      <div class="q-number">5 <span class="q-arrow">&#8594;</span></div>
+      <p class="q-text">Your mobile number <span class="required-star">*</span></p>
+      <input type="tel" id="phone" placeholder="+91 98765 43210" autocomplete="tel" />
+      <div class="error-msg">Please enter your mobile number.</div>
+      <button class="ok-btn" onclick="navigate(1)">OK <span>&#10003;</span></button>
+      <p class="ok-hint">Press <kbd>Enter ↵</kbd></p>
+    </div>
+  </div>
+
+  <!-- ══ 6: Clients ══ -->
+  <div class="screen" data-index="6" data-required="true" data-type="select">
+    <div class="content">
+      <div class="q-number">6 <span class="q-arrow">&#8594;</span></div>
+      <p class="q-text">How many clients does your firm currently handle? <span class="required-star">*</span></p>
+      <div class="select-wrap">
+        <select id="clients">
+          <option value="">— Select a range —</option>
+          <option>1–10</option>
+          <option>11–25</option>
+          <option>26–50</option>
+          <option>51–100</option>
+          <option>100+</option>
+        </select>
+        <span class="select-arrow">&#9660;</span>
+      </div>
+      <div class="error-msg">Please select a range.</div>
+      <br/>
+      <button class="ok-btn" onclick="navigate(1)">OK <span>&#10003;</span></button>
+      <p class="ok-hint">Press <kbd>Enter ↵</kbd></p>
+    </div>
+  </div>
+
+  <!-- ══ 7: Team Size ══ -->
+  <div class="screen" data-index="7" data-required="true" data-type="select">
+    <div class="content">
+      <div class="q-number">7 <span class="q-arrow">&#8594;</span></div>
+      <p class="q-text">How many team members does your firm have? <span class="required-star">*</span></p>
+      <div class="select-wrap">
+        <select id="team">
+          <option value="">— Select a range —</option>
+          <option>Just me</option>
+          <option>2–5</option>
+          <option>6–10</option>
+          <option>11–20</option>
+          <option>20+</option>
+        </select>
+        <span class="select-arrow">&#9660;</span>
+      </div>
+      <div class="error-msg">Please select a range.</div>
+      <br/>
+      <button class="ok-btn" onclick="navigate(1)">OK <span>&#10003;</span></button>
+      <p class="ok-hint">Press <kbd>Enter ↵</kbd></p>
+    </div>
+  </div>
+
+  <!-- ══ 8: Services ══ -->
+  <div class="screen" data-index="8" data-required="true" data-type="checkbox" data-name="services">
+    <div class="content">
+      <div class="q-number">8 <span class="q-arrow">&#8594;</span></div>
+      <p class="q-text">Which services does your firm offer? <span class="required-star">*</span></p>
+      <p class="q-hint">Choose as many as you like</p>
+      <div class="checkbox-list" id="services-list">
+        <label class="cb-option"><input type="checkbox" name="services" value="GST Filing"><div class="cb-key">A</div> GST Filing</label>
+        <label class="cb-option"><input type="checkbox" name="services" value="IT Returns"><div class="cb-key">B</div> IT Returns</label>
+        <label class="cb-option"><input type="checkbox" name="services" value="Audit & Assurance"><div class="cb-key">C</div> Audit &amp; Assurance</label>
+        <label class="cb-option"><input type="checkbox" name="services" value="Accounting & Bookkeeping"><div class="cb-key">D</div> Accounting &amp; Bookkeeping</label>
+        <label class="cb-option"><input type="checkbox" name="services" value="TDS/TCS Compliance"><div class="cb-key">E</div> TDS/TCS Compliance</label>
+        <label class="cb-option"><input type="checkbox" name="services" value="Payroll Processing"><div class="cb-key">F</div> Payroll Processing</label>
+        <label class="cb-option"><input type="checkbox" name="services" value="ROC Filings"><div class="cb-key">G</div> ROC Filings</label>
+        <label class="cb-option"><input type="checkbox" name="services" value="Tax Planning & Advisory"><div class="cb-key">H</div> Tax Planning &amp; Advisory</label>
+        <label class="cb-option"><input type="checkbox" name="services" value="Others"><div class="cb-key">I</div> Others</label>
+      </div>
+      <div class="error-msg">Please select at least one service.</div>
+      <button class="ok-btn" onclick="navigate(1)" style="margin-top:20px">OK <span>&#10003;</span></button>
+      <p class="ok-hint">Press <kbd>Enter ↵</kbd></p>
+    </div>
+  </div>
+
+  <!-- ══ 9: Pain Points ══ -->
+  <div class="screen" data-index="9" data-required="true" data-type="checkbox" data-name="pain">
+    <div class="content">
+      <div class="q-number">9 <span class="q-arrow">&#8594;</span></div>
+      <p class="q-text">Which activities take the most time in your firm? <span class="required-star">*</span></p>
+      <p class="q-hint">Choose as many as you like</p>
+      <div class="checkbox-list" id="pain-list">
+        <label class="cb-option"><input type="checkbox" name="pain" value="Data entry from client documents"><div class="cb-key">A</div> Data entry from client documents</label>
+        <label class="cb-option"><input type="checkbox" name="pain" value="GST reconciliation"><div class="cb-key">B</div> GST reconciliation</label>
+        <label class="cb-option"><input type="checkbox" name="pain" value="Bank reconciliation"><div class="cb-key">C</div> Bank reconciliation</label>
+        <label class="cb-option"><input type="checkbox" name="pain" value="Generating reports for clients"><div class="cb-key">D</div> Generating reports for clients</label>
+        <label class="cb-option"><input type="checkbox" name="pain" value="Sending reminders to clients"><div class="cb-key">E</div> Sending reminders to clients</label>
+        <label class="cb-option"><input type="checkbox" name="pain" value="Managing filing deadlines"><div class="cb-key">F</div> Managing filing deadlines</label>
+        <label class="cb-option"><input type="checkbox" name="pain" value="IT return filing"><div class="cb-key">G</div> IT return filing</label>
+        <label class="cb-option"><input type="checkbox" name="pain" value="Others"><div class="cb-key">H</div> Others</label>
+      </div>
+      <div class="error-msg">Please select at least one activity.</div>
+      <button class="ok-btn" onclick="navigate(1)" style="margin-top:20px">OK <span>&#10003;</span></button>
+      <p class="ok-hint">Press <kbd>Enter ↵</kbd></p>
+    </div>
+  </div>
+
+  <!-- ══ 10: Priority Automation ══ -->
+  <div class="screen" data-index="10" data-required="true" data-type="textarea">
+    <div class="content">
+      <div class="q-number">10 <span class="q-arrow">&#8594;</span></div>
+      <p class="q-text">If you could automate just one process for demo purpose, which would it be? <span class="required-star">*</span></p>
+      <textarea id="automate" placeholder="Type your answer here…"></textarea>
+      <div class="error-msg">Please describe the process you'd like to automate.</div>
+      <button class="ok-btn" onclick="navigate(1)">Submit <span>&#8594;</span></button>
+      <p class="ok-hint">Press <kbd>Ctrl + Enter</kbd> to submit</p>
+    </div>
+  </div>
+
+  <!-- ══ 11: THANK YOU ══ -->
+  <div class="screen" data-index="11">
+    <div class="content">
+      <div class="ty-icon">&#10003;</div>
+      <h2 class="ty-title">Thank you! Your information<br>has been received.</h2>
+      <p class="ty-desc">Click below to book your free 30-minute live demo.</p>
+      <a class="calendly-btn" href="https://calendly.com/learnyourway-ai/new-meeting" target="_blank" rel="noopener">
+        &#128197; Book Your Free 30-Minute Live Demo
+      </a>
+    </div>
+  </div>
+
+</div><!-- /#screens -->
+
+<script>
+  const screens = Array.from(document.querySelectorAll('.screen'));
+  const TOTAL_Q = 10; // questions only (screens 1–10)
+  let current = 0;
+
+  // ── Checkbox interactivity ──
+  document.querySelectorAll('.cb-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const cb = opt.querySelector('input[type="checkbox"]');
+      cb.checked = !cb.checked;
+      opt.classList.toggle('checked', cb.checked);
+    });
+  });
+
+  // ── Focus first input when screen becomes active ──
+  function focusScreen(idx) {
+    const s = screens[idx];
+    const inp = s.querySelector('input:not([type="checkbox"]), textarea, select');
+    if (inp) setTimeout(() => inp.focus(), 480);
+  }
+
+  // ── Validation ──
+  function validateCurrent() {
+    const s = screens[current];
+    s.classList.remove('show-error');
+    if (!s.dataset.required) return true;
+
+    const type = s.dataset.type || 'text';
+
+    if (type === 'checkbox') {
+      const name = s.dataset.name;
+      const ok = s.querySelectorAll(`input[name="${name}"]:checked`).length > 0;
+      if (!ok) { s.classList.add('show-error'); return false; }
+      return true;
+    }
+
+    if (type === 'select') {
+      const sel = s.querySelector('select');
+      if (!sel.value) { s.classList.add('show-error'); return false; }
+      return true;
+    }
+
+    if (type === 'email') {
+      const val = s.querySelector('input').value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { s.classList.add('show-error'); return false; }
+      return true;
+    }
+
+    if (type === 'textarea') {
+      const val = s.querySelector('textarea').value.trim();
+      if (!val) { s.classList.add('show-error'); return false; }
+      return true;
+    }
+
+    // default text / tel
+    const inp = s.querySelector('input');
+    if (!inp.value.trim()) { s.classList.add('show-error'); return false; }
+    return true;
+  }
+
+  // ── Navigate ──
+  function navigate(dir) {
+    if (dir === 1 && current < screens.length - 1) {
+      if (current > 0 && current < 11) { // question screens
+        if (!validateCurrent()) return;
+      }
+      screens[current].classList.add('exit-up');
+      screens[current].classList.remove('active');
+      setTimeout(() => screens[current - 1 + 0].classList.remove('exit-up'), 500); // cleanup handled below
+      current++;
+      screens[current].classList.add('active');
+      updateUI();
+      focusScreen(current);
+    } else if (dir === -1 && current > 0) {
+      screens[current].classList.remove('active');
+      current--;
+      screens[current].classList.add('active');
+      updateUI();
+      focusScreen(current);
+    }
+  }
+
+  function updateUI() {
+    const bar = current === 0 ? 0 : Math.round((current / TOTAL_Q) * 100);
+    document.getElementById('progress-bar').style.width = Math.min(bar, 100) + '%';
+    document.getElementById('btn-up').disabled = current === 0;
+    document.getElementById('btn-down').disabled = current >= screens.length - 1;
+
+    const counter = document.getElementById('step-counter');
+    if (current === 0 || current === screens.length - 1) {
+      counter.textContent = '';
+    } else {
+      counter.textContent = current + ' / ' + TOTAL_Q;
+    }
+
+    // hide arrows on thank-you
+    document.getElementById('nav-arrows').style.display =
+      current === screens.length - 1 ? 'none' : 'flex';
+  }
+
+  // ── Keyboard ──
+  document.addEventListener('keydown', e => {
+    const s = screens[current];
+    const type = s.dataset.type || 'text';
+    const isTextarea = type === 'textarea';
+
+    if (e.key === 'Enter') {
+      if (isTextarea) {
+        if (e.ctrlKey || e.metaKey) { e.preventDefault(); navigate(1); }
+        // else allow newline
+      } else if (type === 'checkbox') {
+        // Enter submits checkboxes
+        e.preventDefault();
+        navigate(1);
+      } else {
+        e.preventDefault();
+        navigate(1);
+      }
+    }
+
+    // letter keys for checkboxes (A–I)
+    if (type === 'checkbox' && e.key.length === 1) {
+      const idx = e.key.toUpperCase().charCodeAt(0) - 65;
+      const opts = s.querySelectorAll('.cb-option');
+      if (idx >= 0 && idx < opts.length) {
+        const cb = opts[idx].querySelector('input[type="checkbox"]');
+        cb.checked = !cb.checked;
+        opts[idx].classList.toggle('checked', cb.checked);
+      }
+    }
+  });
+
+  // Init
+  updateUI();
+  focusScreen(0);
+</script>
+</body>
+</html>
