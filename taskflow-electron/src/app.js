@@ -6,6 +6,9 @@ const TASK_COLORS = [
 ];
 let colorIndex = 0;
 function nextTaskColor() { return TASK_COLORS[colorIndex++ % TASK_COLORS.length]; }
+function hexToRgb(hex) {
+  return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+}
 // ── State ──────────────────────────────────────────────────────────────────
 let tasks = [];
 let filter = 'all';
@@ -347,7 +350,8 @@ function renderCard(t) {
   const priorityMap = { high: 'badge-high', medium: 'badge-medium', low: 'badge-low' };
   const priorityIcon = { high: '🔴', medium: '🟡', low: '🟢' };
   const col = t.color || '#a0a8c0';
-  const colorStyle = ` style="border-left:3px solid ${col};"`;
+  const [r, g, b] = hexToRgb(col);
+  const colorStyle = ` style="background:rgba(${r},${g},${b},0.10);border:1.5px solid rgba(${r},${g},${b},0.40);"`;
 
   return `
     <div class="task-card ${t.completed ? 'completed' : ''} ${isBlinking ? 'blinking' : ''}"${colorStyle}>
