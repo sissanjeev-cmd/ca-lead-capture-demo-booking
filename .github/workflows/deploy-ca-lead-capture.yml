@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'ca-lead-capture-demo-booking/**'
+      - 'taskflow-electron/**'
   workflow_dispatch:
 
 permissions:
