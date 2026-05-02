@@ -351,7 +351,7 @@ function renderCard(t) {
   const priorityIcon = { high: '🔴', medium: '🟡', low: '🟢' };
   const col = t.color || '#a0a8c0';
   const [r, g, b] = hexToRgb(col);
-  const colorStyle = ` style="background:rgba(${r},${g},${b},0.10);border:1.5px solid rgba(${r},${g},${b},0.40);"`;
+  const colorStyle = ` style="background:rgba(${r},${g},${b},0.20);border:1.5px solid rgba(${r},${g},${b},0.60);"`;
 
   return `
     <div class="task-card ${t.completed ? 'completed' : ''} ${isBlinking ? 'blinking' : ''}"${colorStyle}>
