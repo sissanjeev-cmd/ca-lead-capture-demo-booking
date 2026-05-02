@@ -253,7 +253,7 @@ ipcMain.handle('open-card-window', (_, card) => {
   }
   const rgb = hexToRgbMain(card.color || '#a0a8c0');
   const win = new BrowserWindow({
-    width: 290, height: 170,
+    width: 300, height: 190,
     frame: false, transparent: true,
     alwaysOnTop: true, resizable: false,
     skipTaskbar: true, hasShadow: true, roundedCorners: true,

@@ -222,6 +222,36 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   50% { box-shadow: 0 0 18px rgba(255,107,53,0.55); }
 }
 .task-card.blinking { animation: alarmBlink 0.9s ease-in-out infinite; }
+.task-card.floated { opacity: 0.6; }
+
+/* Detach button */
+.btn-detach {
+  width: 100%; margin-top: 8px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  border: 1px dashed rgba(255,255,255,0.30);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.65);
+  font-size: 11px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  text-align: center; letter-spacing: 0.3px;
+  transition: all 0.18s;
+}
+.btn-detach:hover {
+  background: rgba(255,255,255,0.13);
+  border-color: rgba(255,255,255,0.55);
+  color: white;
+}
+.btn-detach-active {
+  border-color: rgba(99,210,255,0.6);
+  background: rgba(99,210,255,0.10);
+  color: #93e8ff;
+  border-style: solid;
+}
+.btn-detach-active:hover {
+  background: rgba(99,210,255,0.18);
+  color: white;
+}
 
 /* Card row */
 .card-row { display: flex; align-items: flex-start; gap: 8px; }

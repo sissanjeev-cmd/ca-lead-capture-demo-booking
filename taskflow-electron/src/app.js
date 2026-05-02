@@ -10,6 +10,7 @@ function hexToRgb(hex) {
   return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
 }
 // ── State ──────────────────────────────────────────────────────────────────
+const floatedIds = new Set();
 let tasks = [];
 let filter = 'all';
 let search = '';
@@ -345,22 +346,31 @@ function render() {
   list.querySelectorAll('[data-dismiss]').forEach(el => el.addEventListener('click', () => dismissAlarm(el.dataset.dismiss)));
   list.querySelectorAll('[data-popout]').forEach(el => el.addEventListener('click', () => {
     const t = tasks.find(x => x.id === el.dataset.popout);
-    if (t) window.taskflow.openCardWindow(t);
+    if (!t) return;
+    if (floatedIds.has(t.id)) {
+      window.taskflow.closeCardWindow(t.id);
+      floatedIds.delete(t.id);
+    } else {
+      window.taskflow.openCardWindow(t);
+      floatedIds.add(t.id);
+    }
+    render();
   }));
 }
 
 function renderCard(t) {
   const due = t.dueDate ? formatDue(t.dueDate, t.dueTime) : null;
   const isBlinking = blinkingIds.has(t.id);
+  const isFloated = floatedIds.has(t.id);
   const dueClass = due ? (due.isOverdue ? 'overdue' : due.isSoon ? 'soon' : '') : '';
   const priorityMap = { high: 'badge-high', medium: 'badge-medium', low: 'badge-low' };
   const priorityIcon = { high: '🔴', medium: '🟡', low: '🟢' };
   const col = t.color || '#a0a8c0';
   const [r, g, b] = hexToRgb(col);
-  const colorStyle = ` style="background:rgba(${r},${g},${b},0.38);border:2px solid rgba(${r},${g},${b},0.90);"`;
+  const colorStyle = ` style="background:rgba(${r},${g},${b},${isFloated ? 0.18 : 0.38});border:2px solid rgba(${r},${g},${b},0.90);"`;
 
   return `
-    <div class="task-card ${t.completed ? 'completed' : ''} ${isBlinking ? 'blinking' : ''}"${colorStyle}>
+    <div class="task-card ${t.completed ? 'completed' : ''} ${isBlinking ? 'blinking' : ''} ${isFloated ? 'floated' : ''}"${colorStyle}>
       <div class="card-row">
         <div class="checkbox ${t.completed ? 'checked' : ''}" data-toggle="${t.id}"></div>
         <div class="card-content">
@@ -378,11 +388,13 @@ function renderCard(t) {
             </div>` : ''}
         </div>
         <div class="card-actions">
-          <button class="card-btn" data-popout="${t.id}" title="Float card on desktop">⧉</button>
           <button class="card-btn" data-edit="${t.id}" title="Edit">✏️</button>
           <button class="card-btn del" data-delete="${t.id}" title="Delete">🗑</button>
         </div>
       </div>
+      <button class="btn-detach ${isFloated ? 'btn-detach-active' : ''}" data-popout="${t.id}">
+        ${isFloated ? '⊙ Floating — click to dock' : '⤢ Detach to desktop'}
+      </button>
     </div>`;
 }
 
