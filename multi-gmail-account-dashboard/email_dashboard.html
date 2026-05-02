@@ -104,11 +104,14 @@
 </head>
 <body>
 
-  <h1>📧 Daily Email Summary</h1>
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px;">
+    <h1>📧 Daily Email Summary</h1>
+    <button id="refresh-btn" onclick="fetchEmails()" style="background:#1f3a5f;color:#79c0ff;border:1px solid #388bfd;border-radius:8px;padding:8px 18px;font-size:15px;cursor:pointer;font-weight:600;">↻ Refresh</button>
+  </div>
   <p class="subtitle" id="date-line"></p>
 
-  <div class="action-bar">
-    ⚠️ Action required: Review the 5 n8n.cloud access notifications across your accounts to verify these were authorized.
+  <div class="action-bar" id="action-bar">
+    ⏳ Loading emails from n8n…
   </div>
 
   <!-- SUMMARY -->
@@ -129,65 +132,34 @@
   <div class="columns-grid" id="columns-grid"></div>
 
   <script>
-    const accounts = [
-      {
-        id: 1, idx: 1,
-        email: "learnyourway.ai@gmail.com",
-        emails: [
-          { id: "1-1", date: "Apr 23, 2026", sender: "accounts-noreply@google.com", subject: "n8n.cloud access to your Google Account", body: "You allowed n8n.cloud access to some of your Google Account data learnyourway.ai@gmail.com. If you didn't allow n8n.cloud access, someone else may be trying to access your account. Check activity.", tag: "tag-red", tagLabel: "Security", time: "8:14 AM" },
-          { id: "1-2", date: "Apr 23, 2026", sender: "hello@flutterflow.io", subject: "FlutterFlow — New features this week", body: "Child Slots, Custom Shader Upload, Supabase OAuth integration, Aspect Ratio Widget — all live now. Log in to explore the latest updates in your projects.", tag: "tag-green", tagLabel: "Tech", time: "7:30 AM" },
-          { id: "1-3", date: "Apr 23, 2026", sender: "hello@jules.ai", subject: "Jules — Early access waitlist open", body: "Jules is a new AI coding agent. Join the early access waitlist to be among the first to try it. Automate repetitive code tasks and ship faster.", tag: "tag-green", tagLabel: "Tech", time: "6:45 AM" },
-          { id: "1-4", date: "Apr 23, 2026", sender: "newsletter@aiautomation.society", subject: "AI Automation Society — Claude + HyperFrames", body: "New video: Using Claude and HyperFrames for automated video editing workflows. Watch how AI agents can handle multi-step video production pipelines.", tag: "tag-blue", tagLabel: "Newsletter", time: "6:00 AM" },
-        ]
-      },
-      {
-        id: 2, idx: 2,
-        email: "garg1969sanjeev@gmail.com",
-        emails: [
-          { id: "2-1", date: "Apr 23, 2026", sender: "accounts-noreply@google.com", subject: "n8n.cloud access to your Google Account", body: "You allowed n8n.cloud access to some of your Google Account data garg1969sanjeev@gmail.com. If you didn't allow this, someone else may be trying to access your account.", tag: "tag-red", tagLabel: "Security", time: "8:14 AM" },
-          { id: "2-2", date: "Apr 23, 2026", sender: "recruiter@dhl.com", subject: "DHL Supply Chain Program Manager — CCT", body: "About Us: DHL Supply Chain India is a leading logistics provider. We are hiring a Program Manager - CCT. Strong communication and stakeholder management skills required.", tag: "tag-blue", tagLabel: "Job", time: "9:20 AM" },
-          { id: "2-3", date: "Apr 23, 2026", sender: "notifications@linkedin.com", subject: "LinkedIn: David may know you", body: "You and David have connections in common. Connect to grow your professional network. David works in operations management.", tag: "tag-gray", tagLabel: "Social", time: "10:05 AM" },
-        ]
-      },
-      {
-        id: 3, idx: 3,
-        email: "sis.sanjeev@gmail.com",
-        emails: [
-          { id: "3-1", date: "Apr 23, 2026", sender: "accounts-noreply@google.com", subject: "n8n.cloud access to your Google Account (1/2)", body: "You allowed n8n.cloud access to some of your Google Account data sis.sanjeev@gmail.com. This is the first of two access notifications received today.", tag: "tag-red", tagLabel: "Security", time: "8:14 AM" },
-          { id: "3-2", date: "Apr 23, 2026", sender: "accounts-noreply@google.com", subject: "n8n.cloud access to your Google Account (2/2)", body: "Second notification: n8n.cloud was granted access to your Google Account data. If you did not authorise this, please review your connected apps immediately.", tag: "tag-red", tagLabel: "Security", time: "8:15 AM" },
-          { id: "3-3", date: "Apr 23, 2026", sender: "recruiter@squircle.it", subject: "Sr. PMO & Governance Professional — Squircle IT", body: "Recruiter follow-up for the Sr. PMO and Governance Professional position at Squircle IT. We believe your profile is a strong match. Please revert at your earliest convenience.", tag: "tag-blue", tagLabel: "Job", time: "11:00 AM" },
-          { id: "3-4", date: "Apr 23, 2026", sender: "admissions@iit.kgp.ac.in", subject: "IIT KGP — 100% Live Learning Program", body: "Enroll now in IIT Kharagpur's live online program. 100% live learning, expert faculty from IIT KGP, industry-recognized certificate on completion. Limited seats available.", tag: "tag-amber", tagLabel: "Education", time: "9:45 AM" },
-        ]
-      },
-      {
-        id: 4, idx: 4,
-        email: "vmanageeverything@gmail.com",
-        emails: [
-          { id: "4-1", date: "Apr 23, 2026", sender: "accounts-noreply@google.com", subject: "n8n.cloud access to your Google Account", body: "You allowed n8n.cloud access to some of your Google Account data vmanageeverything@gmail.com. Review your security settings if this was unexpected.", tag: "tag-red", tagLabel: "Security", time: "8:14 AM" },
-          { id: "4-2", date: "Apr 23, 2026", sender: "newsletter@economist.com", subject: "The Economist — Global Energy Markets", body: "This week: how shifting geopolitics are reshaping global energy markets and what it means for investors and policymakers. Oil prices, renewables, and the energy transition.", tag: "tag-amber", tagLabel: "Newsletter", time: "7:00 AM" },
-          { id: "4-3", date: "Apr 23, 2026", sender: "news@dailydigest.com", subject: "Principal Kirk Moore called a hero", body: "The story of how Principal Kirk Moore stepped in during a critical moment at his school and was hailed a hero by parents, students, and the broader community.", tag: "tag-gray", tagLabel: "News", time: "8:00 AM" },
-        ]
-      },
-      {
-        id: 5, idx: 5,
-        email: "automation.atwork69@gmail.com",
-        emails: [
-          { id: "5-1", date: "Apr 23, 2026", sender: "accounts-noreply@google.com", subject: "n8n.cloud access to your Google Account", body: "You allowed n8n.cloud access to some of your Google Account data automation.atwork69@gmail.com. Verify this was an authorized access grant.", tag: "tag-red", tagLabel: "Security", time: "8:14 AM" },
-          { id: "5-2", date: "Apr 23, 2026", sender: "test@workflow.local", subject: "Test Email #1", body: "This is a test email to verify the workflow is reading emails correctly from this account. No action required.", tag: "tag-gray", tagLabel: "Test", time: "7:00 AM" },
-          { id: "5-3", date: "Apr 23, 2026", sender: "test@workflow.local", subject: "Test Email #2", body: "Second test email. Checking subject line and snippet extraction pipeline is working as expected.", tag: "tag-gray", tagLabel: "Test", time: "7:01 AM" },
-          { id: "5-4", date: "Apr 23, 2026", sender: "test@workflow.local", subject: "Test Email #3", body: "Third test email for complete workflow validation. All three test emails should appear in the dashboard.", tag: "tag-gray", tagLabel: "Test", time: "7:02 AM" },
-          { id: "5-5", date: "Apr 23, 2026", sender: "noreply@quora.com", subject: "Quora: Retiring at age 58 — is it possible?", body: "A highly upvoted answer discusses retiring early at 58 with practical financial planning advice including savings rate, investment strategy, and lifestyle adjustments.", tag: "tag-gray", tagLabel: "Social", time: "9:30 AM" },
-          { id: "5-6", date: "Apr 23, 2026", sender: "hello@n8n.io", subject: "n8n — Automate your workflows today", body: "Discover how n8n's workflow automation platform can save you hours every week. Connect your apps, automate repetitive tasks, and focus on what matters.", tag: "tag-green", tagLabel: "Product", time: "10:00 AM" },
-        ]
-      }
-    ];
+    const WEBHOOK_URL = 'https://automationaisanjeev.app.n8n.cloud/webhook/email-summary';
 
     const summaryCardClasses = ['sc-1','sc-2','sc-3','sc-4','sc-5'];
     const colCardClasses = ['cc-1','cc-2','cc-3','cc-4','cc-5'];
     const colBadgeClasses = ['cb-1','cb-2','cb-3','cb-4','cb-5'];
     const countClasses = ['cnt-1','cnt-2','cnt-3','cnt-4','cnt-5'];
 
+    let accounts = [];
     const deletedEmails = new Set();
+
+    function classifyEmail(from, subject) {
+      const text = (from + ' ' + subject).toLowerCase();
+      if (text.includes('security') || text.includes('alert') || text.includes('accounts.google')) return { tag: 'tag-red', tagLabel: 'Security' };
+      if (text.includes('linkedin job') || text.includes('recruiter') || text.includes('pmo') || text.includes('hiring') || text.includes('apply for')) return { tag: 'tag-blue', tagLabel: 'Job' };
+      if (text.includes('linkedin') || text.includes('facebook') || text.includes('quora') || text.includes('twitter')) return { tag: 'tag-gray', tagLabel: 'Social' };
+      if (text.includes('economist') || text.includes('newsletter') || text.includes('digest') || text.includes('weekly') || text.includes('skool')) return { tag: 'tag-amber', tagLabel: 'Newsletter' };
+      if (text.includes('flutterflow') || text.includes('n8n') || text.includes('jules') || text.includes('claude') || text.includes('scribe') || text.includes('camtasia') || text.includes('ai ')) return { tag: 'tag-green', tagLabel: 'Tech' };
+      if (text.includes('iit') || text.includes('upgrad') || text.includes('iiit') || text.includes('programme') || text.includes('course') || text.includes('learning')) return { tag: 'tag-amber', tagLabel: 'Education' };
+      if (text.includes('test')) return { tag: 'tag-gray', tagLabel: 'Test' };
+      return { tag: 'tag-gray', tagLabel: 'Email' };
+    }
+
+    function setStatus(msg, isError) {
+      const bar = document.getElementById('action-bar');
+      bar.textContent = msg;
+      bar.style.color = isError ? '#ff7b72' : '#e3b341';
+      bar.style.borderColor = isError ? '#ff7b72' : '#d29922';
+    }
 
     function updateMetrics() {
       const total = accounts.reduce((s, a) => s + a.emails.length, 0);
@@ -198,7 +170,7 @@
       document.getElementById('m-deleted').textContent = deleted;
       document.getElementById('m-remaining').textContent = remaining;
       document.getElementById('m-accounts').textContent = active;
-      accounts.forEach((a, i) => {
+      accounts.forEach(a => {
         const rem = a.emails.filter(e => !deletedEmails.has(e.id)).length;
         const del = a.emails.filter(e => deletedEmails.has(e.id)).length;
         const scount = document.getElementById('scount-' + a.id);
@@ -256,8 +228,8 @@
           <div>
             ${a.emails.map(e => `
               <div class="email-item" id="row-${e.id}">
-                <div class="email-meta-row"><span class="email-meta-label">Date</span><span class="email-meta-value">${e.date} · ${e.time}</span></div>
-                <div class="email-meta-row"><span class="email-meta-label">From</span><span class="email-meta-value">${e.sender}</span></div>
+                <div class="email-meta-row"><span class="email-meta-label">Date</span><span class="email-meta-value">${e.date}</span></div>
+                <div class="email-meta-row"><span class="email-meta-label">From</span><span class="email-meta-value">${e.from}</span></div>
                 <div class="email-meta-row" style="margin-bottom:8px;"><span class="email-meta-label">Subject</span><span class="email-subject-value">${e.subject}</span></div>
                 <div class="email-body bl-${a.id}">${e.body}</div>
                 <div class="email-footer">
@@ -272,13 +244,42 @@
       `).join('');
     }
 
-    document.getElementById('date-line').textContent =
-      new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-      + ' · 5 accounts · 17 emails processed';
+    async function fetchEmails() {
+      setStatus('⏳ Fetching emails from n8n…');
+      document.getElementById('refresh-btn').disabled = true;
+      try {
+        const res = await fetch(WEBHOOK_URL);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
 
-    renderSummary();
-    renderColumns();
-    updateMetrics();
+        deletedEmails.clear();
+        accounts = data.accounts.map((a, i) => ({
+          id: i + 1,
+          email: a.email,
+          emails: a.emails.map(e => {
+            const { tag, tagLabel } = classifyEmail(e.from, e.subject);
+            return { ...e, tag, tagLabel };
+          })
+        }));
+
+        const total = accounts.reduce((s, a) => s + a.emails.length, 0);
+        const now = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('date-line').textContent =
+          new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+          + ` · 5 accounts · ${total} emails · updated ${now}`;
+
+        renderSummary();
+        renderColumns();
+        updateMetrics();
+        setStatus('✅ Live data from n8n · Last updated ' + now);
+      } catch (err) {
+        setStatus('❌ Failed to fetch: ' + err.message, true);
+      } finally {
+        document.getElementById('refresh-btn').disabled = false;
+      }
+    }
+
+    fetchEmails();
   </script>
 </body>
 </html>
