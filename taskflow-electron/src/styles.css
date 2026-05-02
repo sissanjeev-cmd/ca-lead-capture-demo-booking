@@ -38,9 +38,9 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   align-items: center;
   gap: 7px;
 }
-#titlebar .logo-icon { font-size: 16px; }
-#titlebar .logo-text { color: white; font-size: 14px; font-weight: 700; letter-spacing: -0.3px; }
-#titlebar .logo-sub { color: rgba(255,255,255,0.35); font-size: 10px; font-weight: 400; margin-top: 1px; }
+#titlebar .logo-icon { font-size: 20px; }
+#titlebar .logo-text { color: white; font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+#titlebar .logo-sub { color: rgba(255,255,255,0.35); font-size: 12px; font-weight: 400; margin-top: 1px; }
 
 #titlebar .controls {
   -webkit-app-region: no-drag;
@@ -102,8 +102,8 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 10px;
   color: white;
-  font-size: 13px;
-  padding: 8px 12px;
+  font-size: 15px;
+  padding: 9px 13px;
   outline: none;
   font-family: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -140,7 +140,7 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   color: rgba(255,255,255,0.5);
   border-radius: 7px;
   padding: 4px 10px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -172,8 +172,8 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   padding: 5px 4px;
   text-align: center;
 }
-.stat-pill .num { font-size: 15px; font-weight: 700; color: white; }
-.stat-pill .lbl { font-size: 9px; color: rgba(255,255,255,0.38); margin-top: 1px; }
+.stat-pill .num { font-size: 19px; font-weight: 700; color: white; }
+.stat-pill .lbl { font-size: 11px; color: rgba(255,255,255,0.38); margin-top: 1px; }
 
 /* ── Progress bar ─────────────────────────────────── */
 #progress-wrap {
@@ -432,7 +432,7 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
 #search-wrap { padding: 8px 10px 8px; flex-shrink: 0; position: relative; z-index: 10; background: rgba(20, 110, 60, 0.90); }
 #search-input {
   width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09);
-  border-radius: 9px; color: white; font-size: 12px; padding: 7px 11px;
+  border-radius: 9px; color: white; font-size: 15px; padding: 9px 13px;
   outline: none; font-family: inherit; transition: border-color 0.2s;
 }
 #search-input:focus { border-color: rgba(255,107,53,0.5); }
@@ -445,9 +445,9 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0; position: relative; z-index: 10;
 }
-.bottom-count { color: rgba(255,255,255,0.25); font-size: 10px; }
+.bottom-count { color: rgba(255,255,255,0.25); font-size: 13px; }
 .btn-clear {
-  color: rgba(255,255,255,0.25); font-size: 10px; cursor: pointer;
+  color: rgba(255,255,255,0.25); font-size: 13px; cursor: pointer;
   background: none; border: none; font-family: inherit;
   transition: color 0.15s;
 }
