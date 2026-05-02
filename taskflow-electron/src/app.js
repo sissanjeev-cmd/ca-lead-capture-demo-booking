@@ -1,3 +1,11 @@
+// ── Task colour palette ────────────────────────────────────────────────────
+const TASK_COLORS = [
+  '#60a5fa','#a78bfa','#f472b6','#4ade80',
+  '#fbbf24','#22d3ee','#2dd4bf','#fb7185',
+  '#818cf8','#fb923c'
+];
+let colorIndex = 0;
+function nextTaskColor() { return TASK_COLORS[colorIndex++ % TASK_COLORS.length]; }
 // ── State ──────────────────────────────────────────────────────────────────
 let tasks = [];
 let filter = 'all';
@@ -20,6 +28,11 @@ async function init() {
   buildUI();
   tasks = await window.taskflow.loadTasks();
   isAlwaysOnTop = await window.taskflow.getAlwaysOnTop();
+
+  // Assign colours to any tasks that don't have one yet
+  let colorsAdded = false;
+  tasks = tasks.map(t => { if (!t.color) { colorsAdded = true; return { ...t, color: nextTaskColor() }; } return t; });
+  if (colorsAdded) persist();
 
   // Restore already-triggered alarms
   tasks.forEach(t => {
@@ -333,9 +346,11 @@ function renderCard(t) {
   const dueClass = due ? (due.isOverdue ? 'overdue' : due.isSoon ? 'soon' : '') : '';
   const priorityMap = { high: 'badge-high', medium: 'badge-medium', low: 'badge-low' };
   const priorityIcon = { high: '🔴', medium: '🟡', low: '🟢' };
+  const col = t.color || '#a0a8c0';
+  const colorStyle = ` style="border-left:3px solid ${col};"`;
 
   return `
-    <div class="task-card ${t.completed ? 'completed' : ''} ${isBlinking ? 'blinking' : ''}">
+    <div class="task-card ${t.completed ? 'completed' : ''} ${isBlinking ? 'blinking' : ''}"${colorStyle}>
       <div class="card-row">
         <div class="checkbox ${t.completed ? 'checked' : ''}" data-toggle="${t.id}"></div>
         <div class="card-content">
@@ -376,7 +391,8 @@ function addQuickTask(title) {
     dueDate: '',
     dueTime: '',
     reminderEnabled: false,
-    alarmTriggered: false
+    alarmTriggered: false,
+    color: nextTaskColor()
   });
   persist(); render();
 }
@@ -465,7 +481,8 @@ function saveModal() {
       description: $('m-desc').value.trim(),
       priority: modalPriority, completed: false, createdAt: Date.now(),
       dueDate: $('m-date').value, dueTime: $('m-time').value,
-      reminderEnabled: modalReminderOn, alarmTriggered: false
+      reminderEnabled: modalReminderOn, alarmTriggered: false,
+      color: nextTaskColor()
     });
   }
 

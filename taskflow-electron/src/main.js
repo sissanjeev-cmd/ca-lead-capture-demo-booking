@@ -66,21 +66,19 @@ function createWindow() {
     maxHeight: 800,
     frame: false,
     transparent: true,
-    vibrancy: 'under-window',
-    visualEffectState: 'active',
     alwaysOnTop: true,
     resizable: true,
     skipTaskbar: true,
     hasShadow: true,
     roundedCorners: true,
     webPreferences: {
-      preload: path.join(__dirname, 'src/preload.js'),
+      preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'src/index.html'));
+  mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
   mainWindow.on('moved', () => {
     windowBounds = mainWindow.getBounds();
