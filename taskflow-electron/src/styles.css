@@ -22,7 +22,7 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
 #titlebar {
   -webkit-app-region: drag;
   user-select: none;
-  background: rgba(120, 20, 80, 0.90);
+  background: rgba(210, 0, 120, 0.90);
   border-bottom: 1px solid rgba(255,255,255,0.08);
   padding: 10px 14px;
   display: flex;
@@ -93,7 +93,7 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   flex-shrink: 0;
   position: relative;
   z-index: 10;
-  background: rgba(20, 60, 160, 0.90);
+  background: rgba(0, 80, 255, 0.90);
 }
 
 .glass-input {
@@ -130,7 +130,7 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   position: relative;
   z-index: 10;
   overflow-x: auto;
-  background: rgba(0, 100, 120, 0.90);
+  background: rgba(120, 0, 255, 0.90);
 }
 #filter-row::-webkit-scrollbar { display: none; }
 
@@ -162,7 +162,7 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   flex-shrink: 0;
   position: relative;
   z-index: 10;
-  background: rgba(140, 70, 10, 0.90);
+  background: rgba(255, 100, 0, 0.90);
 }
 .stat-pill {
   flex: 1;
@@ -429,7 +429,7 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
 .empty-icon { font-size: 32px; margin-bottom: 8px; display: block; }
 
 /* ── Search ───────────────────────────────────────── */
-#search-wrap { padding: 8px 10px 8px; flex-shrink: 0; position: relative; z-index: 10; background: rgba(20, 110, 60, 0.90); }
+#search-wrap { padding: 8px 10px 8px; flex-shrink: 0; position: relative; z-index: 10; background: rgba(0, 200, 80, 0.90); }
 #search-input {
   width: 100%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09);
   border-radius: 9px; color: white; font-size: 15px; padding: 9px 13px;
