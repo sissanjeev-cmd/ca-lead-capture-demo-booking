@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; background: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif; }
+
+    #card {
+      height: 100vh;
+      padding: 11px 13px 12px;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      -webkit-app-region: drag;
+      position: relative;
+      overflow: hidden;
+    }
+    #card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    }
+
+    .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+
+    .card-title { color: white; font-size: 15px; font-weight: 700; line-height: 1.35; flex: 1; }
+    .card-desc  { color: rgba(255,255,255,0.55); font-size: 12px; line-height: 1.4; }
+
+    .card-meta { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+
+    .badge {
+      font-size: 10px; font-weight: 600; border-radius: 20px;
+      padding: 2px 8px; display: inline-flex; align-items: center; gap: 3px;
+    }
+    .badge-high   { background: rgba(239,68,68,0.25);   color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+    .badge-medium { background: rgba(251,191,36,0.25);  color: #fde68a; border: 1px solid rgba(251,191,36,0.4); }
+    .badge-low    { background: rgba(74,222,128,0.25);  color: #86efac; border: 1px solid rgba(74,222,128,0.4); }
+    .badge-overdue{ background: rgba(239,68,68,0.22);   color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
+
+    .due-label { color: rgba(255,255,255,0.45); font-size: 11px; }
+    .due-label.overdue { color: #fca5a5; }
+
+    .close-btn {
+      -webkit-app-region: no-drag;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.22);
+      color: rgba(255,255,255,0.7); font-size: 10px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.15s; outline: none;
+    }
+    .close-btn:hover { background: rgba(239,68,68,0.45); border-color: rgba(239,68,68,0.6); color: white; }
+  </style>
+</head>
+<body>
+  <div id="card">
+    <div class="card-header">
+      <div class="card-title" id="title">…</div>
+      <button class="close-btn" id="close-btn">✕</button>
+    </div>
+    <div class="card-desc" id="desc"></div>
+    <div class="card-meta" id="meta"></div>
+  </div>
+  <script>
+    let cardId = null;
+
+    window.floatingCard.onCardData(data => {
+      cardId = data.id;
+      const { r, g, b } = data;
+
+      const card = document.getElementById('card');
+      card.style.background = `rgba(${r},${g},${b},0.50)`;
+      card.style.border = `2px solid rgba(${r},${g},${b},0.85)`;
+      card.style.boxShadow = `0 8px 32px rgba(${r},${g},${b},0.35)`;
+
+      document.getElementById('title').textContent = data.title;
+
+      const desc = document.getElementById('desc');
+      if (data.description) { desc.textContent = data.description; }
+      else { desc.style.display = 'none'; }
+
+      const priorityIcon = { high: '🔴', medium: '🟡', low: '🟢' };
+      const priorityClass = { high: 'badge-high', medium: 'badge-medium', low: 'badge-low' };
+      const meta = document.getElementById('meta');
+
+      let html = `<span class="badge ${priorityClass[data.priority]}">${priorityIcon[data.priority]} ${data.priority}</span>`;
+
+      if (data.dueDate) {
+        const due = new Date(data.dueDate + (data.dueTime ? 'T' + data.dueTime : 'T00:00'));
+        const isOverdue = due < new Date();
+        const dateStr = due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const timeStr = data.dueTime ? due.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
+        html += `<span class="due-label ${isOverdue ? 'overdue' : ''}">🕐 ${[dateStr, timeStr].filter(Boolean).join(' · ')}`;
+        if (isOverdue) html += ` <span class="badge badge-overdue">Overdue</span>`;
+        html += `</span>`;
+      }
+      meta.innerHTML = html;
+    });
+
+    document.getElementById('close-btn').addEventListener('click', () => {
+      window.floatingCard.close(cardId);
+    });
+  </script>
+</body>
+</html>

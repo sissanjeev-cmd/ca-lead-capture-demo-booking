@@ -6,6 +6,15 @@ let mainWindow = null;
 let tray = null;
 let isAlwaysOnTop = true;
 let windowBounds = null;
+const floatingWindows = new Map();
+
+function hexToRgbMain(hex) {
+  return {
+    r: parseInt(hex.slice(1,3),16),
+    g: parseInt(hex.slice(3,5),16),
+    b: parseInt(hex.slice(5,7),16)
+  };
+}
 
 // ── Data path ──────────────────────────────────────────────────────────────
 const dataPath = path.join(app.getPath('userData'), 'tasks.json');
@@ -236,6 +245,46 @@ async function handleImport() {
 ipcMain.handle('load-tasks', () => loadTasks());
 ipcMain.handle('save-tasks', (_, tasks) => { saveTasks(tasks); return true; });
 ipcMain.handle('get-always-on-top', () => isAlwaysOnTop);
+
+ipcMain.handle('open-card-window', (_, card) => {
+  if (floatingWindows.has(card.id)) {
+    const existing = floatingWindows.get(card.id);
+    if (!existing.isDestroyed()) { existing.focus(); return true; }
+  }
+  const rgb = hexToRgbMain(card.color || '#a0a8c0');
+  const win = new BrowserWindow({
+    width: 290, height: 170,
+    frame: false, transparent: true,
+    alwaysOnTop: true, resizable: false,
+    skipTaskbar: true, hasShadow: true, roundedCorners: true,
+    webPreferences: {
+      preload: path.join(__dirname, 'floating-card-preload.js'),
+      contextIsolation: true, nodeIntegration: false,
+    }
+  });
+  win.loadFile(path.join(__dirname, 'floating-card.html'));
+  win.webContents.once('did-finish-load', () => {
+    win.webContents.send('card-data', { ...card, ...rgb });
+  });
+  floatingWindows.set(card.id, win);
+  win.on('closed', () => floatingWindows.delete(card.id));
+  return true;
+});
+
+ipcMain.on('close-card-window', (_, cardId) => {
+  const win = floatingWindows.get(cardId);
+  if (win && !win.isDestroyed()) win.close();
+  floatingWindows.delete(cardId);
+});
+
+ipcMain.on('send-to-back', () => {
+  if (!mainWindow) return;
+  isAlwaysOnTop = false;
+  mainWindow.setAlwaysOnTop(false);
+  mainWindow.blur();
+  updateTrayMenu();
+  mainWindow.webContents.send('always-on-top-changed', false);
+});
 
 ipcMain.on('set-always-on-top', (_, value) => {
   isAlwaysOnTop = value;

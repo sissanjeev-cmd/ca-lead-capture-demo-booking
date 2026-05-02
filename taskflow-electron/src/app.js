@@ -170,6 +170,7 @@ function buildUI() {
       </div>
       <div class="controls">
         <button class="ctrl-btn ontop-active" id="btn-ontop" title="Toggle always on top">📌</button>
+        <button class="ctrl-btn" id="btn-sendback" title="Send dashboard to back">↙</button>
         <button class="ctrl-btn" id="btn-export" title="Export tasks">↗</button>
         <button class="ctrl-btn close-btn" id="btn-close" title="Hide to tray">✕</button>
       </div>
@@ -262,6 +263,7 @@ function buildUI() {
 
   // Wire up static events
   $('btn-ontop').addEventListener('click', toggleAlwaysOnTop);
+  $('btn-sendback').addEventListener('click', () => window.taskflow.sendToBack());
   $('btn-close').addEventListener('click', () => window.taskflow.closeWindow());
   $('btn-export').addEventListener('click', () => window.taskflow.exportTasks(tasks));
 
@@ -341,6 +343,10 @@ function render() {
   list.querySelectorAll('[data-edit]').forEach(el => el.addEventListener('click', () => openModal(el.dataset.edit)));
   list.querySelectorAll('[data-delete]').forEach(el => el.addEventListener('click', () => deleteTask(el.dataset.delete)));
   list.querySelectorAll('[data-dismiss]').forEach(el => el.addEventListener('click', () => dismissAlarm(el.dataset.dismiss)));
+  list.querySelectorAll('[data-popout]').forEach(el => el.addEventListener('click', () => {
+    const t = tasks.find(x => x.id === el.dataset.popout);
+    if (t) window.taskflow.openCardWindow(t);
+  }));
 }
 
 function renderCard(t) {
@@ -351,7 +357,7 @@ function renderCard(t) {
   const priorityIcon = { high: '🔴', medium: '🟡', low: '🟢' };
   const col = t.color || '#a0a8c0';
   const [r, g, b] = hexToRgb(col);
-  const colorStyle = ` style="background:rgba(${r},${g},${b},0.38);border:1.5px solid rgba(${r},${g},${b},0.75);"`;
+  const colorStyle = ` style="background:rgba(${r},${g},${b},0.38);border:2px solid rgba(${r},${g},${b},0.90);"`;
 
   return `
     <div class="task-card ${t.completed ? 'completed' : ''} ${isBlinking ? 'blinking' : ''}"${colorStyle}>
@@ -372,6 +378,7 @@ function renderCard(t) {
             </div>` : ''}
         </div>
         <div class="card-actions">
+          <button class="card-btn" data-popout="${t.id}" title="Float card on desktop">⧉</button>
           <button class="card-btn" data-edit="${t.id}" title="Edit">✏️</button>
           <button class="card-btn del" data-delete="${t.id}" title="Delete">🗑</button>
         </div>
