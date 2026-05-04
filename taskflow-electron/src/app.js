@@ -1,10 +1,16 @@
-import { createClient }         from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-config.js';
+import { initializeApp }                            from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithCredential, signOut, onAuthStateChanged }
+                                                   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy }
+                                                   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { firebaseConfig }                           from './firebase-config.js';
 
-// ── Supabase init ──────────────────────────────────────────────────────────
-const isConfigured = !SUPABASE_URL.startsWith('REPLACE');
-const supabase     = isConfigured ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-const useLocal     = !isConfigured;
+// ── Firebase init ──────────────────────────────────────────────────────────
+const isConfigured = !firebaseConfig.apiKey.startsWith('REPLACE');
+const fbApp  = isConfigured ? initializeApp(firebaseConfig) : null;
+const auth   = isConfigured ? getAuth(fbApp)      : null;
+const db     = isConfigured ? getFirestore(fbApp) : null;
+const useLocal = !isConfigured;
 
 // ── Task colour palette ────────────────────────────────────────────────────
 const TASK_COLORS = ['#60a5fa','#a78bfa','#f472b6','#4ade80','#fbbf24','#22d3ee','#2dd4bf','#fb7185','#818cf8','#fb923c'];
@@ -12,19 +18,6 @@ let colorIndex = 0;
 function nextColor() { return TASK_COLORS[colorIndex++ % TASK_COLORS.length]; }
 function hexToRgb(hex) {
   return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
-}
-
-// ── DB ↔ app mapping ───────────────────────────────────────────────────────
-function toDb(t, userId) {
-  return { id:t.id, user_id:userId, title:t.title, description:t.description||'',
-    priority:t.priority, completed:t.completed, created_at:t.createdAt||0,
-    due_date:t.dueDate||'', due_time:t.dueTime||'',
-    reminder_enabled:t.reminderEnabled, alarm_triggered:t.alarmTriggered, color:t.color||'#60a5fa' };
-}
-function fromDb(r) {
-  return { id:r.id, title:r.title, description:r.description, priority:r.priority,
-    completed:r.completed, createdAt:r.created_at, dueDate:r.due_date, dueTime:r.due_time,
-    reminderEnabled:r.reminder_enabled, alarmTriggered:r.alarm_triggered, color:r.color };
 }
 
 // ── State ──────────────────────────────────────────────────────────────────
@@ -39,7 +32,7 @@ let isAlwaysOnTop = true;
 let editingId     = null;
 let modalPriority = 'medium';
 let modalReminder = true;
-let realtimeChannel = null;
+let unsubSnapshot  = null;
 
 const $   = id => document.getElementById(id);
 const app = document.getElementById('app');
@@ -61,11 +54,10 @@ async function init() {
     return;
   }
 
-  // ── Supabase auth ──────────────────────────────────────────────────────
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    currentUser = session?.user ?? null;
-    if (currentUser) {
-      await loadTasks();
+  // ── Firebase auth ──────────────────────────────────────────────────────
+  onAuthStateChanged(auth, async user => {
+    currentUser = user;
+    if (user) {
       buildApp();
       startRealtimeSync();
       startAlarmChecker();
@@ -74,9 +66,6 @@ async function init() {
       showAuthScreen();
     }
   });
-
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) showAuthScreen();
 
   window.taskflow.onTasksImported(imported => {
     if (!currentUser) return;
@@ -108,34 +97,37 @@ function showAuthScreen() {
         <p class="auth-note">Tasks sync across mobile &amp; desktop</p>
       </div>
     </div>`;
-  $('btn-signin').addEventListener('click', () => {
-    supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: 'http://localhost:4321' }
-    });
+  $('btn-signin').addEventListener('click', async () => {
+    try {
+      const { idToken, accessToken } = await window.taskflow.googleSignIn();
+      const credential = GoogleAuthProvider.credential(idToken, accessToken);
+      await signInWithCredential(auth, credential);
+    } catch (e) {
+      if (e.message !== 'closed') {
+        console.error('Sign-in error:', e);
+        showToast('Sign-in failed: ' + (e.code || e.message));
+      }
+    }
   });
 }
 
-// ── Supabase data ──────────────────────────────────────────────────────────
-async function loadTasks() {
-  const { data, error } = await supabase.from('tasks').select('*')
-    .eq('user_id', currentUser.id).order('created_at', { ascending: false });
-  if (error) { console.error(error); return; }
-  tasks = (data||[]).map(fromDb);
-  tasks.forEach(t => { if (t.alarmTriggered&&!t.completed) { blinkingIds.add(t.id); alarmFiredIds.add(t.id); } });
+// ── Firestore data ─────────────────────────────────────────────────────────
+function tasksCol() {
+  return collection(db, 'users', currentUser.uid, 'tasks');
 }
 
 function startRealtimeSync() {
   stopRealtimeSync();
-  realtimeChannel = supabase.channel('tasks-sync')
-    .on('postgres_changes', { event:'*', schema:'public', table:'tasks' }, async () => {
-      await loadTasks(); render();
-    })
-    .subscribe();
+  const q = query(tasksCol(), orderBy('createdAt', 'desc'));
+  unsubSnapshot = onSnapshot(q, snap => {
+    tasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    tasks.forEach(t => { if (t.alarmTriggered&&!t.completed) { blinkingIds.add(t.id); alarmFiredIds.add(t.id); } });
+    render();
+  });
 }
 
 function stopRealtimeSync() {
-  if (realtimeChannel) { supabase.removeChannel(realtimeChannel); realtimeChannel=null; }
+  if (unsubSnapshot) { unsubSnapshot(); unsubSnapshot = null; }
 }
 
 // ── CRUD ───────────────────────────────────────────────────────────────────
@@ -145,19 +137,19 @@ async function saveTask(t) {
     if (idx>=0) tasks[idx]=t; else tasks.unshift(t);
     persistLocal(); render();
   } else {
-    const { error } = await supabase.from('tasks').upsert(toDb(t, currentUser.id));
-    if (error) console.error(error);
+    const { id, ...data } = t;
+    await setDoc(doc(tasksCol(), id), data);
   }
 }
 
 async function removeTask(id) {
   if (useLocal) { tasks=tasks.filter(x=>x.id!==id); persistLocal(); render(); }
-  else await supabase.from('tasks').delete().eq('id',id).eq('user_id',currentUser.id);
+  else await deleteDoc(doc(tasksCol(), id));
 }
 
 async function clearCompleted() {
   if (useLocal) { tasks=tasks.filter(t=>!t.completed); persistLocal(); render(); }
-  else await supabase.from('tasks').delete().eq('completed',true).eq('user_id',currentUser.id);
+  else tasks.filter(t=>t.completed).forEach(t => deleteDoc(doc(tasksCol(), t.id)));
 }
 
 // ── Alarm checker ──────────────────────────────────────────────────────────
@@ -221,8 +213,8 @@ function formatDue(dueDate, dueTime) {
 
 // ── Build app UI ───────────────────────────────────────────────────────────
 function buildApp() {
-  const u=currentUser;
-  const av=u?(u.user_metadata?.full_name||u.email||'?')[0].toUpperCase():null;
+  const u = currentUser;
+  const av = u ? (u.displayName||u.email||'?')[0].toUpperCase() : null;
 
   app.innerHTML = `
     <div id="titlebar">
@@ -231,7 +223,7 @@ function buildApp() {
         <div><div class="logo-text">TaskFlow</div><div class="logo-sub">Desktop Widget</div></div>
       </div>
       <div class="controls">
-        ${av?`<div class="user-avatar" title="${escHtml(u.user_metadata?.full_name||u.email||'')}">${av}</div>`:''}
+        ${av?`<div class="user-avatar" title="${escHtml(u.displayName||u.email||'')}">${av}</div>`:''}
         <button class="ctrl-btn ontop-active" id="btn-ontop" title="Toggle always on top">📌</button>
         <button class="ctrl-btn" id="btn-sendback" title="Send to back">↙</button>
         <button class="ctrl-btn" id="btn-export" title="Export tasks">↗</button>
@@ -294,7 +286,7 @@ function buildApp() {
   $('btn-sendback').addEventListener('click', () => window.taskflow.sendToBack());
   $('btn-close').addEventListener('click', () => window.taskflow.closeWindow());
   $('btn-export').addEventListener('click', () => window.taskflow.exportTasks(tasks));
-  if ($('btn-signout')) $('btn-signout').addEventListener('click', () => supabase.auth.signOut());
+  if ($('btn-signout')) $('btn-signout').addEventListener('click', () => signOut(auth));
 
   $('quick-input').addEventListener('keydown', e => { if (e.key==='Enter'&&e.target.value.trim()) { addQuick(e.target.value.trim()); e.target.value=''; } });
   $('btn-add-full').addEventListener('click', () => openModal(null));

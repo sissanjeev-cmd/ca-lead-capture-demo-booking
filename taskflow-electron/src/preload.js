@@ -13,4 +13,5 @@ contextBridge.exposeInMainWorld('taskflow', {
   closeCardWindow:    (id) => ipcRenderer.send('close-card-window', id),
   onTasksImported:    (cb) => ipcRenderer.on('tasks-imported', (_, tasks) => cb(tasks)),
   onAlwaysOnTopChanged:(cb) => ipcRenderer.on('always-on-top-changed', (_, val) => cb(val)),
+  googleSignIn:        () => ipcRenderer.invoke('google-sign-in'),
 });

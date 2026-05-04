@@ -21,12 +21,13 @@ function hexToRgbMain(hex) {
 }
 
 // ── Data path ──────────────────────────────────────────────────────────────
-const dataPath = path.join(app.getPath('userData'), 'tasks.json');
+const getDataPath = () => path.join(app.getPath('userData'), 'tasks.json');
 
 function loadTasks() {
   try {
-    if (fs.existsSync(dataPath)) {
-      return JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    const p = getDataPath();
+    if (fs.existsSync(p)) {
+      return JSON.parse(fs.readFileSync(p, 'utf8'));
     }
   } catch (e) { /* ignore */ }
   return [];
@@ -34,7 +35,7 @@ function loadTasks() {
 
 function saveTasks(tasks) {
   try {
-    fs.writeFileSync(dataPath, JSON.stringify(tasks, null, 2), 'utf8');
+    fs.writeFileSync(getDataPath(), JSON.stringify(tasks, null, 2), 'utf8');
   } catch (e) { /* ignore */ }
 }
 
@@ -275,6 +276,47 @@ async function handleImport() {
     dialog.showErrorBox('Import Failed', 'Could not read the file. Make sure it is a valid TaskFlow JSON export.');
   }
 }
+
+// ── Google Sign-In via dedicated auth window ───────────────────────────────
+ipcMain.handle('google-sign-in', () => {
+  return new Promise((resolve, reject) => {
+    const FIREBASE_REDIRECT = 'https://tasksreminders-9e7a8.firebaseapp.com/__/auth/handler';
+
+    const authWin = new BrowserWindow({
+      width: 500, height: 650,
+      webPreferences: { nodeIntegration: false, contextIsolation: true },
+    });
+
+    const oauthUrl =
+      'https://accounts.google.com/o/oauth2/auth' +
+      '?response_type=id_token%20token' +
+      '&client_id=644486157330-ojpp4o56qf4es95gldjk2rtuespk0ud8.apps.googleusercontent.com' +
+      '&redirect_uri=' + encodeURIComponent(FIREBASE_REDIRECT) +
+      '&scope=' + encodeURIComponent('openid email profile') +
+      '&nonce=' + Math.random().toString(36).slice(2);
+
+    authWin.loadURL(oauthUrl);
+
+    const checkUrl = (url) => {
+      if (!url.includes('firebaseapp.com/__/auth/handler')) return;
+      try {
+        const fragment = new URLSearchParams(new URL(url).hash.slice(1));
+        const idToken     = fragment.get('id_token');
+        const accessToken = fragment.get('access_token');
+        if (idToken || accessToken) {
+          authWin.destroy();
+          resolve({ idToken, accessToken });
+        }
+      } catch (_) {}
+    };
+
+    authWin.webContents.on('will-redirect',       (_, url) => checkUrl(url));
+    authWin.webContents.on('will-navigate',        (_, url) => checkUrl(url));
+    authWin.webContents.on('did-navigate',         (_, url) => checkUrl(url));
+    authWin.webContents.on('did-navigate-in-page', (_, url) => checkUrl(url));
+    authWin.on('closed', () => reject(new Error('closed')));
+  });
+});
 
 // ── IPC handlers ───────────────────────────────────────────────────────────
 ipcMain.handle('load-tasks', () => loadTasks());
