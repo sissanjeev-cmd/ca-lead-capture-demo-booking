@@ -1,6 +1,6 @@
 import { initializeApp }                            from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithCredential, signOut, onAuthStateChanged,
-         createUserWithEmailAndPassword, signInWithEmailAndPassword }
+import { getAuth, GoogleAuthProvider, signInWithCredential, signInWithPopup, signOut,
+         onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword }
                                                    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy }
                                                    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -79,6 +79,19 @@ async function init() {
 function persistLocal() { window.taskflow.saveTasks(tasks); }
 
 // ── Auth screen ────────────────────────────────────────────────────────────
+const googleSvg = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+  <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.021 17.64 11.712 17.64 9.2z" fill="#4285F4"/>
+  <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
+  <path d="M3.964 10.707A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
+  <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
+</svg>`;
+
+async function doGoogleSignIn() {
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  await signInWithPopup(auth, provider);
+}
+
 function showAuthScreen() {
   app.innerHTML = `
     <div id="auth-screen">
@@ -86,70 +99,55 @@ function showAuthScreen() {
         <span class="auth-logo">✅</span>
         <h1 class="auth-title">TaskFlow</h1>
         <p class="auth-sub">Sync your tasks across all devices</p>
+        <button class="btn-google-signin" id="btn-google-signin">
+          ${googleSvg} Sign in with Google
+        </button>
+        <button class="btn-google-create" id="btn-google-create">
+          ${googleSvg} Create account with Google
+        </button>
+        <div class="auth-divider"><span>or use email</span></div>
         <input class="auth-input" id="auth-email" type="email" placeholder="Email address" autocomplete="email" />
         <input class="auth-input" id="auth-pass"  type="password" placeholder="Password" autocomplete="current-password" />
         <p class="auth-error" id="auth-err"></p>
-        <button class="btn-auth-primary" id="btn-signin">Sign in</button>
-        <div class="auth-divider"><span>New to TaskFlow?</span></div>
-        <button class="btn-auth-secondary" id="btn-create">Create account</button>
-        <div class="auth-divider"><span>or</span></div>
-        <button class="btn-google-signin" id="btn-google">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.021 17.64 11.712 17.64 9.2z" fill="#4285F4"/>
-            <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
-            <path d="M3.964 10.707A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
-            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </button>
-        <p class="auth-note">Free · Tasks sync across all your devices</p>
+        <div style="display:flex;gap:8px">
+          <button class="btn-auth-primary" id="btn-signin" style="flex:1">Sign in</button>
+          <button class="btn-auth-secondary" id="btn-create" style="flex:1">Create account</button>
+        </div>
+        <p class="auth-note">Free · Each Google account has its own private task list</p>
       </div>
     </div>`;
 
-  const emailEl = $('auth-email');
-  const passEl  = $('auth-pass');
-  const errEl   = $('auth-err');
-
+  const errEl = $('auth-err');
   function showErr(msg) { errEl.textContent = msg; }
 
-  $('btn-signin').addEventListener('click', async () => {
-    const email = emailEl.value.trim(), pass = passEl.value;
-    if (!email || !pass) { showErr('Please enter email and password.'); return; }
-    try {
-      showErr('');
-      await signInWithEmailAndPassword(auth, email, pass);
-    } catch (e) {
-      showErr(friendlyAuthError(e.code));
+  const handleGoogleErr = (e) => {
+    console.error('Google sign-in error:', e.code, e.message);
+    if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+      showErr('Google sign-in failed: ' + (e.code || e.message));
     }
+  };
+
+  $('btn-google-signin').addEventListener('click', () => doGoogleSignIn().catch(handleGoogleErr));
+  $('btn-google-create').addEventListener('click', () => doGoogleSignIn().catch(handleGoogleErr));
+
+  $('btn-signin').addEventListener('click', async () => {
+    const email = $('auth-email').value.trim(), pass = $('auth-pass').value;
+    if (!email || !pass) { showErr('Please enter email and password.'); return; }
+    try { showErr(''); await signInWithEmailAndPassword(auth, email, pass); }
+    catch (e) { showErr(friendlyAuthError(e.code)); }
   });
 
   $('btn-create').addEventListener('click', async () => {
-    const email = emailEl.value.trim(), pass = passEl.value;
+    const email = $('auth-email').value.trim(), pass = $('auth-pass').value;
     if (!email || !pass) { showErr('Please enter email and password.'); return; }
     if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
-    try {
-      showErr('');
-      await createUserWithEmailAndPassword(auth, email, pass);
-    } catch (e) {
-      showErr(friendlyAuthError(e.code));
-    }
+    try { showErr(''); await createUserWithEmailAndPassword(auth, email, pass); }
+    catch (e) { showErr(friendlyAuthError(e.code)); }
   });
 
-  // Allow Enter key to sign in
-  [emailEl, passEl].forEach(el => el.addEventListener('keydown', e => {
+  [$('auth-email'), $('auth-pass')].forEach(el => el.addEventListener('keydown', e => {
     if (e.key === 'Enter') $('btn-signin').click();
   }));
-
-  $('btn-google').addEventListener('click', async () => {
-    try {
-      showErr('');
-      const { idToken, accessToken } = await window.taskflow.googleSignIn();
-      const credential = GoogleAuthProvider.credential(idToken, accessToken);
-      await signInWithCredential(auth, credential);
-    } catch (e) {
-      if (!e.message?.includes('closed')) showErr('Google sign-in failed. Try email/password instead.');
-    }
-  });
 }
 
 function friendlyAuthError(code) {

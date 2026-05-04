@@ -475,7 +475,7 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
 .btn-auth-secondary:hover { border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.07); color: #fff; }
 .btn-google-signin {
   display: flex; align-items: center; justify-content: center; gap: 10px;
-  width: 100%; padding: 10px 16px; margin-bottom: 12px;
+  width: 100%; padding: 11px 16px; margin-bottom: 10px;
   background: #fff; border: none; border-radius: 10px;
   font-size: 13px; font-weight: 600; color: #1a1a2e;
   cursor: pointer; font-family: inherit;
@@ -483,6 +483,15 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   transition: transform 0.15s;
 }
 .btn-google-signin:hover { transform: translateY(-1px); }
+.btn-google-create {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 10px 16px; margin-bottom: 10px;
+  background: transparent; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 10px;
+  font-size: 13px; font-weight: 600; color: #fff;
+  cursor: pointer; font-family: inherit;
+  transition: transform 0.15s, border-color 0.15s, background 0.15s;
+}
+.btn-google-create:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.07); }
 .auth-note { color: rgba(255,255,255,0.28); font-size: 11px; margin-top: 2px; }
 
 /* ── User avatar in header controls ── */

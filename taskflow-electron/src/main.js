@@ -64,7 +64,7 @@ function startStaticServer() {
 
       // Auth callback page — opened in the system browser after Google sign-in
       if (urlPath === '/auth/callback') {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
         res.end(`<!DOCTYPE html><html><head><title>TaskFlow Sign-In</title>
 <style>body{font-family:-apple-system,sans-serif;text-align:center;padding:60px 40px;background:#1a1a2e;color:#fff;}
 h2{font-size:22px;margin-bottom:12px;}p{color:rgba(255,255,255,0.5);font-size:14px;}</style></head>
@@ -160,12 +160,29 @@ function createWindow() {
 
   mainWindow.loadURL(`http://127.0.0.1:${httpPort}/`);
 
-  // Allow Firebase auth popups (signInWithPopup opens a new BrowserWindow)
+  // Forward renderer console messages to terminal for debugging
+  mainWindow.webContents.on('console-message', (_, level, msg) => {
+    console.log('[renderer]', msg);
+  });
+
+  // Allow Firebase auth popups and set Chrome UA so Google doesn't block sign-in
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.includes('firebaseapp.com') || url.includes('accounts.google.com') || url.includes('gstatic.com')) {
-      return { action: 'allow' };
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: {
+          width: 500, height: 650,
+          webPreferences: { nodeIntegration: false, contextIsolation: true },
+        },
+      };
     }
     return { action: 'deny' };
+  });
+
+  mainWindow.webContents.on('did-create-window', (win) => {
+    win.webContents.setUserAgent(
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    );
   });
 
   mainWindow.on('moved', () => {
@@ -333,7 +350,7 @@ ipcMain.handle('google-sign-in', () => {
     const oauthUrl =
       'https://accounts.google.com/o/oauth2/auth' +
       '?response_type=id_token%20token' +
-      '&client_id=593931374306-rf3jthkp7dr6l8ipsr5u0se8jrvn37si.apps.googleusercontent.com' +
+      '&client_id=644486157330-ojpp4o56qf4es95gldjk2rtuespk0ud8.apps.googleusercontent.com' +
       '&redirect_uri=' + encodeURIComponent(REDIRECT) +
       '&scope=' + encodeURIComponent('openid email profile') +
       '&prompt=select_account' +
