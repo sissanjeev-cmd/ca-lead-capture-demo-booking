@@ -282,12 +282,17 @@ ipcMain.handle('google-sign-in', () => {
   return new Promise((resolve, reject) => {
     const FIREBASE_REDIRECT = 'https://tasksreminders-9e7a8.firebaseapp.com/__/auth/handler';
 
+    // Fresh session per sign-in so Google never sees a prior session
     const authWin = new BrowserWindow({
       width: 500, height: 650,
-      webPreferences: { nodeIntegration: false, contextIsolation: true },
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+        partition: 'auth-' + Date.now(),
+      },
     });
 
-    // Google blocks sign-in in embedded WebViews — spoof a real Chrome UA
+    // Spoof a real Chrome UA so Google allows sign-in in the window
     authWin.webContents.setUserAgent(
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     );
