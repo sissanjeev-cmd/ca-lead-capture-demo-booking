@@ -66,7 +66,8 @@ function startStaticServer() {
         res.end(data);
       });
     });
-    httpServer.listen(0, '127.0.0.1', () => {
+    // Fixed port 4321 so Supabase OAuth redirect URL is predictable
+    httpServer.listen(4321, '127.0.0.1', () => {
       httpPort = httpServer.address().port;
       resolve(httpPort);
     });
