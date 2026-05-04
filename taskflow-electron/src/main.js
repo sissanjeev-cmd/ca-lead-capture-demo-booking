@@ -287,15 +287,23 @@ ipcMain.handle('google-sign-in', () => {
       webPreferences: { nodeIntegration: false, contextIsolation: true },
     });
 
+    // Google blocks sign-in in embedded WebViews — spoof a real Chrome UA
+    authWin.webContents.setUserAgent(
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    );
+
     const oauthUrl =
       'https://accounts.google.com/o/oauth2/auth' +
       '?response_type=id_token%20token' +
-      '&client_id=644486157330-ojpp4o56qf4es95gldjk2rtuespk0ud8.apps.googleusercontent.com' +
+      '&client_id=593931374306-rf3jthkp7dr6l8ipsr5u0se8jrvn37si.apps.googleusercontent.com' +
       '&redirect_uri=' + encodeURIComponent(FIREBASE_REDIRECT) +
       '&scope=' + encodeURIComponent('openid email profile') +
+      '&prompt=select_account' +
       '&nonce=' + Math.random().toString(36).slice(2);
 
     authWin.loadURL(oauthUrl);
+
+    let done = false;
 
     const checkUrl = (url) => {
       if (!url.includes('firebaseapp.com/__/auth/handler')) return;
@@ -304,8 +312,9 @@ ipcMain.handle('google-sign-in', () => {
         const idToken     = fragment.get('id_token');
         const accessToken = fragment.get('access_token');
         if (idToken || accessToken) {
-          authWin.destroy();
+          done = true;
           resolve({ idToken, accessToken });
+          authWin.destroy();
         }
       } catch (_) {}
     };
@@ -314,7 +323,7 @@ ipcMain.handle('google-sign-in', () => {
     authWin.webContents.on('will-navigate',        (_, url) => checkUrl(url));
     authWin.webContents.on('did-navigate',         (_, url) => checkUrl(url));
     authWin.webContents.on('did-navigate-in-page', (_, url) => checkUrl(url));
-    authWin.on('closed', () => reject(new Error('closed')));
+    authWin.on('closed', () => { if (!done) reject(new Error('closed')); });
   });
 });
 

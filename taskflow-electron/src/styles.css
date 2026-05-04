@@ -70,6 +70,8 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
 }
 
 .ctrl-btn.close-btn:hover { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+.ctrl-btn.btn-signout-text { width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.75); letter-spacing: 0.2px; }
+.ctrl-btn.btn-signout-text:hover { color: #fff; background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); }
 
 
 /* ── Scrollable body ──────────────────────────────── */
@@ -445,7 +447,25 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   transition: transform 0.15s; margin-bottom: 12px;
 }
 .btn-google-signin:hover { transform: translateY(-1px); }
-.auth-note { color: rgba(255,255,255,0.30); font-size: 11px; }
+.auth-divider {
+  display: flex; align-items: center; gap: 10px;
+  margin: 16px 0 12px;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.15);
+}
+.auth-divider span { color: rgba(255,255,255,0.4); font-size: 11px; white-space: nowrap; }
+.btn-google-create {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 11px 16px;
+  background: transparent; border: 1.5px solid rgba(255,255,255,0.25); border-radius: 10px;
+  font-size: 13px; font-weight: 600; color: #fff;
+  cursor: pointer; font-family: inherit;
+  transition: transform 0.15s, border-color 0.15s, background 0.15s;
+  margin-bottom: 12px;
+}
+.btn-google-create:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.07); }
+.auth-note { color: rgba(255,255,255,0.30); font-size: 11px; margin-top: 4px; }
 
 /* ── User avatar in header controls ── */
 .user-avatar {
