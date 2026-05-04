@@ -1,10 +1,12 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, Notification, dialog } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, Notification, dialog, shell } = require('electron');
 const path = require('path');
 const fs   = require('fs');
 const http = require('http');
 
 let httpServer = null;
 let httpPort   = 0;
+let pendingAuthResolve = null;
+let pendingAuthReject  = null;
 
 let mainWindow = null;
 let tray = null;
@@ -58,9 +60,50 @@ function startStaticServer() {
   return new Promise((resolve, reject) => {
     const mime = { '.html':'text/html', '.js':'application/javascript', '.css':'text/css', '.json':'application/json', '.png':'image/png', '.ico':'image/x-icon' };
     httpServer = http.createServer((req, res) => {
-      let urlPath = req.url.split('?')[0];
-      if (urlPath === '/') urlPath = '/index.html';
-      const full = path.join(__dirname, urlPath);
+      const urlPath = req.url.split('?')[0];
+
+      // Auth callback page — opened in the system browser after Google sign-in
+      if (urlPath === '/auth/callback') {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        res.end(`<!DOCTYPE html><html><head><title>TaskFlow Sign-In</title>
+<style>body{font-family:-apple-system,sans-serif;text-align:center;padding:60px 40px;background:#1a1a2e;color:#fff;}
+h2{font-size:22px;margin-bottom:12px;}p{color:rgba(255,255,255,0.5);font-size:14px;}</style></head>
+<body><h2 id="t">Signing you in to TaskFlow…</h2><p id="s">You can close this tab once done.</p>
+<script>
+const p = new URLSearchParams(window.location.hash.slice(1));
+const idToken = p.get('id_token'), accessToken = p.get('access_token');
+if (idToken || accessToken) {
+  fetch('/auth/token', {method:'POST',headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({idToken, accessToken})})
+  .then(() => { document.getElementById('t').textContent = '✅ Signed in!';
+                document.getElementById('s').textContent = 'You can close this tab.'; });
+} else {
+  document.getElementById('t').textContent = '❌ Sign-in failed';
+  document.getElementById('s').textContent = 'No tokens received. Please try again.';
+}
+</script></body></html>`);
+        return;
+      }
+
+      // Receive token posted from the auth callback page
+      if (req.method === 'POST' && urlPath === '/auth/token') {
+        let body = '';
+        req.on('data', c => body += c);
+        req.on('end', () => {
+          res.writeHead(200); res.end('ok');
+          try {
+            const { idToken, accessToken } = JSON.parse(body);
+            if (pendingAuthResolve) {
+              pendingAuthResolve({ idToken, accessToken });
+              pendingAuthResolve = null; pendingAuthReject = null;
+            }
+          } catch (_) {}
+        });
+        return;
+      }
+
+      let filePath = urlPath === '/' ? '/index.html' : urlPath;
+      const full = path.join(__dirname, filePath);
       fs.readFile(full, (err, data) => {
         if (err) { res.writeHead(404); res.end('Not found'); return; }
         res.writeHead(200, { 'Content-Type': mime[path.extname(full)] || 'application/octet-stream' });
@@ -277,58 +320,34 @@ async function handleImport() {
   }
 }
 
-// ── Google Sign-In via dedicated auth window ───────────────────────────────
+// ── Google Sign-In via system browser + local server callback ─────────────
 ipcMain.handle('google-sign-in', () => {
+  // Cancel any previous pending auth
+  if (pendingAuthReject) { pendingAuthReject(new Error('closed')); }
+
   return new Promise((resolve, reject) => {
-    const FIREBASE_REDIRECT = 'https://tasksreminders-9e7a8.firebaseapp.com/__/auth/handler';
+    pendingAuthResolve = resolve;
+    pendingAuthReject  = reject;
 
-    // Fresh session per sign-in so Google never sees a prior session
-    const authWin = new BrowserWindow({
-      width: 500, height: 650,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-        partition: 'auth-' + Date.now(),
-      },
-    });
-
-    // Spoof a real Chrome UA so Google allows sign-in in the window
-    authWin.webContents.setUserAgent(
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    );
-
+    const REDIRECT = `http://127.0.0.1:${httpPort}/auth/callback`;
     const oauthUrl =
       'https://accounts.google.com/o/oauth2/auth' +
       '?response_type=id_token%20token' +
       '&client_id=593931374306-rf3jthkp7dr6l8ipsr5u0se8jrvn37si.apps.googleusercontent.com' +
-      '&redirect_uri=' + encodeURIComponent(FIREBASE_REDIRECT) +
+      '&redirect_uri=' + encodeURIComponent(REDIRECT) +
       '&scope=' + encodeURIComponent('openid email profile') +
       '&prompt=select_account' +
       '&nonce=' + Math.random().toString(36).slice(2);
 
-    authWin.loadURL(oauthUrl);
+    shell.openExternal(oauthUrl);
 
-    let done = false;
-
-    const checkUrl = (url) => {
-      if (!url.includes('firebaseapp.com/__/auth/handler')) return;
-      try {
-        const fragment = new URLSearchParams(new URL(url).hash.slice(1));
-        const idToken     = fragment.get('id_token');
-        const accessToken = fragment.get('access_token');
-        if (idToken || accessToken) {
-          done = true;
-          resolve({ idToken, accessToken });
-          authWin.destroy();
-        }
-      } catch (_) {}
-    };
-
-    authWin.webContents.on('will-redirect',       (_, url) => checkUrl(url));
-    authWin.webContents.on('will-navigate',        (_, url) => checkUrl(url));
-    authWin.webContents.on('did-navigate',         (_, url) => checkUrl(url));
-    authWin.webContents.on('did-navigate-in-page', (_, url) => checkUrl(url));
-    authWin.on('closed', () => { if (!done) reject(new Error('closed')); });
+    // Timeout after 5 minutes
+    setTimeout(() => {
+      if (pendingAuthReject) {
+        pendingAuthReject(new Error('closed'));
+        pendingAuthResolve = null; pendingAuthReject = null;
+      }
+    }, 300000);
   });
 });
 
