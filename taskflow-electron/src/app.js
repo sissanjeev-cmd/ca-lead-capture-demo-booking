@@ -1,3 +1,24 @@
+import { initializeApp }                                    from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup,
+         signOut, onAuthStateChanged }                      from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+import { getFirestore, collection, doc, setDoc, deleteDoc,
+         onSnapshot, writeBatch }                           from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+import { firebaseConfig }                                   from './firebase-config.js';
+
+// ── Firebase init ──────────────────────────────────────────────────────────
+let auth, db, provider, firebaseReady = false;
+const isConfigured = !firebaseConfig.apiKey.startsWith('REPLACE');
+
+if (isConfigured) {
+  try {
+    const fbApp = initializeApp(firebaseConfig);
+    auth     = getAuth(fbApp);
+    db       = getFirestore(fbApp);
+    provider = new GoogleAuthProvider();
+    firebaseReady = true;
+  } catch (e) { console.error('Firebase init failed:', e); }
+}
+
 // ── Task colour palette ────────────────────────────────────────────────────
 const TASK_COLORS = [
   '#60a5fa','#a78bfa','#f472b6','#4ade80',
@@ -5,56 +26,51 @@ const TASK_COLORS = [
   '#818cf8','#fb923c'
 ];
 let colorIndex = 0;
-function nextTaskColor() { return TASK_COLORS[colorIndex++ % TASK_COLORS.length]; }
+function nextColor() { return TASK_COLORS[colorIndex++ % TASK_COLORS.length]; }
 function hexToRgb(hex) {
   return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
 }
+
 // ── State ──────────────────────────────────────────────────────────────────
-const floatedIds = new Set();
-let tasks = [];
-let filter = 'all';
-let search = '';
-let blinkingIds = new Set();
+const floatedIds  = new Set();
+let currentUser   = null;
+let tasks         = [];
+let filter        = 'all';
+let search        = '';
+let blinkingIds   = new Set();
 let alarmFiredIds = new Set();
 let isAlwaysOnTop = true;
-let editingTaskId = null;
-
-// Modal form state
+let editingId     = null;
 let modalPriority = 'medium';
-let modalReminderOn = true;
+let modalReminder = true;
+let unsubFS       = null;
 
-// ── DOM refs ───────────────────────────────────────────────────────────────
-const $ = id => document.getElementById(id);
+const $   = id => document.getElementById(id);
 const app = document.getElementById('app');
 
-// ── Init ───────────────────────────────────────────────────────────────────
+// ── Entry ──────────────────────────────────────────────────────────────────
 async function init() {
-  buildUI();
-  tasks = await window.taskflow.loadTasks();
+  if (!isConfigured) { showSetupScreen(); return; }
+  if (!firebaseReady) { showError('Firebase failed to initialise.'); return; }
+
   isAlwaysOnTop = await window.taskflow.getAlwaysOnTop();
 
-  // Assign colours to any tasks that don't have one yet
-  let colorsAdded = false;
-  tasks = tasks.map(t => { if (!t.color) { colorsAdded = true; return { ...t, color: nextTaskColor() }; } return t; });
-  if (colorsAdded) persist();
-
-  // Restore already-triggered alarms
-  tasks.forEach(t => {
-    if (t.alarmTriggered && !t.completed) {
-      blinkingIds.add(t.id);
-      alarmFiredIds.add(t.id);
+  onAuthStateChanged(auth, user => {
+    currentUser = user;
+    if (user) {
+      startFirestoreSync(user);
+      buildApp();
+    } else {
+      stopFirestoreSync();
+      showAuthScreen();
     }
   });
 
-  render();
-  startAlarmChecker();
-
-  // IPC events
+  // Forward import events even after auth (merge on next sync cycle)
   window.taskflow.onTasksImported(imported => {
-    tasks = imported;
-    persist();
-    render();
-    showToast(`Tasks imported successfully`);
+    if (!currentUser) return;
+    imported.forEach(t => saveTask(t));
+    showToast(`Imported ${imported.length} task${imported.length !== 1 ? 's' : ''}`);
   });
   window.taskflow.onAlwaysOnTopChanged(val => {
     isAlwaysOnTop = val;
@@ -62,53 +78,129 @@ async function init() {
   });
 }
 
-// ── Persist ────────────────────────────────────────────────────────────────
-function persist() {
-  window.taskflow.saveTasks(tasks);
+// ── Auth screens ───────────────────────────────────────────────────────────
+function showAuthScreen() {
+  app.innerHTML = `
+    <div id="auth-screen">
+      <div class="auth-card">
+        <span class="auth-logo">✅</span>
+        <h1 class="auth-title">TaskFlow</h1>
+        <p class="auth-sub">Sign in to sync your tasks</p>
+        <button class="btn-google-signin" id="btn-signin">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.658 14.021 17.64 11.712 17.64 9.2z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
+            <path d="M3.964 10.707A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.039l3.007-2.332z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          Sign in with Google
+        </button>
+        <p class="auth-note">Tasks sync across mobile &amp; desktop</p>
+      </div>
+    </div>`;
+  $('btn-signin').addEventListener('click', async () => {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      console.error('Sign-in error:', e);
+      showToast('Sign-in failed — check your internet connection');
+    }
+  });
+}
+
+function showSetupScreen() {
+  app.innerHTML = `
+    <div id="auth-screen">
+      <div class="auth-card">
+        <span class="auth-logo">⚙️</span>
+        <h1 class="auth-title">Setup Required</h1>
+        <p class="auth-sub">Firebase not configured</p>
+        <p class="auth-note" style="text-align:left;font-size:12px;line-height:1.7;margin-top:16px">
+          Edit <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px">src/firebase-config.js</code>
+          with your Firebase project values.<br><br>
+          See the comments in that file for step-by-step setup instructions.
+        </p>
+      </div>
+    </div>`;
+}
+
+function showError(msg) {
+  app.innerHTML = `<div id="auth-screen"><div class="auth-card"><span class="auth-logo">⚠️</span><p class="auth-sub">${msg}</p></div></div>`;
+}
+
+// ── Firestore sync ─────────────────────────────────────────────────────────
+function startFirestoreSync(user) {
+  stopFirestoreSync();
+  unsubFS = onSnapshot(
+    collection(db, 'users', user.uid, 'tasks'),
+    snap => {
+      tasks = snap.docs.map(d => d.data()).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      tasks.forEach(t => {
+        if (t.alarmTriggered && !t.completed) { blinkingIds.add(t.id); alarmFiredIds.add(t.id); }
+      });
+      if ($('stat-total')) render();
+    },
+    err => console.error('Firestore:', err)
+  );
+}
+
+function stopFirestoreSync() {
+  if (unsubFS) { unsubFS(); unsubFS = null; }
+  tasks = [];
+}
+
+// ── Firestore CRUD ─────────────────────────────────────────────────────────
+async function saveTask(t) {
+  if (!currentUser) return;
+  await setDoc(doc(db, 'users', currentUser.uid, 'tasks', t.id), t);
+}
+
+async function removeTask(id) {
+  if (!currentUser) return;
+  await deleteDoc(doc(db, 'users', currentUser.uid, 'tasks', id));
+}
+
+async function clearCompleted() {
+  if (!currentUser) return;
+  const batch = writeBatch(db);
+  tasks.filter(t => t.completed).forEach(t => batch.delete(doc(db, 'users', currentUser.uid, 'tasks', t.id)));
+  await batch.commit();
 }
 
 // ── Alarm checker ──────────────────────────────────────────────────────────
 function startAlarmChecker() {
   const check = () => {
     const now = new Date();
+    let changed = false;
     tasks.forEach(t => {
-      if (t.completed || !t.reminderEnabled || !t.dueDate) return;
-      if (alarmFiredIds.has(t.id) || t.alarmTriggered) return;
-      const dueStr = t.dueDate + (t.dueTime ? 'T' + t.dueTime : 'T00:00');
-      if (new Date(dueStr) <= now) {
-        alarmFiredIds.add(t.id);
-        blinkingIds.add(t.id);
-        t.alarmTriggered = true;
+      if (t.completed || !t.reminderEnabled || !t.dueDate || alarmFiredIds.has(t.id) || t.alarmTriggered) return;
+      if (new Date(t.dueDate + (t.dueTime ? 'T' + t.dueTime : 'T00:00')) <= now) {
+        alarmFiredIds.add(t.id); blinkingIds.add(t.id);
+        t.alarmTriggered = true; changed = true;
         playAlarm();
-        window.taskflow.triggerNotification({
-          title: '⏰ TaskFlow Reminder',
-          body: t.title
-        });
+        window.taskflow.triggerNotification({ title: '⏰ TaskFlow Reminder', body: t.title });
+        saveTask(t);
       }
     });
-    persist();
-    render();
+    if (changed) render();
   };
   check();
   setInterval(check, 30000);
 }
 
-// ── Sound ──────────────────────────────────────────────────────────────────
 function playAlarm() {
   try {
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     [0, 0.38, 0.76].forEach(offset => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, ctx.currentTime + offset);
-      osc.frequency.linearRampToValueAtTime(660, ctx.currentTime + offset + 0.18);
-      gain.gain.setValueAtTime(0, ctx.currentTime + offset);
-      gain.gain.linearRampToValueAtTime(0.45, ctx.currentTime + offset + 0.03);
-      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + offset + 0.32);
-      osc.start(ctx.currentTime + offset);
-      osc.stop(ctx.currentTime + offset + 0.35);
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'sine';
+      o.frequency.setValueAtTime(880, ctx.currentTime + offset);
+      o.frequency.linearRampToValueAtTime(660, ctx.currentTime + offset + 0.18);
+      g.gain.setValueAtTime(0, ctx.currentTime + offset);
+      g.gain.linearRampToValueAtTime(0.45, ctx.currentTime + offset + 0.03);
+      g.gain.linearRampToValueAtTime(0, ctx.currentTime + offset + 0.32);
+      o.start(ctx.currentTime + offset); o.stop(ctx.currentTime + offset + 0.35);
     });
   } catch(e) {}
 }
@@ -117,13 +209,10 @@ function playAlarm() {
 function getStats() {
   const now = new Date();
   return {
-    total: tasks.length,
-    active: tasks.filter(t => !t.completed).length,
-    done: tasks.filter(t => t.completed).length,
-    overdue: tasks.filter(t => {
-      if (t.completed || !t.dueDate) return false;
-      return new Date(t.dueDate + (t.dueTime ? 'T' + t.dueTime : 'T00:00')) < now;
-    }).length
+    total:   tasks.length,
+    active:  tasks.filter(t => !t.completed).length,
+    done:    tasks.filter(t => t.completed).length,
+    overdue: tasks.filter(t => { if (t.completed || !t.dueDate) return false; return new Date(t.dueDate + (t.dueTime ? 'T'+t.dueTime : 'T00:00')) < now; }).length
   };
 }
 
@@ -131,14 +220,10 @@ function getFiltered() {
   const now = new Date();
   return tasks.filter(t => {
     const q = search.toLowerCase();
-    const match = t.title.toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q);
-    if (!match) return false;
-    if (filter === 'active') return !t.completed;
+    if (!(t.title.toLowerCase().includes(q) || (t.description||'').toLowerCase().includes(q))) return false;
+    if (filter === 'active')    return !t.completed;
     if (filter === 'completed') return t.completed;
-    if (filter === 'overdue') {
-      if (t.completed || !t.dueDate) return false;
-      return new Date(t.dueDate + (t.dueTime ? 'T' + t.dueTime : 'T00:00')) < now;
-    }
+    if (filter === 'overdue') { if (t.completed || !t.dueDate) return false; return new Date(t.dueDate + (t.dueTime ? 'T'+t.dueTime : 'T00:00')) < now; }
     return true;
   });
 }
@@ -146,21 +231,21 @@ function getFiltered() {
 function formatDue(dueDate, dueTime) {
   if (!dueDate) return null;
   const due = new Date(dueDate + (dueTime ? 'T' + dueTime : 'T00:00'));
-  const now = new Date();
+  const now  = new Date();
   const diffH = (due - now) / 3600000;
-  const dateStr = due.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const timeStr = dueTime ? due.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
   return {
-    label: [dateStr, timeStr].filter(Boolean).join(' · '),
+    label:    [due.toLocaleDateString('en-US',{month:'short',day:'numeric'}), dueTime ? due.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) : ''].filter(Boolean).join(' · '),
     isOverdue: due < now,
-    isSoon: due >= now && diffH < 24
+    isSoon:    due >= now && diffH < 24
   };
 }
 
-// ── Build static UI shell ──────────────────────────────────────────────────
-function buildUI() {
+// ── Build app UI ───────────────────────────────────────────────────────────
+function buildApp() {
+  const u  = currentUser;
+  const av = (u?.displayName || u?.email || '?')[0].toUpperCase();
+
   app.innerHTML = `
-    <!-- Title bar -->
     <div id="titlebar">
       <div class="logo">
         <span class="logo-icon">✅</span>
@@ -170,25 +255,24 @@ function buildUI() {
         </div>
       </div>
       <div class="controls">
+        <div class="user-avatar" title="${escHtml(u?.displayName || u?.email || '')}">${av}</div>
         <button class="ctrl-btn ontop-active" id="btn-ontop" title="Toggle always on top">📌</button>
-        <button class="ctrl-btn" id="btn-sendback" title="Send dashboard to back">↙</button>
+        <button class="ctrl-btn" id="btn-sendback" title="Send to back">↙</button>
         <button class="ctrl-btn" id="btn-export" title="Export tasks">↗</button>
+        <button class="ctrl-btn" id="btn-signout" title="Sign out">⏏</button>
         <button class="ctrl-btn close-btn" id="btn-close" title="Hide to tray">✕</button>
       </div>
     </div>
 
-    <!-- Add bar -->
     <div id="add-bar">
       <input class="glass-input" id="quick-input" placeholder="Add a task… (Enter to save)" />
       <button class="btn-add" id="btn-add-full" title="Add with details">+</button>
     </div>
 
-    <!-- Search -->
     <div id="search-wrap">
       <input id="search-input" placeholder="🔍 Search tasks…" />
     </div>
 
-    <!-- Stats -->
     <div id="stats-strip">
       <div class="stat-pill"><div class="num" id="stat-total">0</div><div class="lbl">Total</div></div>
       <div class="stat-pill"><div class="num" id="stat-active" style="color:#93c5fd">0</div><div class="lbl">Active</div></div>
@@ -196,12 +280,10 @@ function buildUI() {
       <div class="stat-pill"><div class="num" id="stat-overdue" style="color:#fca5a5">0</div><div class="lbl">Overdue</div></div>
     </div>
 
-    <!-- Progress -->
     <div id="progress-wrap">
       <div id="progress-track"><div id="progress-fill" style="width:0%"></div></div>
     </div>
 
-    <!-- Filter tabs -->
     <div id="filter-row">
       <button class="filter-tab active" data-filter="all">📋 All</button>
       <button class="filter-tab" data-filter="active">⚡ Active</button>
@@ -209,27 +291,18 @@ function buildUI() {
       <button class="filter-tab" data-filter="overdue">⚠️ Overdue</button>
     </div>
 
-    <!-- Task list -->
     <div id="body"><div id="task-list"></div></div>
 
-    <!-- Bottom bar -->
     <div id="bottom-bar">
       <span class="bottom-count" id="bottom-count"></span>
       <button class="btn-clear" id="btn-clear">Clear completed</button>
     </div>
 
-    <!-- Modal -->
     <div id="modal-overlay" class="hidden">
       <div id="modal-box">
         <div class="modal-title" id="modal-title">✨ New Task</div>
-        <div class="field-row">
-          <label class="field-label">Title *</label>
-          <input class="field-input" id="m-title" placeholder="What needs to be done?" />
-        </div>
-        <div class="field-row">
-          <label class="field-label">Description</label>
-          <input class="field-input" id="m-desc" placeholder="Optional notes…" />
-        </div>
+        <div class="field-row"><label class="field-label">Title *</label><input class="field-input" id="m-title" placeholder="What needs to be done?" /></div>
+        <div class="field-row"><label class="field-label">Description</label><input class="field-input" id="m-desc" placeholder="Optional notes…" /></div>
         <div class="field-row">
           <label class="field-label">Priority</label>
           <div class="priority-btns">
@@ -239,114 +312,87 @@ function buildUI() {
           </div>
         </div>
         <div class="field-grid">
-          <div>
-            <label class="field-label">Due Date</label>
-            <input class="field-input" type="date" id="m-date" />
-          </div>
-          <div>
-            <label class="field-label">Due Time</label>
-            <input class="field-input" type="time" id="m-time" />
-          </div>
+          <div><label class="field-label">Due Date</label><input class="field-input" type="date" id="m-date" /></div>
+          <div><label class="field-label">Due Time</label><input class="field-input" type="time" id="m-time" /></div>
         </div>
         <div class="toggle-row">
           <span class="toggle-label">🔔 Enable alarm reminder</span>
-          <button class="toggle-switch on" id="m-reminder">
-            <div class="toggle-knob"></div>
-          </button>
+          <button class="toggle-switch on" id="m-reminder"><div class="toggle-knob"></div></button>
         </div>
         <div class="modal-btns">
           <button class="btn-cancel" id="m-cancel">Cancel</button>
           <button class="btn-save" id="m-save">Add Task</button>
         </div>
       </div>
-    </div>
-  `;
+    </div>`;
 
-  // Wire up static events
+  // Wire controls
   $('btn-ontop').addEventListener('click', toggleAlwaysOnTop);
   $('btn-sendback').addEventListener('click', () => window.taskflow.sendToBack());
   $('btn-close').addEventListener('click', () => window.taskflow.closeWindow());
   $('btn-export').addEventListener('click', () => window.taskflow.exportTasks(tasks));
+  $('btn-signout').addEventListener('click', () => signOut(auth).catch(console.error));
 
   $('quick-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && e.target.value.trim()) {
-      addQuickTask(e.target.value.trim());
-      e.target.value = '';
-    }
+    if (e.key === 'Enter' && e.target.value.trim()) { addQuick(e.target.value.trim()); e.target.value = ''; }
   });
-
   $('btn-add-full').addEventListener('click', () => openModal(null));
-
   $('search-input').addEventListener('input', e => { search = e.target.value; render(); });
-
   $('filter-row').addEventListener('click', e => {
-    const btn = e.target.closest('.filter-tab');
-    if (!btn) return;
+    const btn = e.target.closest('.filter-tab'); if (!btn) return;
     filter = btn.dataset.filter;
     document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    render();
+    btn.classList.add('active'); render();
   });
-
-  $('btn-clear').addEventListener('click', () => {
-    tasks = tasks.filter(t => !t.completed);
-    persist(); render();
-  });
-
-  // Modal events
+  $('btn-clear').addEventListener('click', clearCompleted);
   $('modal-overlay').addEventListener('click', e => { if (e.target === $('modal-overlay')) closeModal(); });
   $('m-cancel').addEventListener('click', closeModal);
   $('m-save').addEventListener('click', saveModal);
   $('m-title').addEventListener('keydown', e => { if (e.key === 'Enter') saveModal(); });
-
-  document.querySelectorAll('.prio-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      modalPriority = btn.dataset.p;
-      document.querySelectorAll('.prio-btn').forEach(b => {
-        b.className = 'prio-btn';
-      });
-      btn.classList.add('active-' + modalPriority);
-    });
-  });
-
+  document.querySelectorAll('.prio-btn').forEach(btn => btn.addEventListener('click', () => {
+    modalPriority = btn.dataset.p;
+    document.querySelectorAll('.prio-btn').forEach(b => b.className = 'prio-btn');
+    btn.classList.add('active-' + modalPriority);
+  }));
   $('m-reminder').addEventListener('click', () => {
-    modalReminderOn = !modalReminderOn;
-    $('m-reminder').className = 'toggle-switch ' + (modalReminderOn ? 'on' : 'off');
+    modalReminder = !modalReminder;
+    $('m-reminder').className = 'toggle-switch ' + (modalReminder ? 'on' : 'off');
   });
+
+  updateOnTopBtn();
+  startAlarmChecker();
 }
 
 // ── Render ─────────────────────────────────────────────────────────────────
 function render() {
-  const stats = getStats();
-  $('stat-total').textContent = stats.total;
-  $('stat-active').textContent = stats.active;
-  $('stat-done').textContent = stats.done;
-  $('stat-overdue').textContent = stats.overdue;
+  if (!$('stat-total')) return;
+  const s = getStats();
+  $('stat-total').textContent   = s.total;
+  $('stat-active').textContent  = s.active;
+  $('stat-done').textContent    = s.done;
+  $('stat-overdue').textContent = s.overdue;
 
-  const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
+  const pct = s.total > 0 ? Math.round((s.done / s.total) * 100) : 0;
   $('progress-fill').style.width = pct + '%';
 
   const filtered = getFiltered();
   $('bottom-count').textContent = filtered.length + ' task' + (filtered.length !== 1 ? 's' : '');
 
   const list = $('task-list');
-  if (filtered.length === 0) {
-    const msgs = { all: 'No tasks yet. Hit + to add one!', active: 'No active tasks — great work!', completed: 'Nothing completed yet.', overdue: "You're all caught up! 🎉" };
-    const icons = { all: '📝', active: '⚡', completed: '🎉', overdue: '✨' };
+  if (!filtered.length) {
+    const msgs  = { all:'No tasks yet. Hit + to add one!', active:'No active tasks — great work!', completed:'Nothing completed yet.', overdue:"You're all caught up! 🎉" };
+    const icons = { all:'📝', active:'⚡', completed:'🎉', overdue:'✨' };
     list.innerHTML = `<div class="empty-state"><span class="empty-icon">${icons[filter]}</span>${search ? 'No tasks match your search.' : msgs[filter]}</div>`;
     return;
   }
 
-  list.innerHTML = filtered.map(t => renderCard(t)).join('');
-
-  // Wire card events
-  list.querySelectorAll('[data-toggle]').forEach(el => el.addEventListener('click', () => toggleTask(el.dataset.toggle)));
-  list.querySelectorAll('[data-edit]').forEach(el => el.addEventListener('click', () => openModal(el.dataset.edit)));
-  list.querySelectorAll('[data-delete]').forEach(el => el.addEventListener('click', () => deleteTask(el.dataset.delete)));
-  list.querySelectorAll('[data-dismiss]').forEach(el => el.addEventListener('click', () => dismissAlarm(el.dataset.dismiss)));
-  list.querySelectorAll('[data-popout]').forEach(el => el.addEventListener('click', () => {
-    const t = tasks.find(x => x.id === el.dataset.popout);
-    if (!t) return;
+  list.innerHTML = filtered.map(renderCard).join('');
+  list.querySelectorAll('[data-toggle]').forEach(el  => el.addEventListener('click', () => toggleTask(el.dataset.toggle)));
+  list.querySelectorAll('[data-edit]').forEach(el    => el.addEventListener('click', () => openModal(el.dataset.edit)));
+  list.querySelectorAll('[data-delete]').forEach(el  => el.addEventListener('click', () => deleteTask(el.dataset.delete)));
+  list.querySelectorAll('[data-dismiss]').forEach(el => el.addEventListener('click', () => { blinkingIds.delete(el.dataset.dismiss); render(); }));
+  list.querySelectorAll('[data-popout]').forEach(el  => el.addEventListener('click', () => {
+    const t = tasks.find(x => x.id === el.dataset.popout); if (!t) return;
     if (floatedIds.has(t.id)) {
       window.taskflow.closeCardWindow(t.id);
       floatedIds.delete(t.id);
@@ -360,82 +406,59 @@ function render() {
 
 function renderCard(t) {
   const due = t.dueDate ? formatDue(t.dueDate, t.dueTime) : null;
-  const isBlinking = blinkingIds.has(t.id);
-  const isFloated = floatedIds.has(t.id);
-  const dueClass = due ? (due.isOverdue ? 'overdue' : due.isSoon ? 'soon' : '') : '';
-  const priorityMap = { high: 'badge-high', medium: 'badge-medium', low: 'badge-low' };
-  const priorityIcon = { high: '🔴', medium: '🟡', low: '🟢' };
-  const col = t.color || '#a0a8c0';
-  const [r, g, b] = hexToRgb(col);
-  const colorStyle = ` style="background:rgba(${r},${g},${b},${isFloated ? 0.18 : 0.38});border:2px solid rgba(${r},${g},${b},0.90);"`;
-
+  const isB = blinkingIds.has(t.id);
+  const isF = floatedIds.has(t.id);
+  const dC  = due ? (due.isOverdue ? 'overdue' : due.isSoon ? 'soon' : '') : '';
+  const pMap = { high:'badge-high', medium:'badge-medium', low:'badge-low' };
+  const pIcon= { high:'🔴', medium:'🟡', low:'🟢' };
+  const col  = t.color || '#a0a8c0';
+  const [r,g,b] = hexToRgb(col);
+  const cs   = ` style="background:rgba(${r},${g},${b},${isF ? 0.18 : 0.38});border:2px solid rgba(${r},${g},${b},0.90);"`;
   return `
-    <div class="task-card ${t.completed ? 'completed' : ''} ${isBlinking ? 'blinking' : ''} ${isFloated ? 'floated' : ''}"${colorStyle}>
+    <div class="task-card ${t.completed?'completed':''} ${isB?'blinking':''} ${isF?'floated':''}"${cs}>
       <div class="card-row">
-        <div class="checkbox ${t.completed ? 'checked' : ''}" data-toggle="${t.id}"></div>
+        <div class="checkbox ${t.completed?'checked':''}" data-toggle="${t.id}"></div>
         <div class="card-content">
-          <div class="card-title ${t.completed ? 'done' : ''}">${escHtml(t.title)}</div>
+          <div class="card-title ${t.completed?'done':''}">${escHtml(t.title)}</div>
           ${t.description ? `<div class="card-desc">${escHtml(t.description)}</div>` : ''}
           <div class="card-meta">
-            <span class="badge ${priorityMap[t.priority]}">${priorityIcon[t.priority]} ${t.priority}</span>
-            ${due ? `<span class="due-label ${dueClass}">🕐 ${due.label}${due.isOverdue && !t.completed ? ' <span class="badge badge-overdue">Overdue</span>' : ''}${due.isSoon && !due.isOverdue && !t.completed ? ' <span class="badge badge-soon">Soon</span>' : ''}</span>` : ''}
+            <span class="badge ${pMap[t.priority]}">${pIcon[t.priority]} ${t.priority}</span>
+            ${due ? `<span class="due-label ${dC}">🕐 ${due.label}${due.isOverdue&&!t.completed?' <span class="badge badge-overdue">Overdue</span>':''}${due.isSoon&&!due.isOverdue&&!t.completed?' <span class="badge badge-soon">Soon</span>':''}</span>` : ''}
             ${t.reminderEnabled && !t.completed ? `<span style="color:rgba(255,255,255,0.22);font-size:10px">🔔</span>` : ''}
           </div>
-          ${isBlinking ? `
-            <div class="alarm-banner">
-              <span class="alarm-text">⏰ Reminder! Task is due</span>
-              <button class="alarm-dismiss" data-dismiss="${t.id}">Dismiss</button>
-            </div>` : ''}
+          ${isB ? `<div class="alarm-banner"><span class="alarm-text">⏰ Reminder! Task is due</span><button class="alarm-dismiss" data-dismiss="${t.id}">Dismiss</button></div>` : ''}
         </div>
         <div class="card-actions">
           <button class="card-btn" data-edit="${t.id}" title="Edit">✏️</button>
           <button class="card-btn del" data-delete="${t.id}" title="Delete">🗑</button>
         </div>
       </div>
-      <button class="btn-detach ${isFloated ? 'btn-detach-active' : ''}" data-popout="${t.id}">
-        ${isFloated ? '⊙ Floating — click to dock' : '⤢ Detach to desktop'}
+      <button class="btn-detach ${isF ? 'btn-detach-active' : ''}" data-popout="${t.id}">
+        ${isF ? '⊙ Floating — click to dock' : '⤢ Detach to desktop'}
       </button>
     </div>`;
 }
 
 function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ── Task operations ────────────────────────────────────────────────────────
-function addQuickTask(title) {
-  tasks.unshift({
-    id: crypto.randomUUID(),
-    title,
-    description: '',
-    priority: 'medium',
-    completed: false,
-    createdAt: Date.now(),
-    dueDate: '',
-    dueTime: '',
-    reminderEnabled: false,
-    alarmTriggered: false,
-    color: nextTaskColor()
-  });
-  persist(); render();
+function addQuick(title) {
+  saveTask({ id: crypto.randomUUID(), title, description:'', priority:'medium', completed:false,
+    createdAt: Date.now(), dueDate:'', dueTime:'', reminderEnabled:false, alarmTriggered:false, color:nextColor() });
 }
 
 function toggleTask(id) {
-  tasks = tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+  const t = tasks.find(x => x.id === id); if (!t) return;
   blinkingIds.delete(id);
-  persist(); render();
+  saveTask({ ...t, completed: !t.completed });
 }
 
 function deleteTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
-  blinkingIds.delete(id);
-  alarmFiredIds.delete(id);
-  persist(); render();
-}
-
-function dismissAlarm(id) {
-  blinkingIds.delete(id);
-  render();
+  blinkingIds.delete(id); alarmFiredIds.delete(id);
+  floatedIds.delete(id);
+  removeTask(id);
 }
 
 // ── Always on top ──────────────────────────────────────────────────────────
@@ -447,8 +470,7 @@ function toggleAlwaysOnTop() {
 }
 
 function updateOnTopBtn() {
-  const btn = $('btn-ontop');
-  if (!btn) return;
+  const btn = $('btn-ontop'); if (!btn) return;
   if (isAlwaysOnTop) {
     btn.classList.add('ontop-active');
     btn.title = 'Send to background';
@@ -460,73 +482,45 @@ function updateOnTopBtn() {
 
 // ── Modal ──────────────────────────────────────────────────────────────────
 function openModal(taskId) {
-  editingTaskId = taskId;
+  editingId = taskId;
   const t = taskId ? tasks.find(x => x.id === taskId) : null;
-
   $('modal-title').textContent = t ? '✏️ Edit Task' : '✨ New Task';
-  $('m-title').value = t ? t.title : '';
-  $('m-desc').value = t ? (t.description || '') : '';
-  $('m-date').value = t ? (t.dueDate || '') : '';
-  $('m-time').value = t ? (t.dueTime || '') : '';
+  $('m-title').value  = t ? t.title : '';
+  $('m-desc').value   = t ? (t.description||'') : '';
+  $('m-date').value   = t ? (t.dueDate||'') : '';
+  $('m-time').value   = t ? (t.dueTime||'') : '';
   $('m-save').textContent = t ? 'Save Changes' : 'Add Task';
-
   modalPriority = t ? t.priority : 'medium';
-  modalReminderOn = t ? t.reminderEnabled : true;
-
-  document.querySelectorAll('.prio-btn').forEach(b => {
-    b.className = 'prio-btn' + (b.dataset.p === modalPriority ? ' active-' + modalPriority : '');
-  });
-  $('m-reminder').className = 'toggle-switch ' + (modalReminderOn ? 'on' : 'off');
-
+  modalReminder = t ? t.reminderEnabled : true;
+  document.querySelectorAll('.prio-btn').forEach(b => b.className = 'prio-btn' + (b.dataset.p === modalPriority ? ' active-' + modalPriority : ''));
+  $('m-reminder').className = 'toggle-switch ' + (modalReminder ? 'on' : 'off');
   $('modal-overlay').classList.remove('hidden');
   setTimeout(() => $('m-title').focus(), 50);
 }
 
-function closeModal() {
-  $('modal-overlay').classList.add('hidden');
-  editingTaskId = null;
-}
+function closeModal() { $('modal-overlay').classList.add('hidden'); editingId = null; }
 
 function saveModal() {
-  const title = $('m-title').value.trim();
-  if (!title) return;
-
-  if (editingTaskId) {
-    tasks = tasks.map(t => {
-      if (t.id !== editingTaskId) return t;
-      blinkingIds.delete(t.id);
-      alarmFiredIds.delete(t.id);
-      return { ...t, title, description: $('m-desc').value.trim(), priority: modalPriority, dueDate: $('m-date').value, dueTime: $('m-time').value, reminderEnabled: modalReminderOn, alarmTriggered: false };
-    });
+  const title = $('m-title').value.trim(); if (!title) return;
+  const base = { title, description: $('m-desc').value.trim(), priority: modalPriority,
+    dueDate: $('m-date').value, dueTime: $('m-time').value, reminderEnabled: modalReminder, alarmTriggered: false };
+  if (editingId) {
+    const t = tasks.find(x => x.id === editingId); if (!t) return;
+    blinkingIds.delete(t.id); alarmFiredIds.delete(t.id);
+    saveTask({ ...t, ...base });
   } else {
-    tasks.unshift({
-      id: crypto.randomUUID(), title,
-      description: $('m-desc').value.trim(),
-      priority: modalPriority, completed: false, createdAt: Date.now(),
-      dueDate: $('m-date').value, dueTime: $('m-time').value,
-      reminderEnabled: modalReminderOn, alarmTriggered: false,
-      color: nextTaskColor()
-    });
+    saveTask({ ...base, id: crypto.randomUUID(), completed: false, createdAt: Date.now(), color: nextColor() });
   }
-
-  persist(); render(); closeModal();
+  closeModal();
 }
 
 // ── Toast ──────────────────────────────────────────────────────────────────
 function showToast(msg) {
   const toast = document.createElement('div');
-  toast.style.cssText = `
-    position:fixed; bottom:16px; left:50%; transform:translateX(-50%);
-    background:rgba(255,107,53,0.9); color:white; padding:7px 16px;
-    border-radius:20px; font-size:12px; font-weight:600;
-    z-index:999; white-space:nowrap; backdrop-filter:blur(10px);
-    box-shadow:0 4px 16px rgba(0,0,0,0.4);
-    animation: fadeIn 0.2s ease;
-  `;
+  toast.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,107,53,0.9);color:white;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;z-index:999;white-space:nowrap;backdrop-filter:blur(10px);box-shadow:0 4px 16px rgba(0,0,0,0.4);';
   toast.textContent = msg;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 2200);
 }
 
-// ── Start ──────────────────────────────────────────────────────────────────
 init();

@@ -1,6 +1,10 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, Notification, dialog } = require('electron');
 const path = require('path');
-const fs = require('fs');
+const fs   = require('fs');
+const http = require('http');
+
+let httpServer = null;
+let httpPort   = 0;
 
 let mainWindow = null;
 let tray = null;
@@ -48,6 +52,28 @@ function createTrayIcon() {
   return nativeImage.createFromDataURL('data:image/png;base64,' + iconBase64).resize(size);
 }
 
+// ── Local HTTP server (needed for Firebase auth to work) ───────────────────
+function startStaticServer() {
+  return new Promise((resolve, reject) => {
+    const mime = { '.html':'text/html', '.js':'application/javascript', '.css':'text/css', '.json':'application/json', '.png':'image/png', '.ico':'image/x-icon' };
+    httpServer = http.createServer((req, res) => {
+      let urlPath = req.url.split('?')[0];
+      if (urlPath === '/') urlPath = '/index.html';
+      const full = path.join(__dirname, urlPath);
+      fs.readFile(full, (err, data) => {
+        if (err) { res.writeHead(404); res.end('Not found'); return; }
+        res.writeHead(200, { 'Content-Type': mime[path.extname(full)] || 'application/octet-stream' });
+        res.end(data);
+      });
+    });
+    httpServer.listen(0, '127.0.0.1', () => {
+      httpPort = httpServer.address().port;
+      resolve(httpPort);
+    });
+    httpServer.on('error', reject);
+  });
+}
+
 // ── Window ─────────────────────────────────────────────────────────────────
 function getStartPosition() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
@@ -87,7 +113,15 @@ function createWindow() {
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  mainWindow.loadURL(`http://127.0.0.1:${httpPort}/`);
+
+  // Allow Firebase auth popups (signInWithPopup opens a new BrowserWindow)
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.includes('firebaseapp.com') || url.includes('accounts.google.com') || url.includes('gstatic.com')) {
+      return { action: 'allow' };
+    }
+    return { action: 'deny' };
+  });
 
   mainWindow.on('moved', () => {
     windowBounds = mainWindow.getBounds();
@@ -320,8 +354,9 @@ ipcMain.on('export-tasks', async (_, tasks) => {
 });
 
 // ── App lifecycle ──────────────────────────────────────────────────────────
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   app.dock.hide(); // hide from dock — tray only
+  await startStaticServer();
   createWindow();
   createTray();
 });
@@ -335,4 +370,5 @@ app.on('before-quit', () => {
     mainWindow.removeAllListeners('close');
     mainWindow.close();
   }
+  if (httpServer) httpServer.close();
 });
