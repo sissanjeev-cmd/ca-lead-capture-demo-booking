@@ -19,6 +19,9 @@ if (isConfigured) {
   } catch (e) { console.error('Firebase init failed:', e); }
 }
 
+// When Firebase is not configured, fall back to local IPC storage (no auth required)
+const useLocal = !isConfigured || !firebaseReady;
+
 // ── Task colour palette ────────────────────────────────────────────────────
 const TASK_COLORS = [
   '#60a5fa','#a78bfa','#f472b6','#4ade80',
@@ -50,11 +53,34 @@ const app = document.getElementById('app');
 
 // ── Entry ──────────────────────────────────────────────────────────────────
 async function init() {
-  if (!isConfigured) { showSetupScreen(); return; }
-  if (!firebaseReady) { showError('Firebase failed to initialise.'); return; }
-
   isAlwaysOnTop = await window.taskflow.getAlwaysOnTop();
 
+  if (useLocal) {
+    // ── Local mode: load from IPC file storage, no auth required ────────────
+    tasks = await window.taskflow.loadTasks();
+
+    let changed = false;
+    tasks = tasks.map(t => { if (!t.color) { changed = true; return { ...t, color: nextColor() }; } return t; });
+    if (changed) persistLocal();
+
+    tasks.forEach(t => {
+      if (t.alarmTriggered && !t.completed) { blinkingIds.add(t.id); alarmFiredIds.add(t.id); }
+    });
+
+    buildApp();
+    startAlarmChecker();
+
+    window.taskflow.onTasksImported(imported => {
+      tasks = imported;
+      persistLocal();
+      render();
+      showToast('Tasks imported successfully');
+    });
+    window.taskflow.onAlwaysOnTopChanged(val => { isAlwaysOnTop = val; updateOnTopBtn(); });
+    return;
+  }
+
+  // ── Firebase mode: require sign-in ──────────────────────────────────────
   onAuthStateChanged(auth, user => {
     currentUser = user;
     if (user) {
@@ -66,19 +92,20 @@ async function init() {
     }
   });
 
-  // Forward import events even after auth (merge on next sync cycle)
   window.taskflow.onTasksImported(imported => {
     if (!currentUser) return;
     imported.forEach(t => saveTask(t));
     showToast(`Imported ${imported.length} task${imported.length !== 1 ? 's' : ''}`);
   });
-  window.taskflow.onAlwaysOnTopChanged(val => {
-    isAlwaysOnTop = val;
-    updateOnTopBtn();
-  });
+  window.taskflow.onAlwaysOnTopChanged(val => { isAlwaysOnTop = val; updateOnTopBtn(); });
 }
 
-// ── Auth screens ───────────────────────────────────────────────────────────
+// ── Local persistence ──────────────────────────────────────────────────────
+function persistLocal() {
+  window.taskflow.saveTasks(tasks);
+}
+
+// ── Auth screen (Firebase mode only) ──────────────────────────────────────
 function showAuthScreen() {
   app.innerHTML = `
     <div id="auth-screen">
@@ -99,33 +126,9 @@ function showAuthScreen() {
       </div>
     </div>`;
   $('btn-signin').addEventListener('click', async () => {
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (e) {
-      console.error('Sign-in error:', e);
-      showToast('Sign-in failed — check your internet connection');
-    }
+    try { await signInWithPopup(auth, provider); }
+    catch (e) { console.error(e); showToast('Sign-in failed — check your internet connection'); }
   });
-}
-
-function showSetupScreen() {
-  app.innerHTML = `
-    <div id="auth-screen">
-      <div class="auth-card">
-        <span class="auth-logo">⚙️</span>
-        <h1 class="auth-title">Setup Required</h1>
-        <p class="auth-sub">Firebase not configured</p>
-        <p class="auth-note" style="text-align:left;font-size:12px;line-height:1.7;margin-top:16px">
-          Edit <code style="background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px">src/firebase-config.js</code>
-          with your Firebase project values.<br><br>
-          See the comments in that file for step-by-step setup instructions.
-        </p>
-      </div>
-    </div>`;
-}
-
-function showError(msg) {
-  app.innerHTML = `<div id="auth-screen"><div class="auth-card"><span class="auth-logo">⚠️</span><p class="auth-sub">${msg}</p></div></div>`;
 }
 
 // ── Firestore sync ─────────────────────────────────────────────────────────
@@ -149,22 +152,42 @@ function stopFirestoreSync() {
   tasks = [];
 }
 
-// ── Firestore CRUD ─────────────────────────────────────────────────────────
+// ── CRUD — works for both local and Firestore mode ─────────────────────────
 async function saveTask(t) {
-  if (!currentUser) return;
-  await setDoc(doc(db, 'users', currentUser.uid, 'tasks', t.id), t);
+  if (useLocal) {
+    const idx = tasks.findIndex(x => x.id === t.id);
+    if (idx >= 0) tasks[idx] = t; else tasks.unshift(t);
+    persistLocal();
+    render();
+  } else {
+    if (!currentUser) return;
+    await setDoc(doc(db, 'users', currentUser.uid, 'tasks', t.id), t);
+    // onSnapshot triggers render
+  }
 }
 
 async function removeTask(id) {
-  if (!currentUser) return;
-  await deleteDoc(doc(db, 'users', currentUser.uid, 'tasks', id));
+  if (useLocal) {
+    tasks = tasks.filter(x => x.id !== id);
+    persistLocal();
+    render();
+  } else {
+    if (!currentUser) return;
+    await deleteDoc(doc(db, 'users', currentUser.uid, 'tasks', id));
+  }
 }
 
 async function clearCompleted() {
-  if (!currentUser) return;
-  const batch = writeBatch(db);
-  tasks.filter(t => t.completed).forEach(t => batch.delete(doc(db, 'users', currentUser.uid, 'tasks', t.id)));
-  await batch.commit();
+  if (useLocal) {
+    tasks = tasks.filter(t => !t.completed);
+    persistLocal();
+    render();
+  } else {
+    if (!currentUser) return;
+    const batch = writeBatch(db);
+    tasks.filter(t => t.completed).forEach(t => batch.delete(doc(db, 'users', currentUser.uid, 'tasks', t.id)));
+    await batch.commit();
+  }
 }
 
 // ── Alarm checker ──────────────────────────────────────────────────────────
@@ -243,7 +266,7 @@ function formatDue(dueDate, dueTime) {
 // ── Build app UI ───────────────────────────────────────────────────────────
 function buildApp() {
   const u  = currentUser;
-  const av = (u?.displayName || u?.email || '?')[0].toUpperCase();
+  const av = u ? (u.displayName || u.email || '?')[0].toUpperCase() : null;
 
   app.innerHTML = `
     <div id="titlebar">
@@ -255,11 +278,11 @@ function buildApp() {
         </div>
       </div>
       <div class="controls">
-        <div class="user-avatar" title="${escHtml(u?.displayName || u?.email || '')}">${av}</div>
+        ${av ? `<div class="user-avatar" title="${escHtml(u.displayName || u.email || '')}">${av}</div>` : ''}
         <button class="ctrl-btn ontop-active" id="btn-ontop" title="Toggle always on top">📌</button>
         <button class="ctrl-btn" id="btn-sendback" title="Send to back">↙</button>
         <button class="ctrl-btn" id="btn-export" title="Export tasks">↗</button>
-        <button class="ctrl-btn" id="btn-signout" title="Sign out">⏏</button>
+        ${av ? `<button class="ctrl-btn" id="btn-signout" title="Sign out">⏏</button>` : ''}
         <button class="ctrl-btn close-btn" id="btn-close" title="Hide to tray">✕</button>
       </div>
     </div>
@@ -326,12 +349,11 @@ function buildApp() {
       </div>
     </div>`;
 
-  // Wire controls
   $('btn-ontop').addEventListener('click', toggleAlwaysOnTop);
   $('btn-sendback').addEventListener('click', () => window.taskflow.sendToBack());
   $('btn-close').addEventListener('click', () => window.taskflow.closeWindow());
   $('btn-export').addEventListener('click', () => window.taskflow.exportTasks(tasks));
-  $('btn-signout').addEventListener('click', () => signOut(auth).catch(console.error));
+  if ($('btn-signout')) $('btn-signout').addEventListener('click', () => signOut(auth).catch(console.error));
 
   $('quick-input').addEventListener('keydown', e => {
     if (e.key === 'Enter' && e.target.value.trim()) { addQuick(e.target.value.trim()); e.target.value = ''; }
@@ -360,7 +382,7 @@ function buildApp() {
   });
 
   updateOnTopBtn();
-  startAlarmChecker();
+  render();
 }
 
 // ── Render ─────────────────────────────────────────────────────────────────
@@ -456,8 +478,7 @@ function toggleTask(id) {
 }
 
 function deleteTask(id) {
-  blinkingIds.delete(id); alarmFiredIds.delete(id);
-  floatedIds.delete(id);
+  blinkingIds.delete(id); alarmFiredIds.delete(id); floatedIds.delete(id);
   removeTask(id);
 }
 
@@ -471,13 +492,8 @@ function toggleAlwaysOnTop() {
 
 function updateOnTopBtn() {
   const btn = $('btn-ontop'); if (!btn) return;
-  if (isAlwaysOnTop) {
-    btn.classList.add('ontop-active');
-    btn.title = 'Send to background';
-  } else {
-    btn.classList.remove('ontop-active');
-    btn.title = 'Bring to front (always on top)';
-  }
+  if (isAlwaysOnTop) { btn.classList.add('ontop-active'); btn.title = 'Send to background'; }
+  else { btn.classList.remove('ontop-active'); btn.title = 'Bring to front (always on top)'; }
 }
 
 // ── Modal ──────────────────────────────────────────────────────────────────
@@ -516,11 +532,11 @@ function saveModal() {
 
 // ── Toast ──────────────────────────────────────────────────────────────────
 function showToast(msg) {
-  const toast = document.createElement('div');
-  toast.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,107,53,0.9);color:white;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;z-index:999;white-space:nowrap;backdrop-filter:blur(10px);box-shadow:0 4px 16px rgba(0,0,0,0.4);';
-  toast.textContent = msg;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 2200);
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,107,53,0.9);color:white;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;z-index:999;white-space:nowrap;backdrop-filter:blur(10px);box-shadow:0 4px 16px rgba(0,0,0,0.4);';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2200);
 }
 
 init();
