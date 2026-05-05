@@ -411,20 +411,50 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
 .card-btn:hover { background: rgba(255,255,255,0.12); color: white; }
 .card-btn.del:hover { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.3); color: #fca5a5; }
 
-/* Alarm banner */
+/* ── Alarm overlay ── */
+#alarm-overlay {
+  position: absolute; inset: 0; z-index: 999;
+  background: rgba(10,0,20,0.92);
+  display: flex; align-items: center; justify-content: center;
+  animation: alarm-fade-in 0.2s ease;
+}
+@keyframes alarm-fade-in { from { opacity:0; } to { opacity:1; } }
+.alarm-box {
+  text-align: center; padding: 24px 20px;
+  background: rgba(255,30,80,0.13);
+  border: 2px solid rgba(255,60,100,0.45);
+  border-radius: 18px; width: 88%;
+}
+.alarm-icon { font-size: 48px; animation: alarm-shake 0.5s infinite alternate; display: block; margin-bottom: 8px; }
+@keyframes alarm-shake { from { transform: rotate(-12deg) scale(1.1); } to { transform: rotate(12deg) scale(1.1); } }
+.alarm-heading { font-size: 20px; font-weight: 800; color: #ff4d6d; margin-bottom: 6px; }
+.alarm-task-name { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 18px; line-height: 1.4; }
+.alarm-actions { display: flex; flex-direction: column; gap: 8px; }
+.alarm-btn {
+  width: 100%; padding: 11px; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: opacity 0.12s;
+}
+.alarm-btn:hover { opacity: 0.88; }
+.alarm-snooze { background: #6366f1; color: #fff; }
+.alarm-stop   { background: #ef4444; color: #fff; }
+
+/* Alarm banner (inline on card) */
 .alarm-banner {
   margin-top: 8px;
-  background: linear-gradient(135deg, rgba(255,107,53,0.2), rgba(247,147,30,0.12));
-  border: 1px solid rgba(255,107,53,0.38);
+  background: linear-gradient(135deg, rgba(255,60,80,0.2), rgba(239,68,68,0.12));
+  border: 1px solid rgba(255,60,80,0.38);
   border-radius: 8px;
-  padding: 6px 10px;
-  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 8px;
+  display: flex; align-items: center; justify-content: space-between; gap: 5px;
 }
-.alarm-text { color: #ffb399; font-size: 11px; font-weight: 600; }
+.alarm-text { color: #ffa0b0; font-size: 11px; font-weight: 600; flex: 1; }
 .alarm-dismiss {
-  color: #ff9a6c; font-size: 10px; cursor: pointer;
-  background: none; border: none; text-decoration: underline; font-family: inherit;
+  font-size: 10px; font-weight: 700; cursor: pointer; font-family: inherit;
+  padding: 3px 8px; border: none; border-radius: 6px;
 }
+.alarm-dismiss { background: rgba(99,102,241,0.8); color: #fff; }
+.alarm-stop-inline { background: rgba(239,68,68,0.8) !important; }
 
 /* ── Modal overlay ────────────────────────────────── */
 #modal-overlay {

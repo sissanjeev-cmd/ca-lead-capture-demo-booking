@@ -34,6 +34,8 @@ let editingId     = null;
 let modalPriority = 'medium';
 let modalReminder = true;
 let unsubSnapshot  = null;
+let alarmBeepId    = null;
+let pendingAlarms  = [];
 
 const $   = id => document.getElementById(id);
 const app = document.getElementById('app');
@@ -180,8 +182,7 @@ function startAlarmChecker() {
       if (t.completed||!t.reminderEnabled||!t.dueDate||alarmFiredIds.has(t.id)||t.alarmTriggered) return;
       if (new Date(t.dueDate+(t.dueTime?'T'+t.dueTime:'T00:00'))<=now) {
         alarmFiredIds.add(t.id); blinkingIds.add(t.id); t.alarmTriggered=true; changed=true;
-        playAlarm();
-        window.taskflow.triggerNotification({ title:'⏰ TaskFlow Reminder', body:t.title });
+        fireAlarm(t);
         saveTask(t);
       }
     });
@@ -190,20 +191,76 @@ function startAlarmChecker() {
   check(); setInterval(check, 30000);
 }
 
-function playAlarm() {
-  try {
-    const ctx=new (window.AudioContext||window.webkitAudioContext)();
-    [0,0.38,0.76].forEach(offset => {
-      const o=ctx.createOscillator(), g=ctx.createGain();
-      o.connect(g); g.connect(ctx.destination); o.type='sine';
-      o.frequency.setValueAtTime(880, ctx.currentTime+offset);
-      o.frequency.linearRampToValueAtTime(660, ctx.currentTime+offset+0.18);
-      g.gain.setValueAtTime(0, ctx.currentTime+offset);
-      g.gain.linearRampToValueAtTime(0.45, ctx.currentTime+offset+0.03);
-      g.gain.linearRampToValueAtTime(0, ctx.currentTime+offset+0.32);
-      o.start(ctx.currentTime+offset); o.stop(ctx.currentTime+offset+0.35);
-    });
-  } catch(e) {}
+function startContinuousBeep() {
+  if (alarmBeepId) return;
+  const beep = () => {
+    try {
+      const ctx=new (window.AudioContext||window.webkitAudioContext)();
+      [[0,1047],[0.22,880],[0.44,1047],[0.66,1319]].forEach(([off,freq]) => {
+        const o=ctx.createOscillator(), g=ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type='square'; o.frequency.value=freq;
+        g.gain.setValueAtTime(0, ctx.currentTime+off);
+        g.gain.linearRampToValueAtTime(0.7, ctx.currentTime+off+0.01);
+        g.gain.setValueAtTime(0.7, ctx.currentTime+off+0.16);
+        g.gain.linearRampToValueAtTime(0, ctx.currentTime+off+0.20);
+        o.start(ctx.currentTime+off); o.stop(ctx.currentTime+off+0.21);
+      });
+      setTimeout(()=>ctx.close().catch(()=>{}), 1500);
+    } catch(e) {}
+  };
+  beep();
+  alarmBeepId = setInterval(beep, 2200);
+}
+
+function stopContinuousBeep() {
+  if (alarmBeepId) { clearInterval(alarmBeepId); alarmBeepId=null; }
+}
+
+function fireAlarm(t) {
+  window.taskflow.triggerNotification({ title:'⏰ TaskFlow Reminder', body:t.title });
+  pendingAlarms.push(t.id);
+  startContinuousBeep();
+  if (!document.getElementById('alarm-overlay')) showAlarmOverlay();
+}
+
+function showAlarmOverlay() {
+  const taskId = pendingAlarms.shift();
+  if (!taskId) { stopContinuousBeep(); return; }
+  const t = tasks.find(x=>x.id===taskId);
+  if (!t) { showAlarmOverlay(); return; }
+
+  const ov = document.createElement('div');
+  ov.id = 'alarm-overlay';
+  ov.innerHTML = `
+    <div class="alarm-box">
+      <div class="alarm-icon">⏰</div>
+      <div class="alarm-heading">Time's Up!</div>
+      <div class="alarm-task-name">${escHtml(t.title)}</div>
+      <div class="alarm-actions">
+        <button class="alarm-btn alarm-snooze" id="alarm-snooze">😴 Snooze 5 min</button>
+        <button class="alarm-btn alarm-stop"   id="alarm-stop">🛑 Stop Alarm</button>
+      </div>
+    </div>`;
+  document.getElementById('app').appendChild(ov);
+
+  document.getElementById('alarm-snooze').onclick = () => {
+    const task=tasks.find(x=>x.id===taskId);
+    if (task) {
+      const at=new Date(Date.now()+5*60*1000);
+      const dd=at.toISOString().split('T')[0];
+      const dt=at.getHours().toString().padStart(2,'0')+':'+at.getMinutes().toString().padStart(2,'0');
+      blinkingIds.delete(taskId); alarmFiredIds.delete(taskId);
+      saveTask({...task, dueDate:dd, dueTime:dt, alarmTriggered:false});
+    }
+    ov.remove(); showAlarmOverlay();
+  };
+
+  document.getElementById('alarm-stop').onclick = () => {
+    const task=tasks.find(x=>x.id===taskId);
+    if (task) { blinkingIds.delete(taskId); saveTask({...task, alarmTriggered:true}); }
+    ov.remove(); showAlarmOverlay();
+  };
 }
 
 // ── Derived data ───────────────────────────────────────────────────────────
@@ -393,7 +450,18 @@ function render() {
   list.querySelectorAll('[data-toggle]').forEach(el=>el.addEventListener('click',()=>toggleTask(el.dataset.toggle)));
   list.querySelectorAll('[data-edit]').forEach(el=>el.addEventListener('click',()=>openModal(el.dataset.edit)));
   list.querySelectorAll('[data-delete]').forEach(el=>el.addEventListener('click',()=>deleteTask(el.dataset.delete)));
-  list.querySelectorAll('[data-dismiss]').forEach(el=>el.addEventListener('click',()=>{ blinkingIds.delete(el.dataset.dismiss); render(); }));
+  list.querySelectorAll('[data-snooze]').forEach(el=>el.addEventListener('click',()=>{
+    const id=el.dataset.snooze, t=tasks.find(x=>x.id===id); if(!t) return;
+    const at=new Date(Date.now()+5*60*1000);
+    const dd=at.toISOString().split('T')[0];
+    const dt=at.getHours().toString().padStart(2,'0')+':'+at.getMinutes().toString().padStart(2,'0');
+    blinkingIds.delete(id); alarmFiredIds.delete(id);
+    saveTask({...t, dueDate:dd, dueTime:dt, alarmTriggered:false});
+  }));
+  list.querySelectorAll('[data-stop]').forEach(el=>el.addEventListener('click',()=>{
+    const id=el.dataset.stop, t=tasks.find(x=>x.id===id); if(!t) return;
+    blinkingIds.delete(id); saveTask({...t, alarmTriggered:true});
+  }));
   list.querySelectorAll('[data-popout]').forEach(el=>el.addEventListener('click',()=>{
     const t=tasks.find(x=>x.id===el.dataset.popout); if(!t) return;
     if (floatedIds.has(t.id)) { window.taskflow.closeCardWindow(t.id); floatedIds.delete(t.id); }
@@ -420,7 +488,7 @@ function renderCard(t) {
             ${due?`<span class="due-label ${dC}">🕐 ${due.label}${due.isOverdue&&!t.completed?' <span class="badge badge-overdue">Overdue</span>':''}${due.isSoon&&!due.isOverdue&&!t.completed?' <span class="badge badge-soon">Soon</span>':''}</span>`:''}
             ${t.reminderEnabled&&!t.completed?`<span style="color:rgba(255,255,255,0.22);font-size:10px">🔔</span>`:''}
           </div>
-          ${isB?`<div class="alarm-banner"><span class="alarm-text">⏰ Reminder! Task is due</span><button class="alarm-dismiss" data-dismiss="${t.id}">Dismiss</button></div>`:''}
+          ${isB?`<div class="alarm-banner"><span class="alarm-text">⏰ Alarm active</span><button class="alarm-dismiss" data-snooze="${t.id}">😴 5min</button><button class="alarm-dismiss alarm-stop-inline" data-stop="${t.id}">🛑 Stop</button></div>`:''}
         </div>
         <div class="card-actions">
           <button class="card-btn" data-edit="${t.id}" title="Edit">✏️</button>
