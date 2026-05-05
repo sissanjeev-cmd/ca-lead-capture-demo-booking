@@ -222,8 +222,9 @@ function startContinuousBeep() {
   if (!ensureAlarmCtx()) return;
   alarmNextTime=alarmCtx.currentTime+0.05;
   const pump=()=>{
-    if (!alarmCtx||alarmCtx.state==='closed') return;
-    if (alarmCtx.state==='suspended') { alarmCtx.resume().catch(()=>{}); return; }
+    if (!alarmCtx||alarmCtx.state==='closed') { if(!ensureAlarmCtx()) return; alarmNextTime=alarmCtx.currentTime+0.05; }
+    if (alarmCtx.state==='suspended') alarmCtx.resume().catch(()=>{});
+    if (alarmNextTime<alarmCtx.currentTime) alarmNextTime=alarmCtx.currentTime+0.05;
     while (alarmNextTime<alarmCtx.currentTime+0.4) { scheduleBeepGroup(alarmNextTime); alarmNextTime+=2.2; }
   };
   pump();
