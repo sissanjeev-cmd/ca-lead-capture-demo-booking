@@ -462,6 +462,16 @@ app.whenReady().then(async () => {
     callback({ responseHeaders: h });
   });
 
+  // Override Sec-CH-UA client hints — Electron sends "Electron";v="28" which
+  // causes Google to show "Couldn't sign you in / browser not secure"
+  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    const headers = { ...details.requestHeaders };
+    headers['Sec-CH-UA'] = '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"';
+    headers['Sec-CH-UA-Mobile'] = '?0';
+    headers['Sec-CH-UA-Platform'] = '"macOS"';
+    callback({ requestHeaders: headers });
+  });
+
   await startStaticServer();
   createWindow();
   createTray();
