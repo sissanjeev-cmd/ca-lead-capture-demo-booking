@@ -79,14 +79,14 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
 /* ── Icon+label control buttons ── */
 .ctrl-btn.ctrl-lbl {
   width: auto;
-  min-width: 34px;
-  height: 34px;
+  min-width: 48px;
+  height: 42px;
   flex-direction: column;
-  gap: 1px;
-  padding: 3px 6px;
+  gap: 2px;
+  padding: 5px 8px;
 }
-.ctrl-btn.ctrl-lbl .ci { font-size: 11px; line-height: 1.2; }
-.ctrl-btn.ctrl-lbl .cl { font-size: 8px; font-weight: 700; opacity: 0.8; line-height: 1; letter-spacing: 0.4px; text-transform: uppercase; }
+.ctrl-btn.ctrl-lbl .ci { font-size: 15px; line-height: 1.2; }
+.ctrl-btn.ctrl-lbl .cl { font-size: 10px; font-weight: 700; opacity: 0.85; line-height: 1; letter-spacing: 0.4px; text-transform: uppercase; }
 .ctrl-btn.ctrl-lbl.ontop-active .cl { opacity: 1; color: #ff9a6c; }
 .ctrl-btn.ctrl-lbl.btn-signout-lbl:hover { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); }
 .ctrl-btn.ctrl-lbl.btn-signout-lbl:hover .ci,
