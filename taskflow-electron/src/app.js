@@ -241,7 +241,10 @@ function buildApp() {
     <div id="titlebar">
       <div class="logo">
         <span class="logo-icon">✅</span>
-        <div><div class="logo-text">TaskFlow</div><div class="logo-sub">Desktop Widget</div></div>
+        <div>
+          <div class="logo-text">TaskFlow</div>
+          <div class="logo-sub">${u ? escHtml(u.email||'') : 'Desktop Widget'}</div>
+        </div>
       </div>
       <div class="controls">
         <button class="ctrl-btn ctrl-lbl" id="btn-ontop">
