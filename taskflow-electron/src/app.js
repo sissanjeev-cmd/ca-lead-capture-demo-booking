@@ -36,6 +36,8 @@ let modalReminder = true;
 let unsubSnapshot  = null;
 let alarmBeepId    = null;
 let pendingAlarms  = [];
+let alarmCtx       = null;
+let alarmNextTime  = 0;
 
 const $   = id => document.getElementById(id);
 const app = document.getElementById('app');
@@ -191,30 +193,46 @@ function startAlarmChecker() {
   check(); setInterval(check, 30000);
 }
 
+function ensureAlarmCtx() {
+  if (!alarmCtx || alarmCtx.state==='closed') {
+    try { alarmCtx=new (window.AudioContext||window.webkitAudioContext)(); } catch(e) { return false; }
+  }
+  if (alarmCtx.state==='suspended') alarmCtx.resume().catch(()=>{});
+  return true;
+}
+
+function scheduleBeepGroup(startTime) {
+  [[0,1047],[0.22,880],[0.44,1047],[0.66,1319]].forEach(([off,freq]) => {
+    try {
+      const o=alarmCtx.createOscillator(), g=alarmCtx.createGain();
+      o.connect(g); g.connect(alarmCtx.destination);
+      o.type='square'; o.frequency.value=freq;
+      const t=startTime+off;
+      g.gain.setValueAtTime(0,t);
+      g.gain.linearRampToValueAtTime(0.7,t+0.01);
+      g.gain.setValueAtTime(0.7,t+0.16);
+      g.gain.linearRampToValueAtTime(0,t+0.21);
+      o.start(t); o.stop(t+0.22);
+    } catch(e) {}
+  });
+}
+
 function startContinuousBeep() {
   if (alarmBeepId) return;
-  const beep = () => {
-    try {
-      const ctx=new (window.AudioContext||window.webkitAudioContext)();
-      [[0,1047],[0.22,880],[0.44,1047],[0.66,1319]].forEach(([off,freq]) => {
-        const o=ctx.createOscillator(), g=ctx.createGain();
-        o.connect(g); g.connect(ctx.destination);
-        o.type='square'; o.frequency.value=freq;
-        g.gain.setValueAtTime(0, ctx.currentTime+off);
-        g.gain.linearRampToValueAtTime(0.7, ctx.currentTime+off+0.01);
-        g.gain.setValueAtTime(0.7, ctx.currentTime+off+0.16);
-        g.gain.linearRampToValueAtTime(0, ctx.currentTime+off+0.20);
-        o.start(ctx.currentTime+off); o.stop(ctx.currentTime+off+0.21);
-      });
-      setTimeout(()=>ctx.close().catch(()=>{}), 1500);
-    } catch(e) {}
+  if (!ensureAlarmCtx()) return;
+  alarmNextTime=alarmCtx.currentTime+0.05;
+  const pump=()=>{
+    if (!alarmCtx||alarmCtx.state==='closed') return;
+    if (alarmCtx.state==='suspended') { alarmCtx.resume().catch(()=>{}); return; }
+    while (alarmNextTime<alarmCtx.currentTime+0.4) { scheduleBeepGroup(alarmNextTime); alarmNextTime+=2.2; }
   };
-  beep();
-  alarmBeepId = setInterval(beep, 2200);
+  pump();
+  alarmBeepId=setInterval(pump,200);
 }
 
 function stopContinuousBeep() {
   if (alarmBeepId) { clearInterval(alarmBeepId); alarmBeepId=null; }
+  if (alarmCtx) { alarmCtx.close().catch(()=>{}); alarmCtx=null; }
 }
 
 function fireAlarm(t) {
