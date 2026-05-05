@@ -15,6 +15,7 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,0.10);
   overflow: hidden;
+  position: relative;
   box-shadow: 0 32px 80px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(255,255,255,0.06);
 }
 
@@ -47,6 +48,7 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
   display: flex;
   align-items: center;
   gap: 6px;
+  position: relative;
 }
 
 .ctrl-btn {
@@ -70,8 +72,98 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
 }
 
 .ctrl-btn.close-btn:hover { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+/* Old sign-out button (kept for fallback) */
 .ctrl-btn.btn-signout-text { width: auto; padding: 0 10px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.75); letter-spacing: 0.2px; }
 .ctrl-btn.btn-signout-text:hover { color: #fff; background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); }
+
+/* ── Icon+label control buttons ── */
+.ctrl-btn.ctrl-lbl {
+  width: auto;
+  min-width: 34px;
+  height: 34px;
+  flex-direction: column;
+  gap: 1px;
+  padding: 3px 6px;
+}
+.ctrl-btn.ctrl-lbl .ci { font-size: 11px; line-height: 1.2; }
+.ctrl-btn.ctrl-lbl .cl { font-size: 8px; font-weight: 700; opacity: 0.8; line-height: 1; letter-spacing: 0.4px; text-transform: uppercase; }
+.ctrl-btn.ctrl-lbl.ontop-active .cl { opacity: 1; color: #ff9a6c; }
+
+/* ── User menu button (avatar) ── */
+.ctrl-btn.user-menu-btn {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  border: 1.5px solid rgba(255,255,255,0.35);
+  font-size: 11px; font-weight: 700; color: #fff;
+  flex-shrink: 0; padding: 0;
+  position: relative;
+}
+.ctrl-btn.user-menu-btn:hover { background: linear-gradient(135deg, #ff7e4d, #f8a030); border-color: rgba(255,255,255,0.55); }
+
+/* ── User dropdown ── */
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: rgba(20, 12, 35, 0.97);
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 12px;
+  padding: 12px 0 8px;
+  min-width: 210px;
+  z-index: 100;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  backdrop-filter: blur(12px);
+}
+.user-dropdown.hidden { display: none; }
+.user-info {
+  padding: 0 14px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 6px;
+}
+.user-name { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.user-email { font-size: 11px; color: rgba(255,255,255,0.5); }
+.btn-signout-drop {
+  display: block; width: calc(100% - 16px); margin: 0 8px;
+  padding: 8px 12px; text-align: left;
+  background: transparent; border: none;
+  color: rgba(255,255,255,0.75); font-size: 13px; font-weight: 600;
+  cursor: pointer; border-radius: 8px;
+  transition: all 0.15s;
+}
+.btn-signout-drop:hover { background: rgba(239,68,68,0.18); color: #fca5a5; }
+
+/* ── Sign-out confirmation overlay ── */
+.signout-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(10px);
+  z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: inherit;
+}
+.signout-overlay.hidden { display: none; }
+.signout-box {
+  background: rgba(18, 10, 30, 0.98);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  padding: 32px 28px 24px;
+  text-align: center;
+  max-width: 270px;
+  width: calc(100% - 48px);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+}
+.signout-icon { font-size: 36px; margin-bottom: 12px; }
+.signout-heading { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.signout-email { font-size: 12px; color: rgba(255,255,255,0.5); margin-bottom: 10px; word-break: break-all; }
+.signout-note { font-size: 12px; color: rgba(255,255,255,0.35); margin-bottom: 24px; line-height: 1.5; }
+.signout-btns { display: flex; gap: 10px; justify-content: center; }
+.btn-danger {
+  padding: 9px 18px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 700;
+  background: rgba(239,68,68,0.18); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5;
+  transition: all 0.15s; font-family: inherit;
+}
+.btn-danger:hover { background: rgba(239,68,68,0.35); border-color: rgba(239,68,68,0.6); color: #fff; }
 
 
 /* ── Scrollable body ──────────────────────────────── */
@@ -494,7 +586,7 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
 .btn-google-create:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.07); }
 .auth-note { color: rgba(255,255,255,0.28); font-size: 11px; margin-top: 2px; }
 
-/* ── User avatar in header controls ── */
+/* ── User avatar (legacy fallback) ── */
 .user-avatar {
   width: 22px; height: 22px; border-radius: 50%;
   background: linear-gradient(135deg, #ff6b35, #f7931e);

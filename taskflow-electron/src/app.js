@@ -235,6 +235,7 @@ function formatDue(dueDate, dueTime) {
 function buildApp() {
   const u = currentUser;
   const av = u ? (u.displayName||u.email||'?')[0].toUpperCase() : null;
+  const displayName = u ? (u.displayName || u.email || '') : '';
 
   app.innerHTML = `
     <div id="titlebar">
@@ -243,12 +244,40 @@ function buildApp() {
         <div><div class="logo-text">TaskFlow</div><div class="logo-sub">Desktop Widget</div></div>
       </div>
       <div class="controls">
-        ${av?`<div class="user-avatar" title="${escHtml(u.displayName||u.email||'')}">${av}</div>`:''}
-        <button class="ctrl-btn ontop-active" id="btn-ontop" title="Toggle always on top">📌</button>
-        <button class="ctrl-btn" id="btn-sendback" title="Send to back">↙</button>
-        <button class="ctrl-btn" id="btn-export" title="Export tasks">↗</button>
-        ${av?`<button class="ctrl-btn btn-signout-text" id="btn-signout">Sign out</button>`:''}
+        <button class="ctrl-btn ctrl-lbl" id="btn-ontop">
+          <span class="ci">📌</span><span class="cl">Pin</span>
+        </button>
+        <button class="ctrl-btn ctrl-lbl" id="btn-sendback">
+          <span class="ci">🔽</span><span class="cl">Behind</span>
+        </button>
+        <button class="ctrl-btn ctrl-lbl" id="btn-export">
+          <span class="ci">📤</span><span class="cl">Export</span>
+        </button>
+        ${av ? `
+        <button class="ctrl-btn user-menu-btn" id="btn-user-menu" title="${escHtml(displayName)}">
+          ${av}
+        </button>
+        <div class="user-dropdown hidden" id="user-dropdown">
+          <div class="user-info">
+            <div class="user-name">${escHtml(u.displayName||'')}</div>
+            <div class="user-email">${escHtml(u.email||'')}</div>
+          </div>
+          <button class="btn-signout-drop" id="btn-signout">🚪 Sign out</button>
+        </div>` : ''}
         <button class="ctrl-btn close-btn" id="btn-close" title="Hide to tray">✕</button>
+      </div>
+    </div>
+
+    <div class="signout-overlay hidden" id="signout-overlay">
+      <div class="signout-box">
+        <div class="signout-icon">🚪</div>
+        <div class="signout-heading">Sign out?</div>
+        <div class="signout-email">${escHtml(u ? u.email||'' : '')}</div>
+        <p class="signout-note">You'll need to sign in again to access your tasks.</p>
+        <div class="signout-btns">
+          <button class="btn-cancel" id="signout-cancel">Cancel</button>
+          <button class="btn-danger" id="signout-confirm">Yes, sign out</button>
+        </div>
       </div>
     </div>
     <div id="add-bar">
@@ -306,7 +335,31 @@ function buildApp() {
   $('btn-sendback').addEventListener('click', () => window.taskflow.sendToBack());
   $('btn-close').addEventListener('click', () => window.taskflow.closeWindow());
   $('btn-export').addEventListener('click', () => window.taskflow.exportTasks(tasks));
-  if ($('btn-signout')) $('btn-signout').addEventListener('click', () => signOut(auth));
+
+  // Avatar → dropdown toggle
+  if ($('btn-user-menu')) {
+    $('btn-user-menu').addEventListener('click', e => {
+      e.stopPropagation();
+      $('user-dropdown').classList.toggle('hidden');
+    });
+    document.addEventListener('click', () => {
+      const dd = $('user-dropdown');
+      if (dd) dd.classList.add('hidden');
+    }, { once: false, capture: false });
+  }
+
+  // Sign-out: show confirmation overlay
+  if ($('btn-signout')) {
+    $('btn-signout').addEventListener('click', () => {
+      if ($('user-dropdown')) $('user-dropdown').classList.add('hidden');
+      $('signout-overlay').classList.remove('hidden');
+    });
+  }
+  $('signout-cancel').addEventListener('click', () => $('signout-overlay').classList.add('hidden'));
+  $('signout-confirm').addEventListener('click', () => {
+    $('signout-overlay').classList.add('hidden');
+    signOut(auth);
+  });
 
   $('quick-input').addEventListener('keydown', e => { if (e.key==='Enter'&&e.target.value.trim()) { addQuick(e.target.value.trim()); e.target.value=''; } });
   $('btn-add-full').addEventListener('click', () => openModal(null));
@@ -421,8 +474,16 @@ function toggleAlwaysOnTop() {
 }
 function updateOnTopBtn() {
   const btn=$('btn-ontop'); if(!btn) return;
-  if (isAlwaysOnTop) { btn.classList.add('ontop-active'); btn.title='Send to background'; }
-  else { btn.classList.remove('ontop-active'); btn.title='Bring to front (always on top)'; }
+  const lbl = btn.querySelector('.cl');
+  if (isAlwaysOnTop) {
+    btn.classList.add('ontop-active');
+    btn.title='Currently pinned on top — click to send to background';
+    if (lbl) lbl.textContent='Pinned';
+  } else {
+    btn.classList.remove('ontop-active');
+    btn.title='Click to pin widget on top of other windows';
+    if (lbl) lbl.textContent='Pin';
+  }
 }
 
 // ── Modal ──────────────────────────────────────────────────────────────────
