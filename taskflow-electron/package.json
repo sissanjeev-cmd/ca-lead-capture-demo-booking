@@ -5,10 +5,35 @@
   "main": "src/main.js",
   "scripts": {
     "start": "unset ELECTRON_RUN_AS_NODE && electron .",
-    "dev": "unset ELECTRON_RUN_AS_NODE && electron . --dev"
+    "dev": "unset ELECTRON_RUN_AS_NODE && electron . --dev",
+    "dist": "electron-builder --mac dmg"
+  },
+  "build": {
+    "appId": "com.taskflow.desktop",
+    "productName": "TaskFlow",
+    "copyright": "Copyright © 2025 TaskFlow",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "identity": null,
+      "icon": "build/icon.png",
+      "target": [
+        { "target": "dmg", "arch": ["universal"] }
+      ]
+    },
+    "dmg": {
+      "title": "Install TaskFlow",
+      "backgroundColor": "#1a0a3e",
+      "window": { "width": 540, "height": 380 }
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "asar": true
   },
   "devDependencies": {
-    "electron": "^28.0.0"
+    "electron": "^28.0.0",
+    "electron-builder": "^26.8.1"
   },
   "author": "TaskFlow",
   "license": "MIT"
