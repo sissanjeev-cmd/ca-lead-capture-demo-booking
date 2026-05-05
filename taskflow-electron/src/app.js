@@ -35,9 +35,7 @@ let modalPriority = 'medium';
 let modalReminder = true;
 let unsubSnapshot  = null;
 let pendingAlarms  = [];
-let alarmCtx       = null;
-let alarmSource    = null;
-let alarmBuffer    = null;
+let alarmInterval  = null;
 
 const $   = id => document.getElementById(id);
 const app = document.getElementById('app');
@@ -193,38 +191,31 @@ function startAlarmChecker() {
   check(); setInterval(check, 30000);
 }
 
-async function buildAlarmBuffer() {
-  if (alarmBuffer) return alarmBuffer;
-  const rate=44100, dur=2.2;
-  const off=new OfflineAudioContext(1, Math.ceil(rate*dur), rate);
-  [[0,1047],[0.22,880],[0.44,1047],[0.66,1319]].forEach(([t,freq]) => {
-    const o=off.createOscillator(), g=off.createGain();
-    o.connect(g); g.connect(off.destination);
-    o.type='square'; o.frequency.value=freq;
-    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.6,t+0.01);
-    g.gain.setValueAtTime(0.6,t+0.16); g.gain.linearRampToValueAtTime(0,t+0.21);
-    o.start(t); o.stop(t+0.22);
-  });
-  alarmBuffer=await off.startRendering();
-  return alarmBuffer;
-}
-
-async function startContinuousBeep() {
-  if (alarmSource) return;
+function playAlarmBeep() {
   try {
-    const buf=await buildAlarmBuffer();
-    if (!alarmCtx||alarmCtx.state==='closed')
-      alarmCtx=new (window.AudioContext||window.webkitAudioContext)();
-    await alarmCtx.resume().catch(()=>{});
-    alarmSource=alarmCtx.createBufferSource();
-    alarmSource.buffer=buf; alarmSource.loop=true;
-    alarmSource.connect(alarmCtx.destination); alarmSource.start(0);
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [[0,1047],[0.22,880],[0.44,1047],[0.66,1319]].forEach(([t,freq]) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'square'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0, ctx.currentTime+t);
+      g.gain.linearRampToValueAtTime(0.6, ctx.currentTime+t+0.01);
+      g.gain.setValueAtTime(0.6, ctx.currentTime+t+0.16);
+      g.gain.linearRampToValueAtTime(0, ctx.currentTime+t+0.21);
+      o.start(ctx.currentTime+t); o.stop(ctx.currentTime+t+0.22);
+    });
+    setTimeout(() => ctx.close().catch(()=>{}), 2000);
   } catch(e) {}
 }
 
+function startContinuousBeep() {
+  if (alarmInterval) return;
+  playAlarmBeep();
+  alarmInterval = setInterval(playAlarmBeep, 2200);
+}
+
 function stopContinuousBeep() {
-  if (alarmSource) { try { alarmSource.stop(0); alarmSource.disconnect(); } catch(e) {} alarmSource=null; }
-  if (alarmCtx) { alarmCtx.close().catch(()=>{}); alarmCtx=null; }
+  if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
 }
 
 function fireAlarm(t) {
