@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, Notification, dialog, shell } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, Notification, dialog, shell, session } = require('electron');
 const path = require('path');
 const fs   = require('fs');
 const http = require('http');
@@ -449,6 +449,15 @@ ipcMain.on('export-tasks', async (_, tasks) => {
 // ── App lifecycle ──────────────────────────────────────────────────────────
 app.whenReady().then(async () => {
   app.dock.hide(); // hide from dock — tray only
+
+  // Strip COOP/COEP headers globally so Firebase popup can postMessage back
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    const h = { ...details.responseHeaders };
+    ['cross-origin-opener-policy', 'Cross-Origin-Opener-Policy',
+     'cross-origin-embedder-policy', 'Cross-Origin-Embedder-Policy'].forEach(k => delete h[k]);
+    callback({ responseHeaders: h });
+  });
+
   await startStaticServer();
   createWindow();
   createTray();

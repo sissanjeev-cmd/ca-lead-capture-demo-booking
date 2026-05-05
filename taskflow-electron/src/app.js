@@ -105,49 +105,21 @@ function showAuthScreen() {
         <button class="btn-google-create" id="btn-google-create">
           ${googleSvg} Create account with Google
         </button>
-        <div class="auth-divider"><span>or use email</span></div>
-        <input class="auth-input" id="auth-email" type="email" placeholder="Email address" autocomplete="email" />
-        <input class="auth-input" id="auth-pass"  type="password" placeholder="Password" autocomplete="current-password" />
         <p class="auth-error" id="auth-err"></p>
-        <div style="display:flex;gap:8px">
-          <button class="btn-auth-primary" id="btn-signin" style="flex:1">Sign in</button>
-          <button class="btn-auth-secondary" id="btn-create" style="flex:1">Create account</button>
-        </div>
         <p class="auth-note">Free · Each Google account has its own private task list</p>
       </div>
     </div>`;
 
   const errEl = $('auth-err');
-  function showErr(msg) { errEl.textContent = msg; }
-
   const handleGoogleErr = (e) => {
     console.error('Google sign-in error:', e.code, e.message);
     if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
-      showErr('Google sign-in failed: ' + (e.code || e.message));
+      errEl.textContent = 'Sign-in failed: ' + (e.code || e.message);
     }
   };
 
   $('btn-google-signin').addEventListener('click', () => doGoogleSignIn().catch(handleGoogleErr));
   $('btn-google-create').addEventListener('click', () => doGoogleSignIn().catch(handleGoogleErr));
-
-  $('btn-signin').addEventListener('click', async () => {
-    const email = $('auth-email').value.trim(), pass = $('auth-pass').value;
-    if (!email || !pass) { showErr('Please enter email and password.'); return; }
-    try { showErr(''); await signInWithEmailAndPassword(auth, email, pass); }
-    catch (e) { showErr(friendlyAuthError(e.code)); }
-  });
-
-  $('btn-create').addEventListener('click', async () => {
-    const email = $('auth-email').value.trim(), pass = $('auth-pass').value;
-    if (!email || !pass) { showErr('Please enter email and password.'); return; }
-    if (pass.length < 6) { showErr('Password must be at least 6 characters.'); return; }
-    try { showErr(''); await createUserWithEmailAndPassword(auth, email, pass); }
-    catch (e) { showErr(friendlyAuthError(e.code)); }
-  });
-
-  [$('auth-email'), $('auth-pass')].forEach(el => el.addEventListener('keydown', e => {
-    if (e.key === 'Enter') $('btn-signin').click();
-  }));
 }
 
 function friendlyAuthError(code) {
