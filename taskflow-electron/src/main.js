@@ -158,6 +158,10 @@ function createWindow() {
     },
   });
 
+  // Set Chrome UA on main window so Google allows sign-in via redirect flow
+  mainWindow.webContents.setUserAgent(
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+  );
   mainWindow.loadURL(`http://127.0.0.1:${httpPort}/`);
 
   // Forward renderer console messages to terminal for debugging

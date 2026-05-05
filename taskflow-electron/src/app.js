@@ -1,6 +1,6 @@
 import { initializeApp }                            from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithCredential, signInWithPopup, signOut,
-         onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword }
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut,
+         onAuthStateChanged }
                                                    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy }
                                                    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
@@ -68,6 +68,13 @@ async function init() {
     }
   });
 
+  // Handle result when Google redirects back after sign-in
+  getRedirectResult(auth).catch(e => {
+    console.error('Redirect sign-in error:', e.code, e.message);
+    const errEl = $('auth-err');
+    if (errEl) errEl.textContent = 'Sign-in failed: ' + (e.code || e.message);
+  });
+
   window.taskflow.onTasksImported(imported => {
     if (!currentUser) return;
     imported.forEach(t => saveTask(t));
@@ -89,7 +96,7 @@ const googleSvg = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
 async function doGoogleSignIn() {
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
-  await signInWithPopup(auth, provider);
+  await signInWithRedirect(auth, provider);
 }
 
 function showAuthScreen() {
@@ -98,28 +105,22 @@ function showAuthScreen() {
       <div class="auth-card">
         <span class="auth-logo">✅</span>
         <h1 class="auth-title">TaskFlow</h1>
-        <p class="auth-sub">Sync your tasks across all devices</p>
+        <p class="auth-sub">Sign in to sync your tasks across all devices</p>
         <button class="btn-google-signin" id="btn-google-signin">
-          ${googleSvg} Sign in with Google
-        </button>
-        <button class="btn-google-create" id="btn-google-create">
-          ${googleSvg} Create account with Google
+          ${googleSvg} Continue with Google
         </button>
         <p class="auth-error" id="auth-err"></p>
-        <p class="auth-note">Free · Each Google account has its own private task list</p>
+        <p class="auth-note">New users are registered automatically · Each account has its own private task list</p>
       </div>
     </div>`;
 
   const errEl = $('auth-err');
-  const handleGoogleErr = (e) => {
-    console.error('Google sign-in error:', e.code, e.message);
-    if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+  $('btn-google-signin').addEventListener('click', () =>
+    doGoogleSignIn().catch(e => {
+      console.error('Google sign-in error:', e.code, e.message);
       errEl.textContent = 'Sign-in failed: ' + (e.code || e.message);
-    }
-  };
-
-  $('btn-google-signin').addEventListener('click', () => doGoogleSignIn().catch(handleGoogleErr));
-  $('btn-google-create').addEventListener('click', () => doGoogleSignIn().catch(handleGoogleErr));
+    })
+  );
 }
 
 function friendlyAuthError(code) {
