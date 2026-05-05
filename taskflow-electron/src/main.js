@@ -341,31 +341,23 @@ async function handleImport() {
   }
 }
 
-// ── Google Sign-In via system browser + local server callback ─────────────
+// ── Google Sign-In via system browser ────────────────────────────────────
+// Opens a dedicated auth page in the user's real browser (Chrome/Safari).
+// That page does signInWithPopup (works in a real browser), then POSTs the
+// Google ID token back to our local server, which resolves this promise.
 ipcMain.handle('google-sign-in', () => {
-  // Cancel any previous pending auth
   if (pendingAuthReject) { pendingAuthReject(new Error('closed')); }
 
   return new Promise((resolve, reject) => {
     pendingAuthResolve = resolve;
     pendingAuthReject  = reject;
 
-    const REDIRECT = `http://127.0.0.1:${httpPort}/auth/callback`;
-    const oauthUrl =
-      'https://accounts.google.com/o/oauth2/auth' +
-      '?response_type=id_token%20token' +
-      '&client_id=644486157330-ojpp4o56qf4es95gldjk2rtuespk0ud8.apps.googleusercontent.com' +
-      '&redirect_uri=' + encodeURIComponent(REDIRECT) +
-      '&scope=' + encodeURIComponent('openid email profile') +
-      '&prompt=select_account' +
-      '&nonce=' + Math.random().toString(36).slice(2);
-
-    shell.openExternal(oauthUrl);
+    shell.openExternal(`http://127.0.0.1:${httpPort}/auth-browser.html`);
 
     // Timeout after 5 minutes
     setTimeout(() => {
       if (pendingAuthReject) {
-        pendingAuthReject(new Error('closed'));
+        pendingAuthReject(new Error('timeout'));
         pendingAuthResolve = null; pendingAuthReject = null;
       }
     }, 300000);

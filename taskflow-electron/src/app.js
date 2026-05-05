@@ -1,5 +1,5 @@
 import { initializeApp }                            from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut,
+import { getAuth, GoogleAuthProvider, signInWithCredential, signOut,
          onAuthStateChanged }
                                                    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy }
@@ -68,13 +68,6 @@ async function init() {
     }
   });
 
-  // Handle result when Google redirects back after sign-in
-  getRedirectResult(auth).catch(e => {
-    console.error('Redirect sign-in error:', e.code, e.message);
-    const errEl = $('auth-err');
-    if (errEl) errEl.textContent = 'Sign-in failed: ' + (e.code || e.message);
-  });
-
   window.taskflow.onTasksImported(imported => {
     if (!currentUser) return;
     imported.forEach(t => saveTask(t));
@@ -94,9 +87,11 @@ const googleSvg = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none">
 </svg>`;
 
 async function doGoogleSignIn() {
-  const provider = new GoogleAuthProvider();
-  provider.setCustomParameters({ prompt: 'select_account' });
-  await signInWithRedirect(auth, provider);
+  // Sign-in happens in the user's real browser (avoids Google's embedded-browser block).
+  // The browser page posts the Google ID token back; we finish sign-in here with it.
+  const { idToken, accessToken } = await window.taskflow.googleSignIn();
+  const credential = GoogleAuthProvider.credential(idToken, accessToken);
+  await signInWithCredential(auth, credential);
 }
 
 function showAuthScreen() {
