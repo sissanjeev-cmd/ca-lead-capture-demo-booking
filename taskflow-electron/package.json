@@ -22,8 +22,12 @@
     },
     "dmg": {
       "title": "Install TaskFlow",
-      "backgroundColor": "#1a0a3e",
-      "window": { "width": 540, "height": 380 }
+      "backgroundColor": "#f0eeff",
+      "window": { "width": 540, "height": 380 },
+      "contents": [
+        { "x": 150, "y": 180, "type": "file" },
+        { "x": 390, "y": 180, "type": "link", "path": "/Applications" }
+      ]
     },
     "files": [
       "src/**/*",
