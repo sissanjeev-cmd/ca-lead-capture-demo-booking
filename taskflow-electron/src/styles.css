@@ -88,6 +88,9 @@ html, body, #app { height: 100%; width: 100%; overflow: hidden; }
 .ctrl-btn.ctrl-lbl .ci { font-size: 11px; line-height: 1.2; }
 .ctrl-btn.ctrl-lbl .cl { font-size: 8px; font-weight: 700; opacity: 0.8; line-height: 1; letter-spacing: 0.4px; text-transform: uppercase; }
 .ctrl-btn.ctrl-lbl.ontop-active .cl { opacity: 1; color: #ff9a6c; }
+.ctrl-btn.ctrl-lbl.btn-signout-lbl:hover { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); }
+.ctrl-btn.ctrl-lbl.btn-signout-lbl:hover .ci,
+.ctrl-btn.ctrl-lbl.btn-signout-lbl:hover .cl { color: #fca5a5; opacity: 1; }
 
 /* ── User menu button (avatar) ── */
 .ctrl-btn.user-menu-btn {

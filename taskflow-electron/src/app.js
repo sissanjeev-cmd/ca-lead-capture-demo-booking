@@ -247,23 +247,16 @@ function buildApp() {
         <button class="ctrl-btn ctrl-lbl" id="btn-ontop">
           <span class="ci">📌</span><span class="cl">Pin</span>
         </button>
-        <button class="ctrl-btn ctrl-lbl" id="btn-sendback">
-          <span class="ci">🔽</span><span class="cl">Behind</span>
+        <button class="ctrl-btn ctrl-lbl" id="btn-sendback" title="Move widget behind other windows">
+          <span class="ci">🪟</span><span class="cl">Minimise</span>
         </button>
-        <button class="ctrl-btn ctrl-lbl" id="btn-export">
+        <button class="ctrl-btn ctrl-lbl" id="btn-export" title="Export tasks to JSON file">
           <span class="ci">📤</span><span class="cl">Export</span>
         </button>
         ${av ? `
-        <button class="ctrl-btn user-menu-btn" id="btn-user-menu" title="${escHtml(displayName)}">
-          ${av}
-        </button>
-        <div class="user-dropdown hidden" id="user-dropdown">
-          <div class="user-info">
-            <div class="user-name">${escHtml(u.displayName||'')}</div>
-            <div class="user-email">${escHtml(u.email||'')}</div>
-          </div>
-          <button class="btn-signout-drop" id="btn-signout">🚪 Sign out</button>
-        </div>` : ''}
+        <button class="ctrl-btn ctrl-lbl btn-signout-lbl" id="btn-signout" title="Sign out of ${escHtml(u.email||'')}">
+          <span class="ci">🚪</span><span class="cl">Sign Out</span>
+        </button>` : ''}
         <button class="ctrl-btn close-btn" id="btn-close" title="Hide to tray">✕</button>
       </div>
     </div>
@@ -336,22 +329,9 @@ function buildApp() {
   $('btn-close').addEventListener('click', () => window.taskflow.closeWindow());
   $('btn-export').addEventListener('click', () => window.taskflow.exportTasks(tasks));
 
-  // Avatar → dropdown toggle
-  if ($('btn-user-menu')) {
-    $('btn-user-menu').addEventListener('click', e => {
-      e.stopPropagation();
-      $('user-dropdown').classList.toggle('hidden');
-    });
-    document.addEventListener('click', () => {
-      const dd = $('user-dropdown');
-      if (dd) dd.classList.add('hidden');
-    }, { once: false, capture: false });
-  }
-
   // Sign-out: show confirmation overlay
   if ($('btn-signout')) {
     $('btn-signout').addEventListener('click', () => {
-      if ($('user-dropdown')) $('user-dropdown').classList.add('hidden');
       $('signout-overlay').classList.remove('hidden');
     });
   }
