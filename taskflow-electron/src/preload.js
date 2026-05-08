@@ -8,6 +8,7 @@ contextBridge.exposeInMainWorld('taskflow', {
   closeWindow:        () => ipcRenderer.send('close-window'),
   sendToBack:         () => ipcRenderer.send('send-to-back'),
   triggerNotification:(data) => ipcRenderer.send('trigger-notification', data),
+  showAlarmWindow:    () => ipcRenderer.send('show-alarm-window'),
   exportTasks:        (tasks) => ipcRenderer.send('export-tasks', tasks),
   openCardWindow:     (card) => ipcRenderer.invoke('open-card-window', card),
   closeCardWindow:    (id) => ipcRenderer.send('close-card-window', id),

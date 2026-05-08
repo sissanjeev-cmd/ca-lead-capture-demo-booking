@@ -430,6 +430,10 @@ ipcMain.on('trigger-notification', (_, { title, body }) => {
   }
 });
 
+ipcMain.on('show-alarm-window', () => {
+  if (mainWindow) { mainWindow.show(); mainWindow.focus(); }
+});
+
 ipcMain.on('export-tasks', async (_, tasks) => {
   const result = await dialog.showSaveDialog({
     title: 'Export Tasks',
