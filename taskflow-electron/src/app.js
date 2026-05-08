@@ -41,6 +41,17 @@ let alarmInterval  = null;
 const $   = id => document.getElementById(id);
 const app = document.getElementById('app');
 
+// Pre-unlock AudioContext on first user gesture so it's ready when alarm fires
+function _initAudioCtx() {
+  if (alarmCtx && alarmCtx.state !== 'closed') return;
+  try {
+    alarmCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (alarmCtx.state === 'suspended') alarmCtx.resume().catch(()=>{});
+  } catch(e) {}
+}
+document.addEventListener('click', _initAudioCtx);
+document.addEventListener('keydown', _initAudioCtx);
+
 // ── Entry ──────────────────────────────────────────────────────────────────
 async function init() {
   isAlwaysOnTop = await window.taskflow.getAlwaysOnTop();
@@ -211,8 +222,10 @@ function _scheduleBeep() {
 async function startContinuousBeep() {
   if (alarmInterval) return;
   try {
-    alarmCtx = new (window.AudioContext || window.webkitAudioContext)();
-    await alarmCtx.resume().catch(()=>{});
+    if (!alarmCtx || alarmCtx.state === 'closed')
+      alarmCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (alarmCtx.state === 'suspended')
+      await alarmCtx.resume().catch(()=>{});
     _scheduleBeep();
     alarmInterval = setInterval(_scheduleBeep, 2200);
   } catch(e) {}
