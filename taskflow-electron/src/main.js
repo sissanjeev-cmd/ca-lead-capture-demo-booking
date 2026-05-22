@@ -1,7 +1,9 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain, screen, Notification, dialog, shell, session } = require('electron');
-const path = require('path');
-const fs   = require('fs');
-const http = require('http');
+const path          = require('path');
+const fs            = require('fs');
+const http          = require('http');
+const os            = require('os');
+const { execSync }  = require('child_process');
 
 let httpServer = null;
 let httpPort   = 0;
@@ -10,6 +12,65 @@ let pendingAuthReject  = null;
 
 let mainWindow = null;
 let tray = null;
+
+// ── Background alarm scheduling (launchd) ──────────────────────────────────
+const IS_ALARM_CHECK   = process.argv.includes('--alarm-check');
+const ALARM_PLIST_LABEL = 'com.taskflow.desktop.alarm';
+const ALARM_PLIST_PATH  = path.join(os.homedir(), 'Library', 'LaunchAgents', `${ALARM_PLIST_LABEL}.plist`);
+
+function unloadAlarmPlist() {
+  try { execSync(`launchctl unload "${ALARM_PLIST_PATH}" 2>/dev/null`); } catch(_) {}
+  try { if (fs.existsSync(ALARM_PLIST_PATH)) fs.unlinkSync(ALARM_PLIST_PATH); } catch(_) {}
+}
+
+function scheduleBackgroundAlarm(tasks) {
+  unloadAlarmPlist();
+  const now = new Date();
+  const entry = tasks
+    .filter(t => !t.completed && t.reminderEnabled && t.dueDate && !t.alarmTriggered)
+    .map(t => ({ task: t, dueAt: new Date(t.dueDate + (t.dueTime ? 'T'+t.dueTime : 'T00:00')) }))
+    .filter(({ dueAt }) => dueAt > now)
+    .sort((a, b) => a.dueAt - b.dueAt)[0];
+
+  if (!entry) return;
+
+  const { dueAt } = entry;
+  const electronBin = process.execPath;
+  const appDir      = path.join(__dirname, '..');
+
+  const plist = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>${ALARM_PLIST_LABEL}</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>${electronBin}</string>
+    <string>${appDir}</string>
+    <string>--alarm-check</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Month</key><integer>${dueAt.getMonth() + 1}</integer>
+    <key>Day</key><integer>${dueAt.getDate()}</integer>
+    <key>Hour</key><integer>${dueAt.getHours()}</integer>
+    <key>Minute</key><integer>${dueAt.getMinutes()}</integer>
+  </dict>
+  <key>RunAtLoad</key><false/>
+  <key>StandardOutPath</key><string>/tmp/taskflow-alarm.log</string>
+  <key>StandardErrorPath</key><string>/tmp/taskflow-alarm.log</string>
+</dict>
+</plist>`;
+
+  try {
+    fs.mkdirSync(path.dirname(ALARM_PLIST_PATH), { recursive: true });
+    fs.writeFileSync(ALARM_PLIST_PATH, plist, 'utf8');
+    execSync(`launchctl load "${ALARM_PLIST_PATH}"`);
+    console.log('[alarm] Background alarm scheduled for', dueAt.toLocaleString());
+  } catch(e) {
+    console.error('[alarm] Failed to schedule launchd alarm:', e.message);
+  }
+}
 let isAlwaysOnTop = true;
 let windowBounds = null;
 const floatingWindows = new Map();
@@ -366,8 +427,25 @@ ipcMain.handle('google-sign-in', () => {
 
 // ── IPC handlers ───────────────────────────────────────────────────────────
 ipcMain.handle('load-tasks', () => loadTasks());
-ipcMain.handle('save-tasks', (_, tasks) => { saveTasks(tasks); return true; });
+ipcMain.handle('save-tasks', (_, tasks) => { saveTasks(tasks); scheduleBackgroundAlarm(tasks); return true; });
 ipcMain.handle('get-always-on-top', () => isAlwaysOnTop);
+
+const getDockerConfigPath = () => path.join(app.getPath('userData'), 'docker-config.json');
+ipcMain.handle('get-docker-config', () => {
+  try {
+    const p = getDockerConfigPath();
+    if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch (_) {}
+  return null;
+});
+ipcMain.handle('save-docker-config', (_, cfg) => {
+  try { fs.writeFileSync(getDockerConfigPath(), JSON.stringify(cfg), 'utf8'); } catch (_) {}
+  return true;
+});
+ipcMain.handle('clear-docker-config', () => {
+  try { if (fs.existsSync(getDockerConfigPath())) fs.unlinkSync(getDockerConfigPath()); } catch (_) {}
+  return true;
+});
 
 ipcMain.handle('open-card-window', (_, card) => {
   if (floatingWindows.has(card.id)) {
@@ -420,6 +498,10 @@ ipcMain.on('close-window', () => {
   updateTrayMenu();
 });
 
+ipcMain.on('quit-app', () => {
+  app.quit();
+});
+
 ipcMain.on('start-drag', () => {
   // handled natively via -webkit-app-region: drag in CSS
 });
@@ -448,6 +530,33 @@ ipcMain.on('export-tasks', async (_, tasks) => {
 
 // ── App lifecycle ──────────────────────────────────────────────────────────
 app.whenReady().then(async () => {
+  // ── Alarm-check mode: launched by launchd when a task is due ─────────────
+  if (IS_ALARM_CHECK) {
+    app.dock?.hide();
+    const tasks = loadTasks();
+    const now = new Date();
+    let count = 0;
+    tasks.forEach(t => {
+      if (!t.completed && t.reminderEnabled && t.dueDate && !t.alarmTriggered) {
+        const dueAt = new Date(t.dueDate + (t.dueTime ? 'T'+t.dueTime : 'T00:00'));
+        if (dueAt <= now) {
+          new Notification({
+            title: '⏰ TaskFlow',
+            body: t.title + (t.description ? ' — ' + t.description : ''),
+            silent: false,
+          }).show();
+          count++;
+        }
+      }
+    });
+    scheduleBackgroundAlarm(tasks); // schedule the next pending alarm
+    setTimeout(() => app.quit(), count > 0 ? 4000 : 500);
+    return;
+  }
+
+  // ── Normal startup ────────────────────────────────────────────────────────
+  unloadAlarmPlist(); // app is running — it handles its own alarms
+
   app.dock.hide(); // hide from dock — tray only
 
   // Strip COOP/COEP headers globally so Firebase popup can postMessage back
@@ -478,6 +587,7 @@ app.on('window-all-closed', (e) => {
 });
 
 app.on('before-quit', () => {
+  if (!IS_ALARM_CHECK) scheduleBackgroundAlarm(loadTasks());
   if (mainWindow) {
     mainWindow.removeAllListeners('close');
     mainWindow.close();
